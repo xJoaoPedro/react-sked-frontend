@@ -263,7 +263,7 @@ export function CommissionsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button size="sm" title='Ver detalhes' className="h-8 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary">
+                          <Button size="sm" className="h-8 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary">
                             <Eye className="w-4 h-4 mr-1" />
                             Detalhes
                           </Button>

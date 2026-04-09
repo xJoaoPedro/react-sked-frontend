@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { Filter, X, Calendar, Download, Eye, Edit, Trash2, Clock, User, DollarSign, } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Appointment {
   id: string;
@@ -438,27 +439,56 @@ export function AppointmentsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Button 
-                              size="sm"
-                              title='Visualizar' 
-                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button  
-                              size="sm"
-                              title='Editar'
-                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button  
-                              size="sm"
-                              title='Excluir'
-                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button 
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+
+                              <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
+                                Visualizar
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button  
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+
+                              <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                                Editar
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button  
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+
+                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                                Excluir
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
                         </TableCell>
                       </TableRow>

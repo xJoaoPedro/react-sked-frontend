@@ -741,7 +741,7 @@ export function CustomersPage() {
                               </div>
                             </TooltipTrigger>
 
-                            <TooltipContent side="top" sideOffset={4} className="bg-foreground">
+                            <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive text-white">
                               Bloquear usuário
                             </TooltipContent>
                           </Tooltip>
