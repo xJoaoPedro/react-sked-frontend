@@ -53,11 +53,11 @@ export function AppointmentList() {
   const getStatusColor = (status: Appointment['status']) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-[#00A676] text-white';
+        return 'bg-primary text-white';
       case 'pending':
         return 'bg-yellow-500 text-white';
       case 'cancelled':
-        return 'bg-[#E63946] text-white';
+        return 'bg-destructive text-white';
       default:
         return 'bg-gray-500 text-white';
     }
@@ -80,7 +80,7 @@ export function AppointmentList() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">Próximos Agendamentos</h3>
-        <a href="#" className="text-[#00A676] hover:underline">Ver todos</a>
+        <a href="#" className="text-primary hover:underline">Ver todos</a>
       </div>
       
       <div className="space-y-4">
@@ -89,8 +89,8 @@ export function AppointmentList() {
             key={appointment.id}
             className="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
           >
-            <div className="w-12 h-12 rounded-full bg-[#00A676]/10 flex items-center justify-center flex-shrink-0">
-              <User className="w-6 h-6 text-[#00A676]" />
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <User className="w-6 h-6 text-primary" />
             </div>
             
             <div className="flex-1 min-w-0">

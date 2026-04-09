@@ -64,17 +64,17 @@ const mockNotifications: Notification[] = [
 const getNotificationIcon = (type: Notification['type']) => {
   switch (type) {
     case 'appointment':
-      return <Calendar className="w-5 h-5 text-[#00A676]" />;
+      return <Calendar className="w-5 h-5 text-primary" />;
     case 'cancellation':
-      return <X className="w-5 h-5 text-[#E63946]" />;
+      return <X className="w-5 h-5 text-destructive" />;
     case 'payment':
-      return <DollarSign className="w-5 h-5 text-[#00A676]" />;
+      return <DollarSign className="w-5 h-5 text-primary" />;
     case 'reminder':
-      return <Clock className="w-5 h-5 text-[#080D0D]" />;
+      return <Clock className="w-5 h-5 text-foreground" />;
     case 'success':
-      return <CheckCircle className="w-5 h-5 text-[#00A676]" />;
+      return <CheckCircle className="w-5 h-5 text-primary" />;
     default:
-      return <AlertCircle className="w-5 h-5 text-[#080D0D]" />;
+      return <AlertCircle className="w-5 h-5 text-foreground" />;
   }
 };
 
@@ -109,9 +109,10 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
         <div className="flex items-center gap-4">
           <div className="relative w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input 
+            <Input
+              name="search"
               placeholder="Buscar agendamentos, clientes..." 
-              className="pl-10 bg-input-background"
+              className="pl-10 bg-input-background hover:bg-secondary"
             />
           </div>
           
@@ -128,7 +129,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-[#E63946] rounded-full text-[10px] text-white font-semibold flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-destructive rounded-full text-[10px] text-white font-semibold flex items-center justify-center">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
@@ -172,14 +173,14 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
                     <div
                       key={notification.id}
                       className={`px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors group ${
-                        !notification.isRead ? 'bg-[#00A676]/5' : ''
+                        !notification.isRead ? 'bg-primary/5' : ''
                       }`}
                     >
                       <div className="flex gap-3">
                         {/* Icon */}
                         <div className="flex-shrink-0 mt-0.5">
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
-                            !notification.isRead ? 'bg-white border-2 border-[#00A676]/20' : 'bg-muted'
+                            !notification.isRead ? 'bg-white border-2 border-primary/20' : 'bg-muted'
                           }`}>
                             {getNotificationIcon(notification.type)}
                           </div>
@@ -199,7 +200,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
                               className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                               onClick={() => handleDeleteNotification(notification.id)}
                             >
-                              <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-[#E63946]" />
+                              <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
                             </Button>
                           </div>
                           <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
@@ -214,7 +215,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleMarkAsRead(notification.id)}
-                                className="text-xs h-6 text-[#00A676] hover:text-[#00A676] hover:bg-[#00A676]/10"
+                                className="text-xs h-6 text-primary hover:text-primary hover:bg-primary/10"
                               >
                                 Marcar como lida
                               </Button>

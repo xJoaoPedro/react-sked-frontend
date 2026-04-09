@@ -217,12 +217,12 @@ export function InventoryPage() {
 
   const getStockStatus = (product: Product) => {
     if (product.quantity === 0) {
-      return { label: 'Esgotado', color: 'bg-[#E63946] text-white' };
+      return { label: 'Esgotado', color: 'bg-destructive text-white' };
     }
     if (product.quantity <= product.minStock) {
       return { label: 'Estoque baixo', color: 'bg-yellow-500 text-white' };
     }
-    return { label: 'Em estoque', color: 'bg-[#00A676] text-white' };
+    return { label: 'Em estoque', color: 'bg-primary text-white' };
   };
 
   return (
@@ -244,12 +244,12 @@ export function InventoryPage() {
                   <p className="text-sm text-muted-foreground mb-1">
                     Total em Vendas
                   </p>
-                  <h3 className="text-2xl font-semibold text-[#00A676]">
+                  <h3 className="text-2xl font-semibold text-primary">
                     R$ {totalSaleValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </h3>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-[#00A676]/10 flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-[#00A676]" />
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-primary" />
                 </div>
               </div>
             </Card>
@@ -260,12 +260,12 @@ export function InventoryPage() {
                   <p className="text-sm text-muted-foreground mb-1">
                     Total de Custo
                   </p>
-                  <h3 className="text-2xl font-semibold text-[#E63946]">
+                  <h3 className="text-2xl font-semibold text-destructive">
                     R$ {totalCostValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </h3>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-[#E63946]/10 flex items-center justify-center">
-                  <ShoppingCart className="w-6 h-6 text-[#E63946]" />
+                <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <ShoppingCart className="w-6 h-6 text-destructive" />
                 </div>
               </div>
             </Card>
@@ -311,15 +311,15 @@ export function InventoryPage() {
                   <p className="text-sm text-muted-foreground mb-1">
                     Esgotado
                   </p>
-                  <h3 className="text-2xl font-semibold text-[#E63946]">
+                  <h3 className="text-2xl font-semibold text-destructive">
                     {outOfStockProducts}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
                     produtos sem estoque
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-[#E63946]/10 flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-[#E63946]" />
+                <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-destructive" />
                 </div>
               </div>
             </Card>
@@ -345,7 +345,7 @@ export function InventoryPage() {
                   
                   <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="bg-[#00A676] hover:bg-[#00A676]/90">
+                      <Button className="bg-primary hover:bg-primary/90">
                         <Plus className="w-4 h-4 mr-2" />
                         Adicionar Produto
                       </Button>
@@ -511,7 +511,7 @@ export function InventoryPage() {
                           Cancelar
                         </Button>
                         <Button
-                          className="bg-[#00A676] hover:bg-[#00A676]/90"
+                          className="bg-primary hover:bg-primary/90"
                           onClick={handleAddProduct}
                           disabled={
                             !formData.name ||
@@ -757,7 +757,7 @@ export function InventoryPage() {
                                     Cancelar
                                   </Button>
                                   <Button
-                                    className="bg-[#00A676] hover:bg-[#00A676]/90"
+                                    className="bg-primary hover:bg-primary/90"
                                     onClick={handleEditProduct}
                                   >
                                     Salvar Alterações
@@ -770,7 +770,7 @@ export function InventoryPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleDeleteProduct(product.id)}
-                              className="text-[#E63946] border-[#E63946]/20 hover:bg-[#E63946]/10"
+                              className="text-destructive border-destructive/20 hover:bg-destructive/10"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

@@ -160,10 +160,10 @@ export function RevenuePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-full bg-[#00A676]/10 flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-[#00A676]" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-primary" />
                 </div>
-                <Badge variant="outline" className="bg-[#00A676]/10 text-[#00A676] border-[#00A676]/20">
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                   <TrendingUp className="w-3 h-3 mr-1" />
                   +12.5%
                 </Badge>
@@ -378,11 +378,11 @@ export function RevenuePage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm font-semibold text-[#00A676]">{transaction.amount}</span>
+                        <span className="text-sm font-semibold text-primary">{transaction.amount}</span>
                       </TableCell>
                       <TableCell>
                         {transaction.status === 'completed' && (
-                          <Badge variant="outline" className="bg-[#00A676]/10 text-[#00A676] border-[#00A676]/20">
+                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                             Concluída
                           </Badge>
                         )}
@@ -392,7 +392,7 @@ export function RevenuePage() {
                           </Badge>
                         )}
                         {transaction.status === 'cancelled' && (
-                          <Badge variant="outline" className="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20">
+                          <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
                             Cancelada
                           </Badge>
                         )}

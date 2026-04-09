@@ -23,28 +23,28 @@ export function DashboardPage() {
             value={24}
             icon={Calendar}
             trend={{ value: '+8% vs ontem', isPositive: true }}
-            iconBgColor="bg-[#00A676]"
+            iconBgColor="bg-primary"
           />
           <StatCard
             title="Total de Clientes"
             value={1.247}
             icon={Users}
             trend={{ value: '+15% vs mês passado', isPositive: true }}
-            iconBgColor="bg-[#080D0D]"
+            iconBgColor="bg-foreground"
           />
           <StatCard
             title="Receita Mensal"
             value="R$ 7.200"
             icon={DollarSign}
             trend={{ value: '+22% vs mês passado', isPositive: true }}
-            iconBgColor="bg-[#00A676]"
+            iconBgColor="bg-primary"
           />
           <StatCard
             title="Taxa de Cancelamento"
             value="3.2%"
             icon={Clock}
             trend={{ value: '-1.5% vs mês passado', isPositive: true }}
-            iconBgColor="bg-[#E63946]"
+            iconBgColor="bg-destructive"
           />
         </div>
 

@@ -8,39 +8,71 @@
 :root {
   --font-size: 16px;
 
-  --background: #F4F4F4;
-  --foreground: #080D0D;
-  --primary: #00A676;
-  --primary-foreground: #ffffff;
+  --background: 0 0% 96%;
+  --foreground: 180 20% 5%;
 
-  --card: #ffffff;
-  --card-foreground: #080D0D;
+  --card: 0 0% 100%;
+  --card-foreground: 180 20% 5%;
 
-  --secondary: #F4F4F4;
-  --secondary-foreground: #080D0D;
+  --popover: 0 0% 100%;
+  --popover-foreground: 180 20% 5%;
 
-  --muted: #E8E8E8;
-  --muted-foreground: #6B6B6B;
+  --primary: 160 100% 33%;
+  --primary-foreground: 0 0% 100%;
 
-  --accent: #00A676;
-  --accent-foreground: #ffffff;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 180 20% 5%;
 
-  --destructive: #E63946;
-  --destructive-foreground: #ffffff;
+  --muted: 0 0% 91%;
+  --muted-foreground: 0 0% 42%;
 
-  --border: rgba(8, 13, 13, 0.1);
-  --input: transparent;
-  --ring: #00A676;
+  --accent: 160 100% 33%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 355 78% 57%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 180 10% 85%;
+  --input: 0 0% 100%;
+  --input-background: 0 0% 100%;
+
+  --switch-background: 220 10% 82%;
+
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  --ring: 160 100% 33%;
+
+  --chart-1: 160 100% 33%;
+  --chart-2: 180 20% 5%;
+  --chart-3: 355 78% 57%;
+  --chart-4: 155 50% 65%;
+  --chart-5: 0 100% 85%;
 
   --radius: 0.625rem;
+
+  --sidebar: 180 20% 5%;
+  --sidebar-foreground: 0 0% 96%;
+
+  --sidebar-primary: 160 100% 33%;
+  --sidebar-primary-foreground: 0 0% 100%;
+
+  --sidebar-accent: 180 15% 13%;
+  --sidebar-accent-foreground: 0 0% 96%;
+
+  --sidebar-border: 180 15% 13%;
+  --sidebar-ring: 160 100% 33%;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --border: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --background: 0 0% 9%;
+  --foreground: 0 0% 98%;
+
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 9%;
+
+  --border: 0 0% 25%;
+  --ring: 0 0% 60%;
 }
 
 @theme inline {
@@ -54,7 +86,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-[var(--ring)];
+    @apply border-border outline-[hsl(var(--ring))];
   }
 
   body {
@@ -84,5 +116,49 @@
   h4 {
     font-size: 1rem;
     font-weight: 500;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+
+  /* Scrollbar (Webkit) */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: hsl(0 0% 94%);
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: hsl(160 100% 33%);
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: hsl(160 100% 27%);
+  }
+
+  /* Firefox */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(160 100% 33%) hsl(0 0% 94%);
   }
 }

@@ -232,8 +232,8 @@ export function CustomersPage() {
                     {totalCustomers}
                   </h3>
                 </div>
-                <div className="w-12 h-12 rounded-full bg-[#00A676]/10 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-[#00A676]" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-primary" />
                 </div>
               </div>
             </Card>
@@ -375,7 +375,7 @@ export function CustomersPage() {
                   onOpenChange={setIsAddDialogOpen}
                 >
                   <DialogTrigger asChild>
-                    <Button className="bg-[#00A676] hover:bg-[#00A676]/90">
+                    <Button className="bg-primary hover:bg-primary/90">
                       <Plus className="w-4 h-4 mr-2" />
                       Cadastrar cliente
                     </Button>
@@ -394,7 +394,7 @@ export function CustomersPage() {
                             htmlFor="photo-upload"
                             className="cursor-pointer block"
                           >
-                            <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-[#00A676] rounded-full">
+                            <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-full">
                               {formData.photo ? (
                                 <img
                                   src={formData.photo}
@@ -500,7 +500,7 @@ export function CustomersPage() {
                         Cancelar
                       </Button>
                       <Button
-                        className="bg-[#00A676] hover:bg-[#00A676]/90"
+                        className="bg-primary hover:bg-primary/90"
                         onClick={handleAddCustomer}
                         disabled={
                           !formData.name || !formData.email || !formData.phone
@@ -565,7 +565,7 @@ export function CustomersPage() {
                       </TableCell>
                       <TableCell>{formatDate(customer.birthDate)}</TableCell>
                       <TableCell>
-                        <span className="px-2 py-1 bg-[#00A676]/10 text-[#00A676] rounded-full text-sm font-medium">
+                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                           {customer.totalVisits}
                         </span>
                       </TableCell>
@@ -583,7 +583,7 @@ export function CustomersPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => openEditDialog(customer)}
-                                className="text-[#080D0D] border-[#080D0D]/20 hover:bg-[#00A676]/10 hover:text-[#00A676] hover:border-[#00A676]/20"
+                                className="text-foreground border-foreground/20 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -602,7 +602,7 @@ export function CustomersPage() {
                                       htmlFor="edit-photo-upload"
                                       className="cursor-pointer block"
                                     >
-                                      <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-[#00A676] rounded-full">
+                                      <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-full">
                                         {formData.photo ? (
                                           <img
                                             src={formData.photo}
@@ -709,7 +709,7 @@ export function CustomersPage() {
                                   Cancelar
                                 </Button>
                                 <Button
-                                  className="bg-[#00A676] hover:bg-[#00A676]/90"
+                                  className="bg-primary hover:bg-primary/90"
                                   onClick={handleEditCustomer}
                                 >
                                   Salvar Alterações
@@ -723,7 +723,7 @@ export function CustomersPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDeleteCustomer(customer.id)}
-                            className="text-[#E63946] border-[#E63946]/20 hover:bg-[#E63946]/10"
+                            className="text-destructive border-destructive/20 hover:bg-destructive/10"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

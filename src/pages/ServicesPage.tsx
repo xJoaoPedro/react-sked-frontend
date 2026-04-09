@@ -115,7 +115,7 @@ const getCategoryIcon = (category: string) => {
   };
 
   const IconComponent = icons[category] || Scissors;
-  return <IconComponent className="w-5 h-5 text-[#00A676]" />;
+  return <IconComponent className="w-5 h-5 text-primary" />;
 };
 
 export function ServicesPage() {
@@ -234,14 +234,14 @@ export function ServicesPage() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         {/* Info Banner */}
-        <Card className="p-4 bg-[#00A676]/10 border-[#00A676]/20 m-6 mb-0">
+        <Card className="p-4 bg-primary/10 border-primary/20 m-6 mb-0">
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-[#00A676] flex-shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-semibold text-[#00A676] mb-1">
+              <h4 className="font-semibold text-primary mb-1">
                 Informações sobre Serviços
               </h4>
-              <p className="text-sm text-[#00A676]/90">
+              <p className="text-sm text-primary/90">
                 Configure os serviços oferecidos, defina preços, duração e taxa
                 de comissão para cada um. Os serviços ativos aparecem
                 disponíveis para agendamento.
@@ -307,7 +307,7 @@ export function ServicesPage() {
                   onOpenChange={setIsAddDialogOpen}
                 >
                   <DialogTrigger asChild>
-                    <Button className="bg-[#00A676] hover:bg-[#00A676]/90">
+                    <Button className="bg-primary hover:bg-primary/90">
                       <Plus className="w-4 h-4 mr-2" />
                       Adicionar Serviço
                     </Button>
@@ -452,7 +452,7 @@ export function ServicesPage() {
                         Cancelar
                       </Button>
                       <Button
-                        className="bg-[#00A676] hover:bg-[#00A676]/90"
+                        className="bg-primary hover:bg-primary/90"
                         onClick={handleAddService}
                         disabled={
                           !formData.name ||
@@ -488,7 +488,7 @@ export function ServicesPage() {
                   <TableRow key={service.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#00A676]/10 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                           {getCategoryIcon(service.category)}
                         </div>
                         <div>
@@ -520,7 +520,7 @@ export function ServicesPage() {
                       <Badge
                         className={
                           service.status === "active"
-                            ? "bg-[#00A676] text-white"
+                            ? "bg-primary text-white"
                             : "bg-gray-400 text-white"
                         }
                       >
@@ -535,7 +535,7 @@ export function ServicesPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => openEditDialog(service)}
-                              className="text-[#080D0D] border-[#080D0D]/20 hover:bg-[#00A676]/10 hover:text-[#00A676] hover:border-[#00A676]/20"
+                              className="text-foreground border-foreground/20 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -706,7 +706,7 @@ export function ServicesPage() {
                                 Cancelar
                               </Button>
                               <Button
-                                className="bg-[#00A676] hover:bg-[#00A676]/90"
+                                className="bg-primary hover:bg-primary/90"
                                 onClick={handleEditService}
                               >
                                 Salvar Alterações
@@ -719,7 +719,7 @@ export function ServicesPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteService(service.id)}
-                          className="text-[#E63946] border-[#E63946]/20 hover:bg-[#E63946]/10"
+                          className="text-destructive border-destructive/20 hover:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

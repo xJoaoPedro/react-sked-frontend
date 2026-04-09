@@ -154,9 +154,9 @@ export function AppointmentsPage() {
 
   const getStatusBadge = (status: Appointment['status']) => {
     const statusConfig = {
-      confirmed: { label: 'Confirmado', className: 'bg-[#00A676]/10 text-[#00A676] border border-[#00A676]/20 hover:bg-[#00A676]/20' },
+      confirmed: { label: 'Confirmado', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
       pending: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20' },
-      cancelled: { label: 'Cancelado', className: 'bg-[#E63946]/10 text-[#E63946] border border-[#E63946]/20 hover:bg-[#E63946]/20' },
+      cancelled: { label: 'Cancelado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
       completed: { label: 'Concluído', className: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20' },
     };
     
@@ -234,32 +234,31 @@ export function AppointmentsPage() {
       />
 
       {/* Content */}
-      <div className="flex-1 flex flex-col overflow-hidden p-6 gap-6">
+      <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom">
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Button
-            variant={showFilters ? 'default' : 'outline'}
             onClick={() => setShowFilters(!showFilters)}
-            className={showFilters ? 'bg-[#00A676] hover:bg-[#008c63] text-white' : ''}
+            className={`p-4 border border-border ${showFilters ? 'bg-primary hover:bg-primary/70 text-white' : 'bg-default text-foreground hover:bg-primary hover:text-white'}`}
           >
             <Filter className="w-4 h-4 mr-2" />
             Filtros Avançados
             {hasActiveFilters() && (
-              <Badge className="ml-2 bg-[#E63946] text-white hover:bg-[#E63946]">
+              <Badge className="ml-2 bg-destructive text-white hover:bg-destructive">
                 {[filterId, filterDate, filterService !== 'all', filterClient, 
                   filterStatus !== 'all', filterTimeStart, filterTimeEnd]
                   .filter(Boolean).length}
               </Badge>
             )}
           </Button>
-          <Button variant="outline">
+          <Button variant="default" className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-white `}>
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto space-y-6 scrollbar-custom">
+        <div className="flex-1 space-y-6">
           {/* Advanced Filters */}
           {showFilters && (
             <Card className="p-6">
@@ -364,7 +363,7 @@ export function AppointmentsPage() {
           )}
 
           {/* Appointments Table */}
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden py-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -377,7 +376,7 @@ export function AppointmentsPage() {
                     <TableHead className="font-semibold text-foreground">Profissional</TableHead>
                     <TableHead className="font-semibold text-foreground">Status</TableHead>
                     <TableHead className="font-semibold text-foreground">Valor</TableHead>
-                    <TableHead className="font-semibold text-foreground text-right">Ações</TableHead>
+                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -392,7 +391,7 @@ export function AppointmentsPage() {
                               : 'Nenhum agendamento cadastrado.'}
                           </p>
                           {hasActiveFilters() && (
-                            <Button variant="link" onClick={clearFilters} className="text-[#00A676]">
+                            <Button variant="link" onClick={clearFilters} className="text-primary">
                               Limpar filtros
                             </Button>
                           )}
@@ -402,7 +401,7 @@ export function AppointmentsPage() {
                   ) : (
                     filteredAppointments.map((appointment) => (
                       <TableRow key={appointment.id} className="hover:bg-muted/30 transition-colors">
-                        <TableCell className="font-mono text-sm font-semibold text-[#00A676]">
+                        <TableCell className="font-mono text-sm font-semibold text-primary">
                           {appointment.id}
                         </TableCell>
                         <TableCell>
@@ -419,8 +418,8 @@ export function AppointmentsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-[#00A676]/10 flex items-center justify-center flex-shrink-0">
-                              <User className="w-4 h-4 text-[#00A676]" />
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 text-primary" />
                             </div>
                             <span className="font-medium">{appointment.clientName}</span>
                           </div>
@@ -434,30 +433,30 @@ export function AppointmentsPage() {
                         <TableCell>{getStatusBadge(appointment.status)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                            <DollarSign className="w-4 h-4 text-[#00A676]" />
+                            <DollarSign className="w-4 h-4 text-primary" />
                             {appointment.price}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center justify-end gap-1">
+                          <div className="flex items-center gap-1">
                             <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-[#00A676]/10 hover:text-[#00A676]"
+                              size="sm"
+                              title='Visualizar' 
+                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-blue-500/10 hover:text-blue-600"
+                            <Button  
+                              size="sm"
+                              title='Editar'
+                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-[#E63946]/10 hover:text-[#E63946]"
+                            <Button  
+                              size="sm"
+                              title='Excluir'
+                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -478,12 +477,8 @@ export function AppointmentsPage() {
                   <span className="font-medium text-foreground">{mockAppointments.length}</span> agendamentos
                 </p>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    Anterior
-                  </Button>
-                  <Button variant="outline" size="sm" disabled>
-                    Próximo
-                  </Button>
+                  <Button variant="outline" size="sm" disabled>Anterior</Button>
+                  <Button variant="outline" size="sm" disabled>Próximo</Button>
                 </div>
               </div>
             )}

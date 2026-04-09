@@ -154,12 +154,12 @@ export function CommissionsPage() {
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto space-y-6 scrollbar-custom">
           {/* Info Banner */}
-          <Card className="p-4 bg-[#00A676]/10 border-[#00A676]/20">
+          <Card className="p-4 bg-primary/10 border-primary/20">
             <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-[#00A676] flex-shrink-0 mt-0.5" />
+              <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-[#00A676] mb-1">Informações sobre Comissões</h4>
-                <p className="text-sm text-[#00A676]/90">
+                <h4 className="font-semibold text-primary mb-1">Informações sobre Comissões</h4>
+                <p className="text-sm text-primary/90">
                   As comissões são calculadas automaticamente com base nos serviços realizados. 
                   Acompanhe o resumo detalhado de cada profissional e suas comissões totais, pagas e pendentes.
                 </p>
@@ -213,13 +213,13 @@ export function CommissionsPage() {
                       <TableRow key={professional.id} className="hover:bg-muted/30 transition-colors">
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#00A676]/10 flex items-center justify-center flex-shrink-0">
-                              <span className="text-[#00A676] font-semibold text-sm">{professional.avatar}</span>
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <span className="text-primary font-semibold text-sm">{professional.avatar}</span>
                             </div>
                             <div>
                               <div className="font-medium">{professional.name}</div>
                               <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                <div className={`w-2 h-2 rounded-full ${professional.status === 'active' ? 'bg-[#00A676]' : 'bg-gray-400'}`} />
+                                <div className={`w-2 h-2 rounded-full ${professional.status === 'active' ? 'bg-primary' : 'bg-gray-400'}`} />
                                 {professional.status === 'active' ? 'Ativo' : 'Inativo'}
                               </div>
                             </div>
@@ -229,7 +229,7 @@ export function CommissionsPage() {
                           <span className="text-sm font-medium">{professional.totalServices}</span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm font-semibold text-[#00A676]">{professional.totalRevenue}</span>
+                          <span className="text-sm font-semibold text-primary">{professional.totalRevenue}</span>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
@@ -240,7 +240,7 @@ export function CommissionsPage() {
                           <span className="text-sm font-semibold">{professional.totalCommission}</span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="bg-[#00A676]/10 text-[#00A676] border-[#00A676]/20">
+                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                             {professional.paidCommission}
                           </Badge>
                         </TableCell>

@@ -201,12 +201,12 @@ export function CancellationsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-[#E63946]/10 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-[#E63946]" />
+                <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-destructive" />
                 </div>
                 <Badge
                   variant="outline"
-                  className="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20"
+                  className="bg-destructive/10 text-destructive border-destructive/20"
                 >
                   Último mês
                 </Badge>
@@ -223,8 +223,8 @@ export function CancellationsPage() {
 
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-[#E63946]/10 flex items-center justify-center">
-                  <TrendingDown className="w-6 h-6 text-[#E63946]" />
+                <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <TrendingDown className="w-6 h-6 text-destructive" />
                 </div>
                 <Badge
                   variant="outline"
@@ -245,12 +245,12 @@ export function CancellationsPage() {
 
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-[#E63946]/10 flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-[#E63946]" />
+                <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-destructive" />
                 </div>
                 <Badge
                   variant="outline"
-                  className="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20"
+                  className="bg-destructive/10 text-destructive border-destructive/20"
                 >
                   Perda
                 </Badge>
@@ -425,7 +425,7 @@ export function CancellationsPage() {
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div
-                          className="bg-[#E63946] h-2 rounded-full transition-all"
+                          className="bg-destructive h-2 rounded-full transition-all"
                           style={{ width: `${rate}%` }}
                         />
                       </div>
@@ -501,7 +501,7 @@ export function CancellationsPage() {
                       key={cancellation.id}
                       className="hover:bg-muted/30 transition-colors"
                     >
-                      <TableCell className="font-mono text-sm font-semibold text-[#E63946]">
+                      <TableCell className="font-mono text-sm font-semibold text-destructive">
                         {cancellation.id}
                       </TableCell>
                       <TableCell>
@@ -524,8 +524,8 @@ export function CancellationsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-[#E63946]/10 flex items-center justify-center flex-shrink-0">
-                            <User className="w-4 h-4 text-[#E63946]" />
+                          <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-destructive" />
                           </div>
                           <span className="font-medium">
                             {cancellation.clientName}
@@ -561,7 +561,7 @@ export function CancellationsPage() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-semibold text-[#E63946]">
+                        <span className="font-semibold text-destructive">
                           {cancellation.price}
                         </span>
                       </TableCell>

@@ -23,13 +23,13 @@ export function WeeklySchedule() {
             key={index}
             className={`text-center p-4 rounded-lg border-2 transition-all ${
               day.isToday 
-                ? 'border-[#00A676] bg-[#00A676]/5' 
-                : 'border-border hover:border-[#00A676]/50'
+                ? 'border-primary bg-primary/5' 
+                : 'border-border hover:border-primary/50'
             }`}
           >
             <p className="text-sm text-muted-foreground mb-1">{day.day}</p>
             <p className={`text-2xl font-semibold mb-3 ${
-              day.isToday ? 'text-[#00A676]' : 'text-foreground'
+              day.isToday ? 'text-primary' : 'text-foreground'
             }`}>
               {day.date}
             </p>
@@ -37,7 +37,7 @@ export function WeeklySchedule() {
             <div className="space-y-1">
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <div 
-                  className="h-full bg-[#00A676] rounded-full transition-all"
+                  className="h-full bg-primary rounded-full transition-all"
                   style={{ width: `${(day.appointments / maxAppointments) * 100}%` }}
                 />
               </div>

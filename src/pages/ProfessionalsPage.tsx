@@ -284,7 +284,7 @@ export function ProfessionalsPage() {
               </div>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#00A676] hover:bg-[#00A676]/90">
+                  <Button className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Cadastrar profissional
                   </Button>
@@ -303,7 +303,7 @@ export function ProfessionalsPage() {
                           htmlFor="photo-upload"
                           className="cursor-pointer block"
                         >
-                          <div className="w-48 h-64 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-[#00A676] rounded-lg">
+                          <div className="w-48 h-64 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-lg">
                             {formData.photo ? (
                               <img
                                 src={formData.photo}
@@ -479,7 +479,7 @@ export function ProfessionalsPage() {
                       Cancelar
                     </Button>
                     <Button
-                      className="bg-[#00A676] hover:bg-[#00A676]/90"
+                      className="bg-primary hover:bg-primary/90"
                       onClick={handleAddProfessional}
                       disabled={!formData.name || !formData.email || !formData.phone}
                     >
@@ -536,7 +536,7 @@ export function ProfessionalsPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => openEditDialog(professional)}
-                              className="text-[#080D0D] border-[#080D0D]/20 hover:bg-[#00A676]/10 hover:text-[#00A676] hover:border-[#00A676]/20"
+                              className="text-foreground border-foreground/20 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -555,7 +555,7 @@ export function ProfessionalsPage() {
                                     htmlFor="edit-photo-upload"
                                     className="cursor-pointer block"
                                   >
-                                    <div className="w-48 h-64 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-[#00A676] rounded-lg">
+                                    <div className="w-48 h-64 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-lg">
                                       {formData.photo ? (
                                         <img
                                           src={formData.photo}
@@ -771,7 +771,7 @@ export function ProfessionalsPage() {
                                 Cancelar
                               </Button>
                               <Button
-                                className="bg-[#00A676] hover:bg-[#00A676]/90"
+                                className="bg-primary hover:bg-primary/90"
                                 onClick={handleEditProfessional}
                               >
                                 Salvar Alterações
@@ -785,7 +785,7 @@ export function ProfessionalsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteProfessional(professional.id)}
-                          className="text-[#E63946] border-[#E63946]/20 hover:bg-[#E63946]/10"
+                          className="text-destructive border-destructive/20 hover:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

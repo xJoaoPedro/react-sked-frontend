@@ -42,7 +42,7 @@ const reportTypes: ReportCard[] = [
     title: 'Relatório Financeiro',
     description: 'Receitas, formas de pagamento, ticket médio e análise de faturamento',
     icon: DollarSign,
-    color: 'text-[#00A676] bg-[#00A676]/10 border-[#00A676]/20',
+    color: 'text-primary bg-primary/10 border-primary/20',
     category: 'Financeiro'
   },
   {
@@ -50,7 +50,7 @@ const reportTypes: ReportCard[] = [
     title: 'Relatório de Cancelamentos',
     description: 'Motivos, taxa de cancelamento e análise de perdas financeiras',
     icon: XCircle,
-    color: 'text-[#E63946] bg-[#E63946]/10 border-[#E63946]/20',
+    color: 'text-destructive bg-destructive/10 border-destructive/20',
     category: 'Operacional'
   },
   {
@@ -222,7 +222,7 @@ export function ReportsPage() {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
-                        className="w-full bg-[#00A676] hover:bg-[#00A676]/90"
+                        className="w-full bg-primary hover:bg-primary/90"
                         onClick={() => setSelectedReport(report.id)}
                       >
                         <FileText className="w-4 h-4 mr-2" />
@@ -232,7 +232,7 @@ export function ReportsPage() {
                     <DialogContent className="sm:max-w-[500px]">
                       <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                          <report.icon className="w-5 h-5 text-[#00A676]" />
+                          <report.icon className="w-5 h-5 text-primary" />
                           {report.title}
                         </DialogTitle>
                         <DialogDescription>
@@ -290,7 +290,7 @@ export function ReportsPage() {
                           Cancelar
                         </Button>
                         <Button 
-                          className="bg-[#00A676] hover:bg-[#00A676]/90"
+                          className="bg-primary hover:bg-primary/90"
                           onClick={handleGenerateReport}
                         >
                           <Download className="w-4 h-4 mr-2" />
@@ -307,7 +307,7 @@ export function ReportsPage() {
           {/* Custom Report Generator */}
           <div className="mt-8">
             <Card className="overflow-hidden">
-              <div className="bg-gradient-to-r from-[#00A676] to-[#00A676]/80 text-white py-4 px-6">
+              <div className="bg-gradient-to-r from-primary to-primary/80 text-white py-4 px-6">
                 <div className="flex items-center gap-2">
                   <Plus className="w-5 h-5" />
                   <h2 className="text-lg font-semibold">Relatório Personalizado</h2>
@@ -400,7 +400,7 @@ export function ReportsPage() {
 
                 <div className="mt-6 flex justify-end">
                   <Button 
-                    className="bg-[#00A676] hover:bg-[#00A676]/90"
+                    className="bg-primary hover:bg-primary/90"
                     onClick={handleGenerateCustomReport}
                     disabled={!customReportName || selectedMetrics.length === 0}
                   >
@@ -446,7 +446,7 @@ export function ReportsPage() {
                     <TableRow key={report.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-[#00A676]" />
+                          <FileText className="w-4 h-4 text-primary" />
                           {report.name}
                         </div>
                       </TableCell>
@@ -481,7 +481,7 @@ export function ReportsPage() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="text-[#00A676] border-[#00A676]/20 hover:bg-[#00A676] hover:bg-[#00A676] hover:text-[#]"
+                            className="text-primary border-primary/20 hover:bg-primary hover:bg-primary hover:text-[#]"
                           >
                             <Download className="w-4 h-4 mr-1" />
                             Baixar

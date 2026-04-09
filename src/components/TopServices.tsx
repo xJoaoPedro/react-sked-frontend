@@ -14,7 +14,7 @@ export function TopServices() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">Serviços Mais Agendados</h3>
-        <TrendingUp className="w-5 h-5 text-[#00A676]" />
+        <TrendingUp className="w-5 h-5 text-primary" />
       </div>
       
       <div className="space-y-4">
@@ -25,7 +25,7 @@ export function TopServices() {
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">{service.count} agendamentos</span>
                 <span className={`text-sm ${
-                  service.trend.startsWith('+') ? 'text-[#00A676]' : 'text-[#E63946]'
+                  service.trend.startsWith('+') ? 'text-primary' : 'text-destructive'
                 }`}>
                   {service.trend}
                 </span>
@@ -33,7 +33,7 @@ export function TopServices() {
             </div>
             <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
               <div 
-                className="h-full bg-[#00A676] rounded-full transition-all"
+                className="h-full bg-primary rounded-full transition-all"
                 style={{ width: `${service.percentage}%` }}
               />
             </div>

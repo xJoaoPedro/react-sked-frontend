@@ -83,8 +83,8 @@ export function SettingsPage() {
           <Card className="gap-0">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#00A676]/10 flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-[#00A676]" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Perfil da Empresa</h3>
@@ -100,7 +100,7 @@ export function SettingsPage() {
                 {/* Logo Upload */}
                 <div className="flex-shrink-0">
                   <Label htmlFor="logo-upload" className="cursor-pointer block">
-                    <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-[#00A676] rounded-lg">
+                    <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-lg">
                       {companyLogo ? (
                         <img
                           src={companyLogo}
@@ -182,7 +182,7 @@ export function SettingsPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="bg-[#00A676] hover:bg-[#00A676]/90"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => handleSaveSection("Perfil da Empresa")}
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -196,8 +196,8 @@ export function SettingsPage() {
           <Card className="gap-0">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#00A676]/10 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-[#00A676]" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Agendamento</h3>
@@ -304,7 +304,7 @@ export function SettingsPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="bg-[#00A676] hover:bg-[#00A676]/90"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => handleSaveSection("Agendamento")}
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -318,8 +318,8 @@ export function SettingsPage() {
           <Card className="gap-0">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#00A676]/10 flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-[#00A676]" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Notificações</h3>
@@ -334,7 +334,7 @@ export function SettingsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-[#00A676]" />
+                    <Mail className="w-5 h-5 text-primary" />
                     <div>
                       <p className="font-medium">Notificações por e-mail</p>
                       <p className="text-sm text-muted-foreground">
@@ -350,7 +350,7 @@ export function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-[#00A676]" />
+                    <Phone className="w-5 h-5 text-primary" />
                     <div>
                       <p className="font-medium">Notificações por SMS</p>
                       <p className="text-sm text-muted-foreground">
@@ -390,7 +390,7 @@ export function SettingsPage() {
 
                 <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#00A676]" />
+                    <Check className="w-4 h-4 text-primary" />
                     <span className="text-sm">Novo agendamento</span>
                   </div>
                   <Switch
@@ -401,7 +401,7 @@ export function SettingsPage() {
 
                 <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#00A676]" />
+                    <Check className="w-4 h-4 text-primary" />
                     <span className="text-sm">Cancelamentos</span>
                   </div>
                   <Switch
@@ -412,7 +412,7 @@ export function SettingsPage() {
 
                 <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#00A676]" />
+                    <Check className="w-4 h-4 text-primary" />
                     <span className="text-sm">Notificar profissional</span>
                   </div>
                   <Switch
@@ -424,7 +424,7 @@ export function SettingsPage() {
 
               <div className="flex justify-end pt-2">
                 <Button
-                  className="bg-[#00A676] hover:bg-[#00A676]/90"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => handleSaveSection("Notificações")}
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -438,8 +438,8 @@ export function SettingsPage() {
           <Card className="gap-0">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#00A676]/10 flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-[#00A676]" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Financeiro</h3>
@@ -456,7 +456,7 @@ export function SettingsPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <DollarSign className="w-5 h-5 text-[#00A676]" />
+                      <DollarSign className="w-5 h-5 text-primary" />
                       <span className="font-medium">Dinheiro</span>
                     </div>
                     <Switch
@@ -467,7 +467,7 @@ export function SettingsPage() {
 
                   <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <CreditCard className="w-5 h-5 text-[#00A676]" />
+                      <CreditCard className="w-5 h-5 text-primary" />
                       <span className="font-medium">Cartão de Débito</span>
                     </div>
                     <Switch
@@ -478,7 +478,7 @@ export function SettingsPage() {
 
                   <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <CreditCard className="w-5 h-5 text-[#00A676]" />
+                      <CreditCard className="w-5 h-5 text-primary" />
                       <span className="font-medium">Cartão de Crédito</span>
                     </div>
                     <Switch
@@ -489,7 +489,7 @@ export function SettingsPage() {
 
                   <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <DollarSign className="w-5 h-5 text-[#00A676]" />
+                      <DollarSign className="w-5 h-5 text-primary" />
                       <span className="font-medium">PIX</span>
                     </div>
                     <Switch
@@ -533,7 +533,7 @@ export function SettingsPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="bg-[#00A676] hover:bg-[#00A676]/90"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => handleSaveSection("Financeiro")}
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -547,8 +547,8 @@ export function SettingsPage() {
           <Card className="gap-0">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#00A676]/10 flex items-center justify-center">
-                  <Palette className="w-5 h-5 text-[#00A676]" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Palette className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Aparência</h3>
@@ -627,7 +627,7 @@ export function SettingsPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="bg-[#00A676] hover:bg-[#00A676]/90"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => handleSaveSection("Aparência")}
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -641,8 +641,8 @@ export function SettingsPage() {
           <Card className="gap-0">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#00A676]/10 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-[#00A676]" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Segurança</h3>
@@ -712,7 +712,7 @@ export function SettingsPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="bg-[#00A676] hover:bg-[#00A676]/90"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => handleSaveSection("Segurança")}
                 >
                   <Save className="w-4 h-4 mr-2" />

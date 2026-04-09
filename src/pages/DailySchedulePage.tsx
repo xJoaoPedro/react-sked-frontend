@@ -135,11 +135,11 @@ export function DailySchedulePage() {
   const getStatusColor = (status: Appointment['status']) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-[#00A676] border-[#00A676]';
+        return 'bg-primary border-primary';
       case 'pending':
         return 'bg-yellow-500 border-yellow-500';
       case 'cancelled':
-        return 'bg-[#E63946] border-[#E63946]';
+        return 'bg-destructive border-destructive';
       default:
         return 'bg-gray-500 border-gray-500';
     }
@@ -188,7 +188,7 @@ export function DailySchedulePage() {
             </div>
           </div>
           
-          <Button className="bg-[#00A676] hover:bg-[#008c63] text-white">
+          <Button className="bg-primary hover:bg-[#008c63] text-white">
             <Plus className="w-4 h-4 mr-2" />
             Novo Agendamento
           </Button>
@@ -274,7 +274,7 @@ export function DailySchedulePage() {
         {/* Legend */}
         <div className="flex items-center justify-center gap-6 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-[#00A676]" />
+            <div className="w-4 h-4 rounded bg-primary" />
             <span className="text-sm text-muted-foreground">Confirmado</span>
           </div>
           <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export function DailySchedulePage() {
             <span className="text-sm text-muted-foreground">Pendente</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-[#E63946]" />
+            <div className="w-4 h-4 rounded bg-destructive" />
             <span className="text-sm text-muted-foreground">Cancelado</span>
           </div>
         </div>
