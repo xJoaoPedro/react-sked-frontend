@@ -188,7 +188,7 @@ export function DailySchedulePage() {
             </div>
           </div>
           
-          <Button className="bg-primary hover:bg-[#008c63] text-white">
+          <Button className="bg-primary hover:bg-[#008c63] text-popover">
             <Plus className="w-4 h-4 mr-2" />
             Novo Agendamento
           </Button>
@@ -245,7 +245,7 @@ export function DailySchedulePage() {
                             key={appointment.id}
                             className={`absolute left-1 right-1 ${getStatusColor(
                               appointment.status
-                            )} text-white rounded-lg p-2 shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow`}
+                            )} text-popover rounded-lg p-2 shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow`}
                             style={{
                               top: `${top}px`,
                               height: `${height}px`,

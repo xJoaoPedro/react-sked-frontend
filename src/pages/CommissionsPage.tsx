@@ -5,7 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { PageHeader } from '../components/PageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { Calendar, Download, Eye, Info } from 'lucide-react';
+import { Calendar, Download, Eye, Filter, Info } from 'lucide-react';
 
 interface ProfessionalCommission {
   id: string;
@@ -134,7 +134,7 @@ export function CommissionsPage() {
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Select value={filterPeriod} onValueChange={setFilterPeriod}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-primary hover:text-popover">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -145,7 +145,7 @@ export function CommissionsPage() {
               <SelectItem value="year">Último ano</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
             <Download className="w-4 h-4 mr-2" />
             Exportar Relatório
           </Button>
@@ -168,7 +168,7 @@ export function CommissionsPage() {
           </Card>
 
           {/* Professionals Commission Table */}
-          <Card className="overflow-hidden gap-0">
+          <Card className="overflow-hidden gap-0 p-0">
             <div className="py-3 px-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
@@ -177,8 +177,9 @@ export function CommissionsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Status" />
+                    <SelectTrigger className="bg-transparent p-4 text-foreground hover:bg-primary hover:text-popover">
+                      <Filter className="w-4 h-4 mr-2" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
@@ -262,7 +263,7 @@ export function CommissionsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm" className="h-8">
+                          <Button size="sm" title='Ver detalhes' className="h-8 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary">
                             <Eye className="w-4 h-4 mr-1" />
                             Detalhes
                           </Button>

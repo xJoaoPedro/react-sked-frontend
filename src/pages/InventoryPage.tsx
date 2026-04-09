@@ -217,12 +217,12 @@ export function InventoryPage() {
 
   const getStockStatus = (product: Product) => {
     if (product.quantity === 0) {
-      return { label: 'Esgotado', color: 'bg-destructive text-white' };
+      return { label: 'Esgotado', color: 'bg-destructive text-popover' };
     }
     if (product.quantity <= product.minStock) {
-      return { label: 'Estoque baixo', color: 'bg-yellow-500 text-white' };
+      return { label: 'Estoque baixo', color: 'bg-yellow-500 text-popover' };
     }
-    return { label: 'Em estoque', color: 'bg-primary text-white' };
+    return { label: 'Em estoque', color: 'bg-primary text-popover' };
   };
 
   return (

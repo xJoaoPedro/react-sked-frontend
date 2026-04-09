@@ -520,8 +520,8 @@ export function ServicesPage() {
                       <Badge
                         className={
                           service.status === "active"
-                            ? "bg-primary text-white"
-                            : "bg-gray-400 text-white"
+                            ? "bg-primary text-popover"
+                            : "bg-gray-400 text-popover"
                         }
                       >
                         {service.status === "active" ? "Ativo" : "Inativo"}

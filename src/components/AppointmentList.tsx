@@ -53,13 +53,13 @@ export function AppointmentList() {
   const getStatusColor = (status: Appointment['status']) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-primary text-white';
+        return 'bg-primary text-popover';
       case 'pending':
-        return 'bg-yellow-500 text-white';
+        return 'bg-yellow-500 text-popover';
       case 'cancelled':
-        return 'bg-destructive text-white';
+        return 'bg-destructive text-popover';
       default:
-        return 'bg-gray-500 text-white';
+        return 'bg-gray-500 text-popover';
     }
   };
 

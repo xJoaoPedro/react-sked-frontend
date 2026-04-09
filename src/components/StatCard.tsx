@@ -26,7 +26,7 @@ export function StatCard({ title, value, icon: Icon, trend, iconBgColor = 'bg-pr
           )}
         </div>
         <div className={`${iconBgColor} p-4 rounded-lg`}>
-          <Icon className="w-6 h-6 text-white" />
+          <Icon className="w-6 h-6 text-popover" />
         </div>
       </div>
     </Card>

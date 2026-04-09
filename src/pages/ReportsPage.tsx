@@ -307,12 +307,12 @@ export function ReportsPage() {
           {/* Custom Report Generator */}
           <div className="mt-8">
             <Card className="overflow-hidden">
-              <div className="bg-gradient-to-r from-primary to-primary/80 text-white py-4 px-6">
+              <div className="bg-gradient-to-r from-primary to-primary/80 text-popover py-4 px-6">
                 <div className="flex items-center gap-2">
                   <Plus className="w-5 h-5" />
                   <h2 className="text-lg font-semibold">Relatório Personalizado</h2>
                 </div>
-                <p className="text-white/90 text-sm mt-1">
+                <p className="text-popover/90 text-sm mt-1">
                   Crie relatórios customizados selecionando as métricas que deseja analisar
                 </p>
               </div>

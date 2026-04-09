@@ -177,12 +177,12 @@ export function CancellationsPage() {
       />
       
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6 scrollbar-custom">
+      <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom">
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Select value={filterPeriod} onValueChange={setFilterPeriod}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
+            <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-primary hover:text-popover">
+              <SelectValue className="hover:bg-white" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="week">Última semana</SelectItem>
@@ -191,7 +191,7 @@ export function CancellationsPage() {
               <SelectItem value="year">Último ano</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
             <Download className="w-4 h-4 mr-2" />
             Exportar Relatório
           </Button>
@@ -437,7 +437,7 @@ export function CancellationsPage() {
           </div>
 
           {/* Recent Cancellations Table */}
-          <Card className="overflow-hidden gap-0">
+          <Card className="overflow-hidden gap-0 p-0">
             <div className="px-6 pt-6 pb-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
@@ -449,7 +449,7 @@ export function CancellationsPage() {
                   </p>
                 </div>
                 <Select value={filterReason} onValueChange={setFilterReason}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="bg-transparent p-4 text-foreground hover:bg-primary hover:text-popover">
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue />
                   </SelectTrigger>

@@ -311,7 +311,7 @@ export function CustomersPage() {
                   </div>
                 </div>
                 <Button
-                  className="bg-pink-500 hover:bg-pink-600 text-white"
+                  className="bg-pink-500 hover:bg-pink-600 text-popover"
                   onClick={handleSendBirthdayCoupon}
                 >
                   <Gift className="w-4 h-4 mr-2" />

@@ -75,7 +75,11 @@ export const theme = {
 };
 
 const config: Config = {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}", // 👈 ESSENCIAL pro shadcn
+  ],
   theme,
   plugins: [animate],
 };

@@ -122,14 +122,13 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
             onClose={() => setIsOpen(false)}
             trigger={
               <Button 
-                variant="ghost" 
                 size="icon" 
-                className="relative"
+                className="relative bg-transparent text-muted-foreground hover:bg-primary hover:text-popover"
                 onClick={() => setIsOpen(!isOpen)}
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-destructive rounded-full text-[10px] text-white font-semibold flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-destructive rounded-full text-[10px] text-popover font-semibold flex items-center justify-center">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}

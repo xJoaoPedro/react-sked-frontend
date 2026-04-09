@@ -233,31 +233,30 @@ export function AppointmentsPage() {
         subtitle={`${filteredAppointments.length} de ${mockAppointments.length} agendamentos`}
       />
 
-      {/* Content */}
+      {/* Scrollable Content Area */}
       <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom">
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Button
             onClick={() => setShowFilters(!showFilters)}
-            className={`p-4 border border-border ${showFilters ? 'bg-primary hover:bg-primary/70 text-white' : 'bg-default text-foreground hover:bg-primary hover:text-white'}`}
+            className={`p-4 border border-border ${showFilters ? 'bg-primary hover:bg-primary/70 text-popover' : 'bg-default text-foreground hover:bg-primary hover:text-popover'}`}
           >
             <Filter className="w-4 h-4 mr-2" />
             Filtros Avançados
             {hasActiveFilters() && (
-              <Badge className="ml-2 bg-destructive text-white hover:bg-destructive">
+              <Badge className="ml-2 bg-destructive text-popover hover:bg-destructive">
                 {[filterId, filterDate, filterService !== 'all', filterClient, 
                   filterStatus !== 'all', filterTimeStart, filterTimeEnd]
                   .filter(Boolean).length}
               </Badge>
             )}
           </Button>
-          <Button variant="default" className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-white `}>
+          <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>
         </div>
 
-        {/* Scrollable Content Area */}
         <div className="flex-1 space-y-6">
           {/* Advanced Filters */}
           {showFilters && (

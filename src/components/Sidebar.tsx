@@ -99,7 +99,7 @@ export function Sidebar() {
                             to={item.path}
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                               location.pathname === item.path
-                                ? 'bg-primary text-white' 
+                                ? 'bg-primary text-popover' 
                                 : 'hover:bg-sidebar-accent text-secondary'
                             }`}
                           >
@@ -119,7 +119,7 @@ export function Sidebar() {
                         to={item.path}
                         className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                           location.pathname === item.path
-                            ? 'bg-primary text-white' 
+                            ? 'bg-primary text-popover' 
                             : 'hover:bg-sidebar-accent text-secondary'
                         }`}
                       >
@@ -142,12 +142,12 @@ export function Sidebar() {
                   to="/settings"
                   className={`flex items-center gap-2 p-3 transition-colors justify-center relative group ${
                     location.pathname === '/settings'
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-popover'
                       : 'hover:bg-sidebar-accent text-secondary'
                   }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-sm font-medium">AD</span>
+                    <span className="text-popover text-sm font-medium">AD</span>
                   </div>
                   <button
                     onClick={(e) => {
@@ -157,7 +157,7 @@ export function Sidebar() {
                     }}
                     className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive hover:bg-[#D32F3C] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <LogOut className="w-3 h-3 text-white" />
+                    <LogOut className="w-3 h-3 text-popover" />
                   </button>
                 </Link>
               </TooltipTrigger>
@@ -174,12 +174,12 @@ export function Sidebar() {
               to="/settings"
               className={`flex items-center gap-2 p-3 transition-colors relative group ${
                 location.pathname === '/settings'
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-popover'
                   : 'hover:bg-sidebar-accent text-secondary'
               }`}
             >
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-sm font-medium">AD</span>
+                <span className="text-popover text-sm font-medium">AD</span>
               </div>
               <div className="flex-1 overflow-hidden">
                 <p className="text-sm font-medium truncate">Admin User</p>
@@ -191,7 +191,7 @@ export function Sidebar() {
                   e.stopPropagation();
                   setShowLogoutDialog(true);
                 }}
-                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 opacity-60 hover:opacity-100 hover:bg-destructive hover:text-white transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 opacity-60 hover:opacity-100 hover:bg-destructive hover:text-popover transition-colors"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -214,7 +214,7 @@ export function Sidebar() {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleLogout}
-              className="bg-destructive hover:bg-[#D32F3C] text-white"
+              className="bg-destructive hover:bg-[#D32F3C] text-popover"
             >
               Sair
             </AlertDialogAction>
