@@ -1,12 +1,29 @@
 import { useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
+// TODO VERIFICAR USO
+// import { Input } from "../components/ui/input";
+// import { Label } from "../components/ui/label";
 import { PageHeader } from "../components/PageHeader";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
-import { Plus, Edit, Trash2, User, Users, UserPlus, Cake, Gift, Upload, Repeat, } from "lucide-react";
+// import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
+import {
+  User,
+  Users,
+  UserPlus,
+  Cake,
+  Gift,
+  Repeat,
+  UserRoundX,
+} from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Customer {
   id: number;
@@ -97,18 +114,19 @@ const isBirthdayToday = (birthDate: string) => {
 };
 
 export function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [customers] = useState<Customer[]>(mockCustomers);
+  // TODO VERIFICAR USO
+  // const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  // const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
-  // Form states
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    birthDate: "",
-    photo: "",
-  });
+  // Form states TODO VERIFICAR USO
+  // const [formData, setFormData] = useState({
+  //   name: "",
+  //   email: "",
+  //   phone: "",
+  //   birthDate: "",
+  //   photo: "",
+  // });
 
   const birthdayCustomers = customers.filter((c) =>
     isBirthdayToday(c.birthDate),
@@ -130,80 +148,79 @@ export function CustomersPage() {
       ? Math.round((returningCustomers / totalCustomers) * 100)
       : 0;
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, photo: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // TODO VERIFICAR USO
+  // const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setFormData({ ...formData, photo: reader.result as string });
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
-  const handleAddCustomer = () => {
-    const newCustomer: Customer = {
-      id: Math.max(...customers.map((c) => c.id)) + 1,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      birthDate: formData.birthDate,
-      photo: formData.photo,
-      registeredAt: new Date().toISOString().split("T")[0],
-      totalVisits: 0,
-    };
+  // const handleAddCustomer = () => {
+  //   const newCustomer: Customer = {
+  //     id: Math.max(...customers.map((c) => c.id)) + 1,
+  //     name: formData.name,
+  //     email: formData.email,
+  //     phone: formData.phone,
+  //     birthDate: formData.birthDate,
+  //     photo: formData.photo,
+  //     registeredAt: new Date().toISOString().split("T")[0],
+  //     totalVisits: 0,
+  //   };
 
-    setCustomers([...customers, newCustomer]);
-    setIsAddDialogOpen(false);
-    resetForm();
-  };
+  //   setCustomers([...customers, newCustomer]);
+  //   setIsAddDialogOpen(false);
+  //   resetForm();
+  // };
 
-  const handleEditCustomer = () => {
-    if (!editingCustomer) return;
+  // TODO VERIFICAR USO
+  // const handleEditCustomer = () => {
+  //   if (!editingCustomer) return;
 
-    setCustomers(
-      customers.map((c) =>
-        c.id === editingCustomer.id
-          ? {
-              ...editingCustomer,
-              name: formData.name,
-              email: formData.email,
-              phone: formData.phone,
-              birthDate: formData.birthDate,
-              photo: formData.photo,
-            }
-          : c,
-      ),
-    );
+  //   setCustomers(
+  //     customers.map((c) =>
+  //       c.id === editingCustomer.id
+  //         ? {
+  //             ...editingCustomer,
+  //             name: formData.name,
+  //             email: formData.email,
+  //             phone: formData.phone,
+  //             birthDate: formData.birthDate,
+  //             photo: formData.photo,
+  //           }
+  //         : c,
+  //     ),
+  //   );
 
-    setEditingCustomer(null);
-    resetForm();
-  };
+  //   setEditingCustomer(null);
+  //   resetForm();
+  // };
 
-  const handleDeleteCustomer = (id: number) => {
-    setCustomers(customers.filter((c) => c.id !== id));
-  };
+  // TODO VERIFICAR USO
+  // const openEditDialog = (customer: Customer) => {
+  //   setEditingCustomer(customer);
+  //   setFormData({
+  //     name: customer.name,
+  //     email: customer.email,
+  //     phone: customer.phone,
+  //     birthDate: customer.birthDate,
+  //     photo: customer.photo || "",
+  //   });
+  // };
 
-  const openEditDialog = (customer: Customer) => {
-    setEditingCustomer(customer);
-    setFormData({
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      birthDate: customer.birthDate,
-      photo: customer.photo || "",
-    });
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      birthDate: "",
-      photo: "",
-    });
-  };
+  // const resetForm = () => {
+  //   setFormData({
+  //     name: "",
+  //     email: "",
+  //     phone: "",
+  //     birthDate: "",
+  //     photo: "",
+  //   });
+  // };
 
   const handleSendBirthdayCoupon = () => {
     alert(
@@ -370,7 +387,8 @@ export function CustomersPage() {
                     {customers.length} clientes cadastrados
                   </p>
                 </div>
-                <Dialog
+                {/* TODO VERIFICAR USO */}
+                {/* <Dialog
                   open={isAddDialogOpen}
                   onOpenChange={setIsAddDialogOpen}
                 >
@@ -386,9 +404,7 @@ export function CustomersPage() {
                     </DialogHeader>
 
                     <div className="space-y-6 py-4">
-                      {/* Photo and Basic Info */}
                       <div className="flex gap-6">
-                        {/* Photo Upload */}
                         <div className="flex-shrink-0">
                           <Label
                             htmlFor="photo-upload"
@@ -420,7 +436,6 @@ export function CustomersPage() {
                           />
                         </div>
 
-                        {/* Basic Info */}
                         <div className="flex-1 space-y-4">
                           <div className="space-y-2">
                             <Label htmlFor="name">Nome completo</Label>
@@ -455,7 +470,6 @@ export function CustomersPage() {
                         </div>
                       </div>
 
-                      {/* Contact and Birth Date */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="phone">Telefone</Label>
@@ -510,7 +524,7 @@ export function CustomersPage() {
                       </Button>
                     </DialogFooter>
                   </DialogContent>
-                </Dialog>
+                </Dialog> */}
               </div>
             </div>
 
@@ -523,7 +537,7 @@ export function CustomersPage() {
                     <TableHead>Aniversário</TableHead>
                     <TableHead>Visitas</TableHead>
                     <TableHead>Última Visita</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -565,7 +579,7 @@ export function CustomersPage() {
                       </TableCell>
                       <TableCell>{formatDate(customer.birthDate)}</TableCell>
                       <TableCell>
-                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                        <span className="w-full px-2 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                           {customer.totalVisits}
                         </span>
                       </TableCell>
@@ -575,9 +589,9 @@ export function CustomersPage() {
                           : "Nunca"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          {/* Edit Dialog */}
-                          <Dialog>
+                        <div className="flex gap-2">
+                          {/* TODO VERIFICAR USO Edit Dialog */}
+                          {/* <Dialog>
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
@@ -594,9 +608,7 @@ export function CustomersPage() {
                               </DialogHeader>
 
                               <div className="space-y-6 py-4">
-                                {/* Photo and Basic Info */}
                                 <div className="flex gap-6">
-                                  {/* Photo Upload */}
                                   <div className="flex-shrink-0">
                                     <Label
                                       htmlFor="edit-photo-upload"
@@ -628,7 +640,6 @@ export function CustomersPage() {
                                     />
                                   </div>
 
-                                  {/* Basic Info */}
                                   <div className="flex-1 space-y-4">
                                     <div className="space-y-2">
                                       <Label htmlFor="edit-name">
@@ -663,7 +674,6 @@ export function CustomersPage() {
                                   </div>
                                 </div>
 
-                                {/* Contact and Birth Date */}
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-2">
                                     <Label htmlFor="edit-phone">Telefone</Label>
@@ -716,17 +726,25 @@ export function CustomersPage() {
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
-                          </Dialog>
+                          </Dialog> */}
 
-                          {/* Delete Button */}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteCustomer(customer.id)}
-                            className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                  <UserRoundX className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TooltipTrigger>
+
+                            <TooltipContent side="top" sideOffset={4} className="bg-foreground">
+                              Bloquear usuário
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>

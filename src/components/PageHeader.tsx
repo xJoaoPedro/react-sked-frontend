@@ -103,7 +103,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground mb-1">{title}</h1>
-          {subtitle && <p className="text-muted-foreground capitalize">{subtitle}</p>}
+          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
         </div>
         
         <div className="flex items-center gap-4">
