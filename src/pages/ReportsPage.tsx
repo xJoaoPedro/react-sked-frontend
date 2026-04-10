@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { BarChart3, Calendar, DollarSign, XCircle, Percent, Users, UserCog, Scissors, FileText, Download, Eye, TrendingUp, Plus, Clock, LucideIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ReportCard {
   id: string;
@@ -474,18 +475,39 @@ export function ReportsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
-                            Visualizar
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="text-primary border-primary/20 hover:bg-primary hover:bg-primary hover:text-[#]"
-                          >
-                            <Download className="w-4 h-4 mr-1" />
-                            Baixar
-                          </Button>
+                          <Tooltip disableHoverableContent>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <Button 
+                                  size="sm"
+                                  className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TooltipTrigger>
+
+                            <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
+                              Visualizar
+                            </TooltipContent>
+                          </Tooltip>
+                          
+                          <Tooltip disableHoverableContent>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <Button  
+                                  size="sm"
+                                  className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                >
+                                  <Download className="w-4 h-4 mr-1" />
+                                </Button>
+                              </div>
+                            </TooltipTrigger>
+
+                            <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                              Baixar
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { Info, Plus, Edit, Trash2, Search, Clock, Scissors, Sparkles, Hand, Flower2, } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Service {
   id: number;
@@ -221,6 +222,22 @@ export function ServicesPage() {
       description: "",
       status: "active",
     });
+  };
+
+  const getStatusBadge = (service: Service) => {
+    let status = 'inactive';
+
+    if (service.status === 'active') {
+      status = 'active';
+    }
+    
+    const statusConfig = {
+      active: { label: 'Ativo', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:cursor-default' },
+      inactive: { label: 'Inativo', className: 'bg-gray-400/10 text-gray-500 border border-gray-400/20 hover:bg-gray-400/20 hover:cursor-default' },
+    };
+  
+    const config = statusConfig[status];
+    return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
   };
 
   return (
@@ -476,11 +493,11 @@ export function ServicesPage() {
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableHead>Serviço</TableHead>
                   <TableHead>Categoria</TableHead>
-                  <TableHead className="text-center">Duração</TableHead>
-                  <TableHead className="text-right">Preço</TableHead>
-                  <TableHead className="text-center">Comissão</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead>Duração</TableHead>
+                  <TableHead>Preço</TableHead>
+                  <TableHead>Comissão</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -504,42 +521,42 @@ export function ServicesPage() {
                         {service.category}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-muted-foreground">
                         <Clock className="w-4 h-4" />
                         <span>{service.duration} min</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-medium">
+                    <TableCell className="font-medium">
                       R$ {service.price.toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-center text-muted-foreground">
+                    <TableCell className="text-muted-foreground">
                       {service.commissionRate}%
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        className={
-                          service.status === "active"
-                            ? "bg-primary text-popover"
-                            : "bg-gray-400 text-popover"
-                        }
-                      >
-                        {service.status === "active" ? "Ativo" : "Inativo"}
-                      </Badge>
+                    <TableCell>
+                      {getStatusBadge(service)}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                    <TableCell>
+                      <div className="flex gap-2">
                         <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openEditDialog(service)}
-                              className="text-foreground border-foreground/20 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
+                          <Tooltip disableHoverableContent>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    onClick={() => openEditDialog(service)}
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>                          
+                                </DialogTrigger>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                              Editar
+                            </TooltipContent>
+                          </Tooltip>
                           <DialogContent className="sm:max-w-[600px]">
                             <DialogHeader>
                               <DialogTitle>Editar Serviço</DialogTitle>
@@ -715,14 +732,23 @@ export function ServicesPage() {
                           </DialogContent>
                         </Dialog>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteService(service.id)}
-                          className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <Tooltip disableHoverableContent>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Button  
+                                size="sm"
+                                onClick={() => handleDeleteService(service.id)}
+                                className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+
+                          <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                            Excluir
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </TableCell>
                   </TableRow>

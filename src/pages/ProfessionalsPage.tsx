@@ -7,6 +7,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Plus, Edit, Trash2, User, Upload, } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface WorkSchedule {
   [key: string]: {
@@ -498,7 +499,7 @@ export function ProfessionalsPage() {
                   <TableHead>Nome</TableHead>
                   <TableHead>E-mail</TableHead>
                   <TableHead>Telefone</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -527,20 +528,28 @@ export function ProfessionalsPage() {
                     </TableCell>
                     <TableCell>{professional.email}</TableCell>
                     <TableCell>{professional.phone}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                    <TableCell >
+                      <div className="flex gap-2">
                         {/* Edit Dialog */}
                         <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openEditDialog(professional)}
-                              className="text-foreground border-foreground/20 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
+                          <Tooltip disableHoverableContent>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    onClick={() => openEditDialog(professional)}
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </DialogTrigger>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                              Editar
+                            </TooltipContent>
+                          </Tooltip>
                           <DialogContent className="sm:max-w-[1400px]">
                             <DialogHeader>
                               <DialogTitle>Editar Profissional</DialogTitle>
@@ -781,14 +790,23 @@ export function ProfessionalsPage() {
                         </Dialog>
 
                         {/* Delete Button */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteProfessional(professional.id)}
-                          className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <Tooltip disableHoverableContent>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Button  
+                                size="sm"
+                                onClick={() => handleDeleteProfessional(professional.id)}
+                                className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+
+                          <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                            Remover
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </TableCell>
                   </TableRow>

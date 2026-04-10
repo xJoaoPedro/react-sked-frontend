@@ -139,18 +139,17 @@ export function RevenuePage() {
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3">
             <Select value={filterPeriod} onValueChange={setFilterPeriod}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
+              <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-primary hover:text-popover">
+                <SelectValue className="hover:bg-white" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="today">Hoje</SelectItem>
                 <SelectItem value="week">Última semana</SelectItem>
                 <SelectItem value="month">Último mês</SelectItem>
                 <SelectItem value="quarter">Último trimestre</SelectItem>
                 <SelectItem value="year">Último ano</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
               <Download className="w-4 h-4 mr-2" />
               Exportar Relatório
             </Button>
@@ -310,8 +309,8 @@ export function RevenuePage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Select value={filterPayment} onValueChange={setFilterPayment}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Pagamento" />
+                    <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-primary hover:text-popover">
+                      <SelectValue className="hover:bg-white" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
@@ -322,8 +321,8 @@ export function RevenuePage() {
                     </SelectContent>
                   </Select>
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Status" />
+                    <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-primary hover:text-popover">
+                      <SelectValue className="hover:bg-white" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
