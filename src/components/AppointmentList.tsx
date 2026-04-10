@@ -50,31 +50,17 @@ const appointments: Appointment[] = [
 ];
 
 export function AppointmentList() {
-  const getStatusColor = (status: Appointment['status']) => {
-    switch (status) {
-      case 'confirmed':
-        return 'bg-primary text-popover';
-      case 'pending':
-        return 'bg-yellow-500 text-popover';
-      case 'cancelled':
-        return 'bg-destructive text-popover';
-      default:
-        return 'bg-gray-500 text-popover';
-    }
-  };
-
-  const getStatusLabel = (status: Appointment['status']) => {
-    switch (status) {
-      case 'confirmed':
-        return 'Confirmado';
-      case 'pending':
-        return 'Pendente';
-      case 'cancelled':
-        return 'Cancelado';
-      default:
-        return status;
-    }
-  };
+  const getStatusBadge = (status: Appointment['status']) => {
+      const statusConfig = {
+        confirmed: { label: 'Confirmado', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
+        pending: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20' },
+        cancelled: { label: 'Cancelado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
+        completed: { label: 'Concluído', className: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20' },
+      };
+      
+      const config = statusConfig[status];
+      return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
+    };
 
   return (
     <Card className="p-6">
@@ -103,9 +89,7 @@ export function AppointmentList() {
               <span className="text-sm">{appointment.time}</span>
             </div>
             
-            <Badge className={getStatusColor(appointment.status)}>
-              {getStatusLabel(appointment.status)}
-            </Badge>
+            {getStatusBadge(appointment.status)}            
           </div>
         ))}
       </div>

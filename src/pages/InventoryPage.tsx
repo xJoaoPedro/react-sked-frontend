@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { DollarSign, Package, ShoppingCart, Plus, Edit, Trash2, Search, AlertTriangle, Package2, X, } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Product {
   id: number;
@@ -184,9 +185,10 @@ export function InventoryPage() {
     resetForm();
   };
 
-  const handleDeleteProduct = (id: number) => {
-    setProducts(products.filter(p => p.id !== id));
-  };
+  // TODO VERIFICAR USO
+  // const handleDeleteProduct = (id: number) => {
+  //   setProducts(products.filter(p => p.id !== id));
+  // };
 
   const openEditDialog = (product: Product) => {
     setEditingProduct(product);
@@ -215,14 +217,23 @@ export function InventoryPage() {
     setProductImage(null);
   };
 
-  const getStockStatus = (product: Product) => {
+  const getStatusBadge = (product: Product) => {
+    let status = 'confirmed';
+
     if (product.quantity === 0) {
-      return { label: 'Esgotado', color: 'bg-destructive text-popover' };
+      status = 'cancelled';
+    } else if (product.quantity <= product.minStock) {
+      status = 'pending';
     }
-    if (product.quantity <= product.minStock) {
-      return { label: 'Estoque baixo', color: 'bg-yellow-500 text-popover' };
-    }
-    return { label: 'Em estoque', color: 'bg-primary text-popover' };
+    
+    const statusConfig = {
+      confirmed: { label: 'Em estoque', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
+      pending: { label: 'Estoque baixo', className: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20' },
+      cancelled: { label: 'Esgotado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
+    };
+    
+    const config = statusConfig[status];
+    return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
   };
 
   return (
@@ -545,7 +556,6 @@ export function InventoryPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredProducts.map(product => {
-                    const status = getStockStatus(product);
                     return (
                       <TableRow key={product.id}>
                         <TableCell className="font-medium max-w-md">
@@ -573,9 +583,7 @@ export function InventoryPage() {
                           {product.quantity} {product.unit}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Badge className={`text-xs ${status.color}`}>
-                            {status.label}
-                          </Badge>
+                          {getStatusBadge(product)}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
                           R$ {product.costPrice.toFixed(2)}
@@ -593,15 +601,24 @@ export function InventoryPage() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openEditDialog(product)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                              </DialogTrigger>
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        onClick={() => openEditDialog(product)}
+                                        size="sm"
+                                        className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                      >
+                                        <Edit className="w-4 h-4" />
+                                      </Button>                          
+                                    </DialogTrigger>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                                  Editar
+                                </TooltipContent>
+                              </Tooltip>
                               <DialogContent className="sm:max-w-[600px]">
                                 <DialogHeader>
                                   <DialogTitle>Editar Produto</DialogTitle>
@@ -765,15 +782,23 @@ export function InventoryPage() {
                                 </DialogFooter>
                               </DialogContent>
                             </Dialog>
+                            
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button  
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
 
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteProduct(product.id)}
-                              className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                                Excluir
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
                         </TableCell>
                       </TableRow>

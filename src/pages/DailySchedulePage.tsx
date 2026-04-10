@@ -173,22 +173,22 @@ export function DailySchedulePage() {
         {/* Controls */}
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <Button onClick={goToToday} variant="outline">
+            <Button onClick={goToToday} className='bg-transparent border border-border text-foreground hover:bg-primary hover:text-popover'>
               <Calendar className="w-4 h-4 mr-2" />
               Hoje
             </Button>
-            <div className="flex items-center gap-1 border border-border rounded-lg">
-              <Button onClick={previousDay} variant="ghost" size="icon">
+            <div className="flex items-center border border-border rounded-lg">
+              <Button onClick={previousDay} size="icon" className='bg-transparent text-foreground hover:text-popover'>
                 <ChevronLeft className="w-5 h-5" />
               </Button>
               <div className="w-px h-6 bg-border" />
-              <Button onClick={nextDay} variant="ghost" size="icon">
+              <Button onClick={nextDay} size="icon" className='bg-transparent text-foreground hover:text-popover'>
                 <ChevronRight className="w-5 h-5" />
               </Button>
             </div>
           </div>
           
-          <Button className="bg-primary hover:bg-[#008c63] text-popover">
+          <Button className="bg-primary hover:bg-primary/70 text-popover">
             <Plus className="w-4 h-4 mr-2" />
             Novo Agendamento
           </Button>
@@ -196,16 +196,16 @@ export function DailySchedulePage() {
 
         {/* Schedule Grid - with both vertical and horizontal scroll */}
         <Card className="flex-1 overflow-auto scrollbar-custom">
-          <div className="flex min-w-max h-full">
+          <div className="flex min-w-max">
             {/* Time column */}
-            <div className="w-20 flex-shrink-0 border-r border-border sticky left-0 bg-white z-10">
-              <div className="h-12 border-b border-border" /> {/* Header spacer */}
+            <div className="w-24 flex-shrink-0 border-r border-border sticky left-0 bg-background z-20">
+              <div className="h-12 border-b border-border sticky top-0 bg-white z-20" /> {/* Header spacer */}
               {timeSlots.map((time) => (
                 <div
                   key={time}
-                  className="h-16 border-b border-border flex items-start justify-end pr-2 pt-1"
+                  className="h-16 border-b border-border flex items-start justify-end pr-3 pt-1"
                 >
-                  <span className="text-xs text-muted-foreground">{time}</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap font-medium">{time}</span>
                 </div>
               ))}
             </div>
@@ -219,7 +219,7 @@ export function DailySchedulePage() {
               return (
                 <div key={professional.id} className="w-[350px] flex-shrink-0 border-r border-border last:border-r-0">
                   {/* Professional header */}
-                  <div className="h-12 border-b border-border bg-muted/30 flex items-center justify-center px-4">
+                  <div className="h-12 border-b border-border bg-background flex items-center justify-center px-4 sticky top-0 z-10">
                     <span className="font-medium text-sm truncate">{professional.name}</span>
                   </div>
 
@@ -245,7 +245,7 @@ export function DailySchedulePage() {
                             key={appointment.id}
                             className={`absolute left-1 right-1 ${getStatusColor(
                               appointment.status
-                            )} text-popover rounded-lg p-2 shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow`}
+                            )} text-white rounded-lg p-2 shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow`}
                             style={{
                               top: `${top}px`,
                               height: `${height}px`,
