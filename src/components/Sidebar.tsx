@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { socket } from "@/services/socket";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import skedLogo from '../assets/skedLogo.svg';
 import { Users, BarChart3, Menu, LayoutDashboard, CalendarCheck, CalendarX, DollarSign, Package, Wrench, UserCog, CalendarDays, Percent, LogOut, LucideIcon, } from 'lucide-react';
@@ -57,8 +58,9 @@ export function Sidebar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // TODO Aqui você pode adicionar lógica de logout (limpar tokens, etc)
-    navigate('/');
+    localStorage.removeItem("token");
+    socket.disconnect();
+    navigate("/login");
   };
 
   return (
@@ -155,7 +157,7 @@ export function Sidebar() {
                       e.stopPropagation();
                       setShowLogoutDialog(true);
                     }}
-                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive hover:bg-[#D32F3C] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <LogOut className="w-3 h-3 text-popover" />
                   </button>
@@ -203,18 +205,18 @@ export function Sidebar() {
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <AlertDialogContent className="bg-white border-[#E5E5E5]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">Confirmar Logout</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#6B6B6B]">
-              Tem certeza que deseja sair? Você precisará fazer login novamente para acessar o sistema.
+            <AlertDialogTitle className="text-destructive font-bold">Tem certeza que deseja sair?</AlertDialogTitle>
+            <AlertDialogDescription className="text-destructive">
+              Você precisará fazer login novamente para acessar o sistema.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-[#E5E5E5] text-foreground hover:bg-secondary">
+            <AlertDialogCancel className="p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleLogout}
-              className="bg-destructive hover:bg-[#D32F3C] text-popover"
+              className="bg-destructive hover:bg-destructive/70 text-popover"
             >
               Sair
             </AlertDialogAction>
