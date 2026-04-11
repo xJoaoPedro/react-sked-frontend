@@ -6,7 +6,10 @@ import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { PageHeader } from "../components/PageHeader";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
-import { Building2, Calendar, Bell, CreditCard, Palette, Shield, Upload, Save, Mail, Phone, Globe, Clock, DollarSign, Check, } from "lucide-react";
+import { Building2, Calendar, Bell, CreditCard, Palette, Shield, Upload, Save, Mail, Phone, Globe, Clock, DollarSign, Check, MessageCircle, HelpCircle, Copy, Lock, } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText, } from "@/components/ui/input-group";
+
 
 export function SettingsPage() {
   // Company Profile State
@@ -27,7 +30,6 @@ export function SettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [reminderBefore, setReminderBefore] = useState("24");
-  const [notifyProfessional, setNotifyProfessional] = useState(true);
   const [notifyNewAppointment, setNotifyNewAppointment] = useState(true);
   const [notifyCancellation, setNotifyCancellation] = useState(true);
 
@@ -36,14 +38,10 @@ export function SettingsPage() {
   const [acceptDebit, setAcceptDebit] = useState(true);
   const [acceptCredit, setAcceptCredit] = useState(true);
   const [acceptPix, setAcceptPix] = useState(true);
-  const [serviceFee, setServiceFee] = useState("0");
-  const [currency, setCurrency] = useState("BRL");
 
   // Appearance Settings
   const [primaryColor, setPrimaryColor] = useState("#00A676");
-  const [bookingPageUrl, setBookingPageUrl] = useState(
-    "agendify.app/salon-beleza",
-  );
+  const [bookingPageUrl, setBookingPageUrl] = useState("salon-beleza");
   const [showPrices, setShowPrices] = useState(true);
   const [requireLogin, setRequireLogin] = useState(false);
 
@@ -218,10 +216,11 @@ export function SettingsPage() {
                     value={appointmentInterval}
                     onValueChange={setAppointmentInterval}
                   >
-                    <SelectTrigger id="appointment-interval">
+                    <SelectTrigger id="appointment-interval" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="0">Nenhum</SelectItem>
                       <SelectItem value="15">15 minutos</SelectItem>
                       <SelectItem value="30">30 minutos</SelectItem>
                       <SelectItem value="45">45 minutos</SelectItem>
@@ -236,10 +235,11 @@ export function SettingsPage() {
                     value={minAdvanceBooking}
                     onValueChange={setMinAdvanceBooking}
                   >
-                    <SelectTrigger id="min-advance">
+                    <SelectTrigger id="min-advance" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="0">Nenhuma</SelectItem>
                       <SelectItem value="1">1 hora</SelectItem>
                       <SelectItem value="2">2 horas</SelectItem>
                       <SelectItem value="4">4 horas</SelectItem>
@@ -254,10 +254,11 @@ export function SettingsPage() {
                     value={maxAdvanceBooking}
                     onValueChange={setMaxAdvanceBooking}
                   >
-                    <SelectTrigger id="max-advance">
+                    <SelectTrigger id="max-advance" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="0">Nenhuma</SelectItem>
                       <SelectItem value="7">7 dias</SelectItem>
                       <SelectItem value="15">15 dias</SelectItem>
                       <SelectItem value="30">30 dias</SelectItem>
@@ -275,10 +276,11 @@ export function SettingsPage() {
                     value={cancellationDeadline}
                     onValueChange={setCancellationDeadline}
                   >
-                    <SelectTrigger id="cancellation-deadline">
+                    <SelectTrigger id="cancellation-deadline" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="0">Nenhum</SelectItem>
                       <SelectItem value="2">2 horas antes</SelectItem>
                       <SelectItem value="6">6 horas antes</SelectItem>
                       <SelectItem value="12">12 horas antes</SelectItem>
@@ -337,9 +339,28 @@ export function SettingsPage() {
                     <Mail className="w-5 h-5 text-primary" />
                     <div>
                       <p className="font-medium">Notificações por e-mail</p>
-                      <p className="text-sm text-muted-foreground">
-                        Enviar lembretes por e-mail
-                      </p>
+                      <div className="flex items-center">
+                        <p className="text-sm text-muted-foreground">
+                          Enviar lembretes por e-mail 
+                        </p>
+                        <Tooltip disableHoverableContent>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Button 
+                                size="xs"
+                                className="h-8 w-8 p-0 rounded rounded-md bg-transparent hover:bg-transparent"
+                              >
+                                <HelpCircle className="w-4 h-4 stroke-yellow-500" />
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+
+                          <TooltipContent side="top" sideOffset={4} className="bg-yellow-500 fill-yellow-500">
+                            Caso o cliente não possua email cadastrado, a notificação não será enviada.
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      
                     </div>
                   </div>
                   <Switch
@@ -350,11 +371,11 @@ export function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-primary" />
+                    <MessageCircle className="w-5 h-5 text-primary" />
                     <div>
-                      <p className="font-medium">Notificações por SMS</p>
+                      <p className="font-medium">Notificações por Whatsapp</p>
                       <p className="text-sm text-muted-foreground">
-                        Enviar lembretes por mensagem de texto
+                        Enviar lembretes por mensagem de texto via Whatsapp
                       </p>
                     </div>
                   </div>
@@ -376,6 +397,7 @@ export function SettingsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="0">Não enviar</SelectItem>
                     <SelectItem value="1">1 hora antes</SelectItem>
                     <SelectItem value="2">2 horas antes</SelectItem>
                     <SelectItem value="6">6 horas antes</SelectItem>
@@ -410,16 +432,6 @@ export function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Notificar profissional</span>
-                  </div>
-                  <Switch
-                    checked={notifyProfessional}
-                    onCheckedChange={setNotifyProfessional}
-                  />
-                </div>
               </div>
 
               <div className="flex justify-end pt-2">
@@ -500,37 +512,6 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currency">Moeda</Label>
-                  <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger id="currency">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BRL">Real (R$)</SelectItem>
-                      <SelectItem value="USD">Dólar (US$)</SelectItem>
-                      <SelectItem value="EUR">Euro (€)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="service-fee">
-                    Taxa de serviço (%) - opcional
-                  </Label>
-                  <Input
-                    id="service-fee"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={serviceFee}
-                    onChange={(e) => setServiceFee(e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
               <div className="flex justify-end">
                 <Button
                   className="bg-primary hover:bg-primary/90"
@@ -584,13 +565,35 @@ export function SettingsPage() {
                   URL da página de agendamento
                 </Label>
                 <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="booking-url"
-                    value={bookingPageUrl}
-                    onChange={(e) => setBookingPageUrl(e.target.value)}
-                    className="pl-10"
-                  />
+                  <InputGroup>
+                    <InputGroupInput 
+                      id="booking-url"
+                      value={bookingPageUrl}
+                      onChange={(e) => setBookingPageUrl(e.target.value)}
+                    />
+                    <InputGroupAddon>
+                      <InputGroupText>sked.com.br/</InputGroupText>
+                    </InputGroupAddon>
+                    <InputGroupAddon align="inline-end">
+                      <Tooltip disableHoverableContent>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button 
+                              size="sm"
+                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+
+                        <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                          Copiar
+                        </TooltipContent>
+                      </Tooltip>
+                      
+                    </InputGroupAddon>
+                  </InputGroup>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Link público para seus clientes agendarem serviços
@@ -699,11 +702,8 @@ export function SettingsPage() {
                     <p className="text-sm text-amber-700 mb-3">
                       Recomendamos trocar sua senha a cada 90 dias
                     </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-amber-300 hover:bg-amber-100"
-                    >
+                    <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
+                      <Lock className="w-4 h-4 mr-2" />
                       Alterar senha
                     </Button>
                   </div>

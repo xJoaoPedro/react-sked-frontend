@@ -112,7 +112,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
             <Input
               name="search"
               placeholder="Buscar agendamentos, clientes..." 
-              className="pl-10 bg-input-background hover:bg-secondary"
+              className="pl-10"
             />
           </div>
           
