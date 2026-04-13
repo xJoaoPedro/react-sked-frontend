@@ -59,6 +59,7 @@ export function Sidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("companyId");
     socket.disconnect();
     navigate("/login");
   };

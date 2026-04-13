@@ -19,7 +19,7 @@ export function LoginPage() {
     setError("");
 
     try {
-      const res = await fetch(`${url}/auth/login`, {
+      const res = await fetch(`${url}/auth/companies/login`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ email, password }),
@@ -32,6 +32,7 @@ export function LoginPage() {
       const data = await res.json();
 
       localStorage.setItem("token", data.token);
+      if (data.companyId) localStorage.setItem("companyId", data.companyId);
 
       navigate("/dashboard");
     } catch (err) {
