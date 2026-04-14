@@ -38,8 +38,6 @@ const weekStatsMapper = (item) => {
 
 
 export function WeeklySchedule({ weekStats }: DashboardProps) {
-  console.log(weekStats)
-
   const weekDays = weekStats.map(weekStatsMapper)
   
   const maxAppointments = Math.max(...weekDays.map(d => d.appointments));

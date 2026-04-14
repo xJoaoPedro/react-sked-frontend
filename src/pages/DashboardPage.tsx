@@ -62,7 +62,7 @@ export function DashboardPage() {
 
         {/* Charts and Lists Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RevenueChart />
+          <RevenueChart revenue={data.revenueLastMonths} />
           <TopServices />
         </div>
 

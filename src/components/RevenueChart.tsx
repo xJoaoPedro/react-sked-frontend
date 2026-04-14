@@ -1,16 +1,31 @@
 import { Card } from './ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const data = [
-  { month: 'Jan', receita: 4500 },
-  { month: 'Fev', receita: 5200 },
-  { month: 'Mar', receita: 4800 },
-  { month: 'Abr', receita: 6100 },
-  { month: 'Mai', receita: 5900 },
-  { month: 'Jun', receita: 7200 },
+interface RevenueItem {
+  month: string
+  total: number
+}
+
+interface RevenueProps {
+  revenue: RevenueItem[]
+}
+
+
+const monthMap = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez"
 ];
 
-export function RevenueChart() {
+export function RevenueChart({ revenue }: RevenueProps) {
+  const data = revenue.map((item) => {
+    const month = Number(item.month.split('-')[1]) - 1
+    
+    return {
+      month: monthMap[month],
+      receita: item.total
+    }
+  })
+  
   return (
     <Card className="p-6">
       <h3 className="text-xl font-semibold mb-6">Receita Mensal</h3>
