@@ -18,7 +18,7 @@ export function Layout() {
           headers: { Authorization: `Bearer ${token}` },
       })).data;
 
-      setDados(response);
+      setDados(response.data);
     }
 
     fetchData();

@@ -32,7 +32,7 @@ export function LoginPage() {
       const data = await res.json();
 
       localStorage.setItem("token", data.token);
-      if (data.companyId) localStorage.setItem("companyId", data.companyId);
+      if (data.id) localStorage.setItem("companyId", data.id);
 
       navigate("/dashboard");
     } catch (err) {

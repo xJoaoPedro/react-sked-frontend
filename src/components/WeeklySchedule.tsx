@@ -1,16 +1,47 @@
 import { Card } from './ui/card';
 
-const weekDays = [
-  { day: 'Seg', date: '27', appointments: 8 },
-  { day: 'Ter', date: '28', appointments: 12 },
-  { day: 'Qua', date: '29', appointments: 10 },
-  { day: 'Qui', date: '30', appointments: 15 },
-  { day: 'Sex', date: '31', appointments: 14, isToday: true },
-  { day: 'Sáb', date: '1', appointments: 6 },
-  { day: 'Dom', date: '2', appointments: 3 },
-];
+interface DashboardProps {
+  weekStats: {
+    day: string;
+    date: string;
+    appointments: number;
+    isToday?: boolean;
+  }[];
+}
 
-export function WeeklySchedule() {
+const dayMap = {
+  0: "Dom",
+  1: "Seg",
+  2: "Ter",
+  3: "Qua",
+  4: "Qui",
+  5: "Sex",
+  6: "Sáb",
+};
+
+const weekStatsMapper = (item) => {
+  const dow = Number(item.dow)
+  const dateOnly = item.date.split("T")[0]
+  const day = Number(dateOnly.split("-")[2])
+
+  const today = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  })
+
+  return {
+    day: dayMap[dow],
+    date: String(day),
+    appointments: item.appointments,
+    isToday: dateOnly === today,
+  }
+}
+
+
+export function WeeklySchedule({ weekStats }: DashboardProps) {
+  console.log(weekStats)
+
+  const weekDays = weekStats.map(weekStatsMapper)
+  
   const maxAppointments = Math.max(...weekDays.map(d => d.appointments));
 
   return (

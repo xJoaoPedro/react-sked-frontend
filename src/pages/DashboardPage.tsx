@@ -1,17 +1,31 @@
-import { StatCard } from '../components/StatCard';
-import { AppointmentList } from '../components/AppointmentList';
-import { RevenueChart } from '../components/RevenueChart';
-import { WeeklySchedule } from '../components/WeeklySchedule';
-import { TopServices } from '../components/TopServices';
-import { Calendar, Users, DollarSign, Clock } from 'lucide-react';
-import { PageHeader } from '../components/PageHeader';
+import { StatCard } from "../components/StatCard";
+import { AppointmentList } from "../components/AppointmentList";
+import { RevenueChart } from "../components/RevenueChart";
+import { WeeklySchedule } from "../components/WeeklySchedule";
+import { TopServices } from "../components/TopServices";
+import { Calendar, Users, DollarSign, Clock } from "lucide-react";
+import { PageHeader } from "../components/PageHeader";
+import { useOutletContext } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export function DashboardPage() {
+  const { dados } = useOutletContext();
+  const [data, setDataState] = useState(null)
+
+
+  useEffect(() => {
+    if (dados === null) return;
+
+    setDataState(dados.dashboard)
+  }, [dados, data]);
+
+  if (data === null) return <div>Carregando...</div>
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <PageHeader 
-        title="Painel" 
-        subtitle="Bem-vindo de volta! Aqui está o resumo de hoje." 
+      <PageHeader
+        title="Painel"
+        subtitle="Bem-vindo de volta! Aqui está o resumo de hoje."
       />
 
       {/* Content */}
@@ -20,36 +34,31 @@ export function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Agendamentos Hoje"
-            value={24}
+            value={3}
             icon={Calendar}
-            trend={{ value: '+8% vs ontem', isPositive: true }}
-            iconBgColor="bg-primary"
           />
           <StatCard
             title="Total de Clientes"
-            value={1.247}
+            value={data.totalClients}
             icon={Users}
-            trend={{ value: '+15% vs mês passado', isPositive: true }}
-            iconBgColor="bg-foreground"
+            trend={{ value: data.clientsPercentage.toFixed(1) }}
           />
           <StatCard
             title="Receita Mensal"
-            value="R$ 7.200"
+            value={`R$ ${data.monthlyRevenue}`}
             icon={DollarSign}
-            trend={{ value: '+22% vs mês passado', isPositive: true }}
-            iconBgColor="bg-primary"
+            trend={{ value: data.revenuePercentage.toFixed(1)}}
           />
           <StatCard
             title="Taxa de Cancelamento"
-            value="3.2%"
+            value={`${data.cancelRate.toFixed(1)}%`}
             icon={Clock}
-            trend={{ value: '-1.5% vs mês passado', isPositive: true }}
-            iconBgColor="bg-destructive"
+            trend={{ value: data.cancelPercentage.toFixed(1), inverted: true}}
           />
         </div>
 
         {/* Weekly Schedule */}
-        <WeeklySchedule />
+        <WeeklySchedule weekStats={data.weekStats} />
 
         {/* Charts and Lists Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
