@@ -1,15 +1,18 @@
 import { Card } from './ui/card';
 import { TrendingUp } from 'lucide-react';
 
-const services = [
-  { name: 'Corte de Cabelo', count: 145, percentage: 32, trend: '+12%' },
-  { name: 'Massagem', count: 98, percentage: 22, trend: '+8%' },
-  { name: 'Manicure', count: 87, percentage: 19, trend: '+5%' },
-  { name: 'Consulta', count: 76, percentage: 17, trend: '+15%' },
-  { name: 'Depilação', count: 45, percentage: 10, trend: '-3%' },
-];
+interface ServicesItem {
+  name: string
+  total: number
+}
 
-export function TopServices() {
+interface TopServicesProps {
+  services: ServicesItem[]
+}
+
+export function TopServices({services}: TopServicesProps) {
+  const maxTotal = Math.max(...services.map(d => d.total));
+
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -23,18 +26,13 @@ export function TopServices() {
             <div className="flex items-center justify-between">
               <span className="font-medium">{service.name}</span>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">{service.count} agendamentos</span>
-                <span className={`text-sm ${
-                  service.trend.startsWith('+') ? 'text-primary' : 'text-destructive'
-                }`}>
-                  {service.trend}
-                </span>
+                <span className="text-sm text-muted-foreground">{service.total} agendamentos</span>
               </div>
             </div>
             <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
               <div 
                 className="h-full bg-primary rounded-full transition-all"
-                style={{ width: `${service.percentage}%` }}
+                style={{ width: `${(service.total / maxTotal) * 50}%` }}
               />
             </div>
           </div>

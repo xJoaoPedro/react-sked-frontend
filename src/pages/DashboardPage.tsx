@@ -17,6 +17,8 @@ export function DashboardPage() {
     if (dados === null) return;
 
     setDataState(dados.dashboard)
+
+    console.log(data)
   }, [dados, data]);
 
   if (data === null) return <div>Carregando...</div>
@@ -63,11 +65,11 @@ export function DashboardPage() {
         {/* Charts and Lists Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RevenueChart revenue={data.revenueLastMonths} />
-          <TopServices />
+          <TopServices services={data.topServices} />
         </div>
 
         {/* Appointments List */}
-        <AppointmentList />
+        <AppointmentList appointments={data.nextAppointments} />
       </div>
     </div>
   );

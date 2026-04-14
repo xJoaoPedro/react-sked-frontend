@@ -11,45 +11,11 @@ interface Appointment {
   avatar?: string;
 }
 
-const appointments: Appointment[] = [
-  {
-    id: '1',
-    clientName: 'Maria Silva',
-    service: 'Corte de Cabelo',
-    time: '09:00',
-    status: 'confirmed',
-  },
-  {
-    id: '2',
-    clientName: 'João Santos',
-    service: 'Massagem Relaxante',
-    time: '10:30',
-    status: 'confirmed',
-  },
-  {
-    id: '3',
-    clientName: 'Ana Paula',
-    service: 'Manicure',
-    time: '11:00',
-    status: 'pending',
-  },
-  {
-    id: '4',
-    clientName: 'Carlos Oliveira',
-    service: 'Consulta Odontológica',
-    time: '14:00',
-    status: 'confirmed',
-  },
-  {
-    id: '5',
-    clientName: 'Beatriz Costa',
-    service: 'Depilação',
-    time: '15:30',
-    status: 'pending',
-  },
-];
+interface AppointmentProps {
+  appointments : Appointment[]
+}
 
-export function AppointmentList() {
+export function AppointmentList({appointments}: AppointmentProps) {
   const getStatusBadge = (status: Appointment['status']) => {
       const statusConfig = {
         confirmed: { label: 'Confirmado', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
@@ -66,6 +32,7 @@ export function AppointmentList() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">Próximos Agendamentos</h3>
+        {/* TODO AJUSTAR ISSO */}
         <a href="#" className="text-primary hover:underline">Ver todos</a>
       </div>
       
@@ -86,10 +53,18 @@ export function AppointmentList() {
             
             <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
               <Clock className="w-4 h-4" />
-              <span className="text-sm">{appointment.time}</span>
+              <span className="text-sm">
+                {new Date(appointment.time).toLocaleString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             </div>
             
-            {getStatusBadge(appointment.status)}            
+            {getStatusBadge(appointment.status)}
           </div>
         ))}
       </div>
