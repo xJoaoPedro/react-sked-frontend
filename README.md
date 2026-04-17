@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+<p align="center"><img src="src/assets/readme/readme.svg" width="400" alt="Sked API"></p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Requisitos e instalação
 
-Currently, two official plugins are available:
+### Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+<p align="center">
+<a href="https://nodejs.org/pt">
+<img src="https://img.shields.io/badge/Node-24.14.*-3C873A?logo=node.js&logoColor=FFF" alt="node 24.14.*"></a>
+&nbsp
+<a href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">
+<img src="https://img.shields.io/badge/NPM-11.9.*-CC3534?logo=npm&logoColor=FFF" alt="npm 11.9.*"></a>
 
-## React Compiler
+### Instalação e teste
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Para rodar este projeto é necessário ter uma _[aplicação backend própria](https://github.com/xJoaoPedro/node-sked-backend)_ instalada, configurada e hospedada.
 
-## Expanding the ESLint configuration
+#### Configuração do projeto
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Após a instalação e configuração do backend, a clonagem do repositório e certificação de que todos os requisitos necessários estão atendidos, você deve clonar o arquivo `.env.example`, renomear para `.env` e preencher conforme suas variáveis locais, e rodar o seguinte comando no seu terminal:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+<p style="color:yellow">
+  ⚠️ Atenção: É expressamente necessário ter os endereços no .env preenchidos antes de rodar os comandos, caso contrário, terá que preencher e rodar os comandos novamente.
+</p>
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+# instalar dependências do projeto
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Agora com o projeto configurado, basta rodar `npm run dev` no terminal responsável por este projeto e no terminal onde está o backend.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+E pronto! basta acessar seu `localhost:5173` nas rotas internas para testar o projeto!
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+<br />
+
+### Tecnologias usadas
+
+Além da _[API](https://github.com/xJoaoPedro/node-sked-backend)_ citada anteriormente, o sistema foi desenvolvido utilizando a biblioteca _[React](https://react.dev/)_, com auxílio do _[Vite](https://vite.dev/)_ como ferramenta de build e servidor de desenvolvimento, proporcionando inicialização rápida e uma experiência mais eficiente durante o desenvolvimento.
+
+Para a estilização da interface, foi utilizado o framework _[Tailwind CSS](https://tailwindcss.com/)_, que permite a construção de layouts responsivos e consistentes por meio de classes utilitárias, reduzindo a necessidade de escrita de CSS customizado.
+
+A aplicação foi construída seguindo o modelo de Single Page Application (SPA), onde toda a renderização ocorre no lado do cliente, sem recarregamento completo das páginas. Nesse contexto, o front-end não realiza processamento de regras de negócio ou manipulação direta de dados persistentes, sendo responsável exclusivamente pela camada de apresentação e interação com o usuário.
+
+Toda a lógica de negócio e manipulação de dados é centralizada na API, com a qual o front-end se comunica por meio de requisições HTTP, garantindo uma separação clara entre as responsabilidades de interface e processamento.
+
+<div align="center">
+
+![Logo Sked API](https://img.shields.io/badge/Sked_API-00A676?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzc3XzEwMikiPgo8cGF0aCBkPSJNMTIuMDEyNSAwLjEzNzI2MkMxMC40MTI1IDAuNDQ5NzYyIDguNzk5OTkgMS42OTk3NiA4LjEyNDk5IDMuMTQ5NzZDNy42NjI0OSA0LjEzNzI2IDcuNDk5OTkgNC45NzQ3NiA3LjQ5OTk5IDYuMzg3MjZWNy40OTk3Nkg2LjM4NzQ5QzUuNzg3NDkgNy40OTk3NiA0Ljk4NzQ5IDcuNTYyMjYgNC42MTI0OSA3LjYyNDc2QzIuMzYyNDkgOC4wNDk3NiAwLjU0OTk5NCA5Ljg2MjI2IDAuMTI0OTk0IDEyLjExMjNDLTAuMDUwMDA2MSAxMy4wMzczIC0wLjA1MDAwNjEgNTQuNzEyMyAwLjEyNDk5NCA1NS42MzczQzAuNTQ5OTk0IDU3Ljg4NzMgMi4zNjI0OSA1OS42OTk4IDQuNjEyNDkgNjAuMTI0OEM1LjA0OTk5IDYwLjE5OTggMTAuOCA2MC4yNDk4IDIwLjkgNjAuMjQ5OEgzNi41MTI1TDM3LjQ3NSA2MC45MjQ4QzM4LjggNjEuODM3MyAzOS44NSA2Mi4zOTk4IDQxLjI1IDYyLjkxMjNDNDQuNDg3NSA2NC4xMTIzIDQ4LjA2MjUgNjQuMjk5OCA1MS4zNzUgNjMuNDI0OEM1Ny4wNzUgNjEuOTI0OCA2MS42NjI1IDU3LjQ2MjMgNjMuMzI1IDUxLjc2MjNDNjQgNDkuNDc0OCA2NCA0OS40ODczIDY0IDMwLjQyNDhDNjQgMTguOTM3MyA2My45NSAxMi41NDk4IDYzLjg3NSAxMi4xMTIzQzYzLjQ1IDkuODYyMjYgNjEuNjM3NSA4LjA0OTc2IDU5LjM4NzUgNy42MjQ3NkM1OS4wMTI1IDcuNTYyMjYgNTguMjEyNSA3LjQ5OTc2IDU3LjYxMjUgNy40OTk3Nkg1Ni41VjYuMzg3MjZDNTYuNSA0LjI2MjI2IDU2IDIuODYyMjYgNTQuODI1IDEuNjc0NzZDNTIuNjUgLTAuNTAwMjM4IDQ5LjEgLTAuNTAwMjM4IDQ2LjkyNSAxLjY3NDc2QzQ1Ljc1IDIuODYyMjYgNDUuMjUgNC4yNjIyNiA0NS4yNSA2LjM4NzI2VjcuNDk5NzZINDEuNUgzNy43NVY2LjM4NzI2QzM3Ljc1IDQuMjYyMjYgMzcuMjUgMi44NjIyNiAzNi4wNzUgMS42NzQ3NkMzMy45IC0wLjUwMDIzOCAzMC4zNSAtMC41MDAyMzggMjguMTc1IDEuNjc0NzZDMjcgMi44NjIyNiAyNi41IDQuMjYyMjYgMjYuNSA2LjM4NzI2VjcuNDk5NzZIMjIuNjI1SDE4Ljc1VjYuMzg3MjZDMTguNzUgNS43ODcyNiAxOC42ODc1IDQuOTg3MjYgMTguNjI1IDQuNjEyMjZDMTguMDM3NSAxLjU2MjI2IDE1LjA2MjUgLTAuNDYyNzM4IDEyLjAxMjUgMC4xMzcyNjJaTTE0IDMuOTk5NzZDMTQuMzI1IDQuMTYyMjYgMTQuNTg3NSA0LjQyNDc2IDE0Ljc1IDQuNzQ5NzZDMTQuOTg3NSA1LjIxMjI2IDE1IDUuNDc0NzYgMTUgOS4zNzQ3NkMxNSAxMy4yNzQ4IDE0Ljk4NzUgMTMuNTM3MyAxNC43NSAxMy45OTk4QzE0LjQ2MjUgMTQuNTYyMyAxMy43NSAxNC45OTk4IDEzLjEyNSAxNC45OTk4QzEyLjUgMTQuOTk5OCAxMS43ODc1IDE0LjU2MjMgMTEuNSAxMy45OTk4QzExLjI2MjUgMTMuNTM3MyAxMS4yNSAxMy4yNzQ4IDExLjI1IDkuMzc0NzZDMTEuMjUgNS40NzQ3NiAxMS4yNjI1IDUuMjEyMjYgMTEuNSA0Ljc0OTc2QzExLjk2MjUgMy44MzcyNiAxMy4wNSAzLjUxMjI2IDE0IDMuOTk5NzZaTTMzIDMuOTk5NzZDMzMuMzI1IDQuMTYyMjYgMzMuNTg3NSA0LjQyNDc2IDMzLjc1IDQuNzQ5NzZDMzMuOTg3NSA1LjIxMjI2IDM0IDUuNDc0NzYgMzQgOS4zNzQ3NkMzNCAxMy4yNzQ4IDMzLjk4NzUgMTMuNTM3MyAzMy43NSAxMy45OTk4QzMzLjQ2MjUgMTQuNTYyMyAzMi43NSAxNC45OTk4IDMyLjEyNSAxNC45OTk4QzMxLjUgMTQuOTk5OCAzMC43ODc1IDE0LjU2MjMgMzAuNSAxMy45OTk4QzMwLjI2MjUgMTMuNTM3MyAzMC4yNSAxMy4yNzQ4IDMwLjI1IDkuMzc0NzZDMzAuMjUgNS40NzQ3NiAzMC4yNjI1IDUuMjEyMjYgMzAuNSA0Ljc0OTc2QzMwLjk2MjUgMy44MzcyNiAzMi4wNSAzLjUxMjI2IDMzIDMuOTk5NzZaTTUxLjc1IDMuOTk5NzZDNTIuMDc1IDQuMTYyMjYgNTIuMzM3NSA0LjQyNDc2IDUyLjUgNC43NDk3NkM1Mi43Mzc1IDUuMjEyMjYgNTIuNzUgNS40NzQ3NiA1Mi43NSA5LjM3NDc2QzUyLjc1IDEzLjI3NDggNTIuNzM3NSAxMy41MzczIDUyLjUgMTMuOTk5OEM1Mi4yMTI1IDE0LjU2MjMgNTEuNSAxNC45OTk4IDUwLjg3NSAxNC45OTk4QzUwLjI1IDE0Ljk5OTggNDkuNTM3NSAxNC41NjIzIDQ5LjI1IDEzLjk5OThDNDkuMDEyNSAxMy41MzczIDQ5IDEzLjI3NDggNDkgOS4zNzQ3NkM0OSA1LjQ3NDc2IDQ5LjAxMjUgNS4yMTIyNiA0OS4yNSA0Ljc0OTc2QzQ5LjcxMjUgMy44MzcyNiA1MC44IDMuNTEyMjYgNTEuNzUgMy45OTk3NlpNNy40OTk5OSAxMi4zNjIzQzcuNDk5OTkgMTQuNDg3MyA3Ljk5OTk5IDE1Ljg4NzMgOS4xNzQ5OSAxNy4wNzQ4QzExLjM1IDE5LjI0OTggMTQuOSAxOS4yNDk4IDE3LjA3NSAxNy4wNzQ4QzE4LjI1IDE1Ljg4NzMgMTguNzUgMTQuNDg3MyAxOC43NSAxMi4zNjIzVjExLjI0OThIMjIuNjI1SDI2LjVWMTIuMzYyM0MyNi41IDE0LjQ4NzMgMjcgMTUuODg3MyAyOC4xNzUgMTcuMDc0OEMzMC4zNSAxOS4yNDk4IDMzLjkgMTkuMjQ5OCAzNi4wNzUgMTcuMDc0OEMzNy4yNSAxNS44ODczIDM3Ljc1IDE0LjQ4NzMgMzcuNzUgMTIuMzYyM1YxMS4yNDk4SDQxLjVINDUuMjVWMTIuMzYyM0M0NS4yNSAxNC40ODczIDQ1Ljc1IDE1Ljg4NzMgNDYuOTI1IDE3LjA3NDhDNDkuMSAxOS4yNDk4IDUyLjY1IDE5LjI0OTggNTQuODI1IDE3LjA3NDhDNTYgMTUuODg3MyA1Ni41IDE0LjQ4NzMgNTYuNSAxMi4zNjIzVjExLjI0OThINTcuNjI1QzU5LjAyNSAxMS4yNDk4IDU5LjYxMjUgMTEuNDk5OCA2MCAxMi4yNDk4QzYwLjIzNzUgMTIuNzEyMyA2MC4yNSAxMi45NzQ4IDYwLjI1IDE3Ljc0OThWMjIuNzQ5OEgzMkgzLjc0OTk5VjE3Ljc0OThDMy43NDk5OSAxMi45NzQ4IDMuNzYyNDkgMTIuNzEyMyAzLjk5OTk5IDEyLjI0OThDNC4zODc0OSAxMS40OTk4IDQuOTM3NDkgMTEuMjYyMyA2LjM0OTk5IDExLjI0OThINy40OTk5OVYxMi4zNjIzWk02MC4yNSAzMS40NzQ4VjM2LjQ0OThMNTguOTYyNSAzNS4xOTk4QzU4LjI2MjUgMzQuNDk5OCA1Ny4yNSAzMy42NDk4IDU2LjczNzUgMzMuMjg3M0M1MC44IDI5LjIxMjMgNDMuMTM3NSAyOS4yNzQ4IDM3LjI3NSAzMy40NjIzTDM2LjQ4NzUgMzQuMDEyM0wzMi4yNSAzMy45OTk4QzI4LjIgMzMuOTg3MyAyNy45ODc1IDMzLjk5OTggMjcuNSAzNC4yNDk4QzI2LjkzNzUgMzQuNTM3MyAyNi41IDM1LjI0OTggMjYuNSAzNS44ODczQzI2LjUgMzYuNDk5OCAyNi45NzUgMzcuMjEyMyAyNy41NjI1IDM3LjQ5OThDMjguMDI1IDM3LjcyNDggMjguMzM3NSAzNy43NDk4IDMwLjUzNzUgMzcuNzQ5OEMzMS44ODc1IDM3Ljc0OTggMzMgMzcuNzg3MyAzMyAzNy44MzczQzMzIDM3Ljg4NzMgMzIuNzc1IDM4LjI4NzMgMzIuNTEyNSAzOC43NDk4QzMxLjYxMjUgNDAuMjYyMyAzMC42NzUgNDIuOTEyMyAzMC40MjUgNDQuNjQ5OEwzMC4zNSA0NS4yNDk4SDI5LjE2MjVDMjcuNzI1IDQ1LjI0OTggMjcuMTM3NSA0NS40ODczIDI2Ljc1IDQ2LjI0OThDMjYuNDM3NSA0Ni44NzQ4IDI2LjQzNzUgNDcuMzc0OCAyNi43NSA0Ny45OTk4QzI3LjEzNzUgNDguNzYyMyAyNy43MjUgNDguOTk5OCAyOS4xNzUgNDguOTk5OEgzMC4zNUwzMC40Mzc1IDQ5LjY0OThDMzAuNjc1IDUxLjQxMjMgMzEuNjYyNSA1NC4xMTIzIDMyLjYzNzUgNTUuNzEyM0wzMy4xMjUgNTYuNDk5OEgxOS4xNzVDNS40NDk5OSA1Ni40OTk4IDUuMjM3NDkgNTYuNDk5OCA0Ljc0OTk5IDU2LjI0OThDNC40MjQ5OSA1Ni4wODczIDQuMTYyNDkgNTUuODI0OCAzLjk5OTk5IDU1LjQ5OThDMy43NDk5OSA1NS4wMTIzIDMuNzQ5OTkgNTQuNzk5OCAzLjc0OTk5IDQwLjc0OThWMjYuNDk5OEgzMkg2MC4yNVYzMS40NzQ4Wk00OC45MTI1IDM0LjEzNzNDNTQuMSAzNC45MTIzIDU4LjI4NzUgMzguNTYyMyA1OS43MjUgNDMuNTYyM0M2MS43MjUgNTAuNDYyMyA1Ny42NjI1IDU3LjcxMjMgNTAuNjg3NSA1OS43MjQ4QzQzLjc4NzUgNjEuNzI0OCAzNi41Mzc1IDU3LjY2MjMgMzQuNTI1IDUwLjY4NzNDMzIuMTUgNDIuNDc0OCAzOC4zODc1IDM0LjEyNDggNDYuOTc1IDM0LjAxMjNDNDcuNTUgMzMuOTk5OCA0OC40MjUgMzQuMDYyMyA0OC45MTI1IDM0LjEzNzNaIiBmaWxsPSIjZmZmZmZmIi8+CjxwYXRoIGQ9Ik04LjQ3NSAzNC4yNjI1QzcuOTM3NSAzNC41Mzc1IDcuNSAzNS4yNzUgNy41IDM1Ljg3NUM3LjUgMzYuNSA3LjkzNzUgMzcuMjEyNSA4LjUgMzcuNUM4Ljk2MjUgMzcuNzM3NSA5LjIyNSAzNy43NSAxMy4xMjUgMzcuNzVDMTcuMDI1IDM3Ljc1IDE3LjI4NzUgMzcuNzM3NSAxNy43NSAzNy41QzE4LjMxMjUgMzcuMjEyNSAxOC43NSAzNi41IDE4Ljc1IDM1Ljg3NUMxOC43NSAzNS4yNSAxOC4zMTI1IDM0LjUzNzUgMTcuNzUgMzQuMjVDMTcuMjg3NSAzNC4wMTI1IDE3LjAyNSAzNCAxMy4xIDM0QzkuMiAzNC4wMTI1IDguOTEyNSAzNC4wMjUgOC40NzUgMzQuMjYyNVoiIGZpbGw9IiNmZmZmZmYiLz4KPHBhdGggZD0iTTguNDc1IDQ1LjUxMjVDNy45Mzc1IDQ1Ljc4NzUgNy41IDQ2LjUyNSA3LjUgNDcuMTI1QzcuNSA0Ny43NSA3LjkzNzUgNDguNDYyNSA4LjUgNDguNzVDOC45NjI1IDQ4Ljk4NzUgOS4yMjUgNDkgMTMuMTI1IDQ5QzE3LjAyNSA0OSAxNy4yODc1IDQ4Ljk4NzUgMTcuNzUgNDguNzVDMTguMzEyNSA0OC40NjI1IDE4Ljc1IDQ3Ljc1IDE4Ljc1IDQ3LjEyNUMxOC43NSA0Ni41IDE4LjMxMjUgNDUuNzg3NSAxNy43NSA0NS41QzE3LjI4NzUgNDUuMjYyNSAxNy4wMjUgNDUuMjUgMTMuMSA0NS4yNUM5LjIgNDUuMjYyNSA4LjkxMjUgNDUuMjc1IDguNDc1IDQ1LjUxMjVaIiBmaWxsPSIjZmZmZmZmIi8+CjxwYXRoIGQ9Ik00Ni4yMjUgMzguMDEyNUM0NS45Mzc1IDM4LjE2MjUgNDUuNjUgMzguNDUgNDUuNSAzOC43NUM0NS4yNjI1IDM5LjIxMjUgNDUuMjUgMzkuNDc1IDQ1LjI1IDQzLjM3NUM0NS4yNSA0Ny4yNzUgNDUuMjYyNSA0Ny41Mzc1IDQ1LjUgNDhDNDUuNjYyNSA0OC4zMjUgNDUuOTI1IDQ4LjU4NzUgNDYuMjUgNDguNzVDNDYuNzEyNSA0OC45ODc1IDQ2Ljk3NSA0OSA1MC44NzUgNDlDNTQuNzc1IDQ5IDU1LjAzNzUgNDguOTg3NSA1NS41IDQ4Ljc1QzU2LjA2MjUgNDguNDYyNSA1Ni41IDQ3Ljc1IDU2LjUgNDcuMTI1QzU2LjUgNDYuNSA1Ni4wNjI1IDQ1Ljc4NzUgNTUuNSA0NS41QzU1LjA1IDQ1LjI3NSA1NC43NzUgNDUuMjUgNTIgNDUuMjVINDlWNDIuMjVDNDkgMzkuNDc1IDQ4Ljk3NSAzOS4yIDQ4Ljc1IDM4Ljc1QzQ4LjI4NzUgMzcuODM3NSA0Ny4xNjI1IDM3LjUxMjUgNDYuMjI1IDM4LjAxMjVaIiBmaWxsPSIjZmZmZmZmIi8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfNzdfMTAyIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPgo=&logoColor=FFF)
+![Logo React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=FFF)
+![Logo Vite](https://img.shields.io/badge/Vite-9135FF?logo=vite&logoColor=FFF)
+![Logo Tailwind](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=FFF)
+</div>
+
+<br />
+
+# Rotas internas do SPA
+
+Embora todo o processamento de dados seja feito pela API, o sistema é desenvolvido como SPA e possui rotas internas para acesso nas tela, e esse roteamento se dá na seguinte forma:
+
+| Rota | Página |
+| ---- | ------ |
+| `/login` | Página de login |
+
+<p style="color:yellow">
+  ⚠️ Atenção: As demais páginas dependem da autenticação da API e presença do Token JWT (recebido após login).
+</p>
+
+| Rota | Página |
+| ---- | ------ |
+| `/` | Elemento de Layout (responsável pelo SPA nas rotas) |
+| `/dashboard` | Página de dashboard (principal) |
+| `/daily-schedule` | Página de agendamentos do dia |
+| `/appointments` | Página de agendamentos gerais |
+| `/cancellations` | Página de cancelamentos |
+| `/commissions` | Página de comissões |
+| `/revenue` | Página de receita |
+| `/reports` | Página de relatórios |
+| `/inventory` | Página de estoque |
+| `/services` | Página de serviços |
+| `/professionals` | Página de profissionais |
+| `/customers` | Página de clientes |
+| `/settings` | Página de configurações |
