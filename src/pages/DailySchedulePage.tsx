@@ -1,164 +1,129 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { PageHeader } from '../components/PageHeader';
 import { ChevronLeft, ChevronRight, Calendar, Plus } from 'lucide-react';
-
-interface Appointment {
-  id: string;
-  clientName: string;
-  service: string;
-  startTime: string;
-  endTime: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  professional: string;
-}
-
-const professionals = [
-  { id: 'joao', name: 'João Barbeiro' },
-  { id: 'ana', name: 'Ana Terapeuta' },
-  { id: 'carla', name: 'Carla Manicure' },
-  { id: 'pedro', name: 'Dr. Pedro' },
-  { id: 'maria', name: 'Maria Estética' },
-];
-
-const mockAppointments: Appointment[] = [
-  {
-    id: '1',
-    clientName: 'Maria Silva',
-    service: 'Corte de Cabelo',
-    startTime: '09:00',
-    endTime: '10:00',
-    status: 'confirmed',
-    professional: 'João Barbeiro',
-  },
-  {
-    id: '2',
-    clientName: 'João Santos',
-    service: 'Massagem Relaxante',
-    startTime: '10:30',
-    endTime: '11:30',
-    status: 'confirmed',
-    professional: 'Ana Terapeuta',
-  },
-  {
-    id: '3',
-    clientName: 'Ana Paula',
-    service: 'Manicure',
-    startTime: '11:00',
-    endTime: '12:00',
-    status: 'pending',
-    professional: 'Carla Manicure',
-  },
-  {
-    id: '4',
-    clientName: 'Carlos Oliveira',
-    service: 'Consulta Odontológica',
-    startTime: '14:00',
-    endTime: '15:00',
-    status: 'confirmed',
-    professional: 'Dr. Pedro',
-  },
-  {
-    id: '5',
-    clientName: 'Beatriz Costa',
-    service: 'Depilação',
-    startTime: '15:30',
-    endTime: '16:00',
-    status: 'pending',
-    professional: 'Maria Estética',
-  },
-  {
-    id: '6',
-    clientName: 'Rafael Mendes',
-    service: 'Barba',
-    startTime: '16:00',
-    endTime: '16:30',
-    status: 'cancelled',
-    professional: 'João Barbeiro',
-  },
-  {
-    id: '7',
-    clientName: 'Luciana Ferreira',
-    service: 'Massagem',
-    startTime: '14:00',
-    endTime: '15:00',
-    status: 'confirmed',
-    professional: 'Ana Terapeuta',
-  },
-  {
-    id: '8',
-    clientName: 'Pedro Alves',
-    service: 'Pedicure',
-    startTime: '09:00',
-    endTime: '10:00',
-    status: 'confirmed',
-    professional: 'Carla Manicure',
-  },
-];
+import { useOutletContext } from 'react-router-dom';
+import axios from 'axios';
 
 const timeSlots = [
-  '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+  '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
   '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
   '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
-  '19:00', '19:30', '20:00'
+  '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'
 ];
 
 export function DailySchedulePage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { dados } = useOutletContext();
+  const [data, setDataState] = useState(null)
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('pt-BR', {
+  useEffect(() => {
+    if (!dados) return;
+
+    setDataState(dados.dailySchedules || []);
+  }, [dados]);
+
+  if (data === null) return <div>Carregando...</div>;
+
+  const filteredAppointments = data.appointments.filter((apt) => {
+    const date = new Date(apt.start_time);
+
+    return (
+      date.getDate() === selectedDate.getDate() &&
+      date.getMonth() === selectedDate.getMonth() &&
+      date.getFullYear() === selectedDate.getFullYear()
+    );
+  });
+
+  const formatDate = (date, schedule = false) => {
+    const parsedDate = new Date(date);
+
+    return schedule 
+    
+    ? new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(parsedDate) 
+    
+    : new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    }).format(date);
+    }).format(parsedDate);
+  }
+
+  const updateAppointments = async (date) => {
+    try {
+      const response = (await axios.get(`${import.meta.env.VITE_BASE_URL}/api/appointments/${data.id}/${date.toISOString()}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      })).data.data;
+
+      setDataState((prev) => ({
+        ...prev,
+        appointments: response,
+      }));
+    } catch (error) {
+      console.error('Erro ao atualizar agendamentos:', error);
+    }
+  };
+    
+  const previousDay = async () => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() - 1);
+
+    setSelectedDate(d);
+    await updateAppointments(d);
   };
 
-  const previousDay = () => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() - 1);
-    setSelectedDate(newDate);
+  const nextDay = async () => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + 1);
+
+    setSelectedDate(d);
+    await updateAppointments(d);
   };
 
-  const nextDay = () => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + 1);
-    setSelectedDate(newDate);
+  const goToToday = async () => {
+    const d = new Date();
+
+    setSelectedDate(d);
+    await updateAppointments(d);
   };
 
-  const goToToday = () => {
-    setSelectedDate(new Date());
-  };
-
-  const getStatusColor = (status: Appointment['status']) => {
+  const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed':
+      case 'CONFIRMED':
         return 'bg-primary border-primary';
-      case 'pending':
+      case 'PENDING':
         return 'bg-yellow-500 border-yellow-500';
-      case 'cancelled':
+      case 'CANCELED':
         return 'bg-destructive border-destructive';
       default:
-        return 'bg-gray-500 border-gray-500';
+        return 'bg-gray-500';
     }
   };
 
-  const timeToMinutes = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
+  const timeToMinutes = (time) => {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
   };
 
-  const getAppointmentPosition = (startTime: string, endTime: string) => {
-    const startMinutes = timeToMinutes(startTime);
-    const endMinutes = timeToMinutes(endTime);
-    const firstSlotMinutes = timeToMinutes(timeSlots[0]);
-    
-    const top = ((startMinutes - firstSlotMinutes) / 30) * 64; // 64px per 30min slot
-    const height = ((endMinutes - startMinutes) / 30) * 64;
-    
-    return { top, height };
+  const getAppointmentPosition = (start, end) => {
+    const s = new Date(start);
+    const e = new Date(end);
+
+    const startMinutes = s.getHours() * 60 + s.getMinutes();
+    const endMinutes = e.getHours() * 60 + e.getMinutes();
+    const base = timeToMinutes(timeSlots[0]);
+
+    return {
+      top: ((startMinutes - base) / 30) * 64,
+      height: ((endMinutes - startMinutes) / 30) * 64,
+    };
   };
 
   return (
@@ -211,16 +176,14 @@ export function DailySchedulePage() {
             </div>
 
             {/* Professional columns */}
-            {professionals.map((professional) => {
-              const professionalAppointments = mockAppointments.filter(
-                apt => apt.professional === professional.name
-              );
+            {data.professionals.map((professional) => {
+              const professionalAppointments = data.appointments.filter(apt => apt.employee_id === professional.id);
 
               return (
                 <div key={professional.id} className="w-[350px] flex-shrink-0 border-r border-border last:border-r-0">
                   {/* Professional header */}
                   <div className="h-12 border-b border-border bg-background flex items-center justify-center px-4 sticky top-0 z-10">
-                    <span className="font-medium text-sm truncate">{professional.name}</span>
+                    <span className="font-medium text-sm truncate">{professional.user.name}</span>
                   </div>
 
                   {/* Grid lines */}
@@ -236,8 +199,8 @@ export function DailySchedulePage() {
                     <div className="absolute inset-0 pointer-events-none">
                       {professionalAppointments.map((appointment) => {
                         const { top, height } = getAppointmentPosition(
-                          appointment.startTime,
-                          appointment.endTime
+                          appointment.start_time,
+                          appointment.end_time
                         );
                         
                         return (
@@ -252,13 +215,13 @@ export function DailySchedulePage() {
                             }}
                           >
                             <div className="text-xs font-semibold truncate">
-                              {appointment.clientName}
+                              {appointment.client.name}
                             </div>
                             <div className="text-xs opacity-90 truncate">
-                              {appointment.service}
+                              {appointment.service?.name}
                             </div>
                             <div className="text-xs opacity-90 mt-1">
-                              {appointment.startTime} - {appointment.endTime}
+                              {formatDate(appointment.start_time, true)} - {formatDate(appointment.end_time, true)}
                             </div>
                           </div>
                         );
@@ -270,22 +233,6 @@ export function DailySchedulePage() {
             })}
           </div>
         </Card>
-
-        {/* Legend */}
-        <div className="flex items-center justify-center gap-6 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-primary" />
-            <span className="text-sm text-muted-foreground">Confirmado</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-yellow-500" />
-            <span className="text-sm text-muted-foreground">Pendente</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-destructive" />
-            <span className="text-sm text-muted-foreground">Cancelado</span>
-          </div>
-        </div>
       </div>
     </div>
   );
