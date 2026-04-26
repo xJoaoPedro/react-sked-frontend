@@ -17,8 +17,6 @@ export function DashboardPage() {
     if (dados === null) return;
 
     setDataState(dados.dashboard)
-
-    console.log(data)
   }, [dados, data]);
 
   if (data === null) return <div>Carregando...</div>
@@ -36,7 +34,7 @@ export function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Agendamentos Hoje"
-            value={3}
+            value={data.totalToday}
             icon={Calendar}
           />
           <StatCard

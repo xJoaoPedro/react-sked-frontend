@@ -7,7 +7,7 @@ interface Appointment {
   clientName: string;
   service: string;
   time: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: 'confirmed' | 'pending' | 'canceled';
   avatar?: string;
 }
 
@@ -20,7 +20,7 @@ export function AppointmentList({appointments}: AppointmentProps) {
       const statusConfig = {
         confirmed: { label: 'Confirmado', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
         pending: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20' },
-        cancelled: { label: 'Cancelado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
+        canceled: { label: 'Cancelado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
         completed: { label: 'Concluído', className: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20' },
       };
       
@@ -32,11 +32,9 @@ export function AppointmentList({appointments}: AppointmentProps) {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">Próximos Agendamentos</h3>
-        {/* TODO AJUSTAR ISSO */}
-        <a href="#" className="text-primary hover:underline">Ver todos</a>
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-y-auto max-h-[700px] scrollbar-custom">
         {appointments.map((appointment) => (
           <div 
             key={appointment.id}
