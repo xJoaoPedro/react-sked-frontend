@@ -1,3 +1,4 @@
+import { api } from "@/lib/api";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
@@ -10,8 +11,8 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  if (localStorage.getItem('token')) return <Navigate to="/dashboard" replace />;
-  
+  if (localStorage.getItem("token"))
+    return <Navigate to="/dashboard" replace />;
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -19,17 +20,10 @@ export function LoginPage() {
     setError("");
 
     try {
-      const res = await fetch(`${url}/auth/companies/login`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ email, password }),
+      const { data } = await api.post("/auth/companies/login", {
+        email,
+        password,
       });
-
-      if (!res.ok) {
-        throw new Error("Credenciais inválidas");
-      }
-
-      const data = await res.json();
 
       localStorage.setItem("token", data.token);
       if (data.id) localStorage.setItem("companyId", data.id);
@@ -48,15 +42,9 @@ export function LoginPage() {
         onSubmit={handleLogin}
         className="w-full max-w-sm p-6 rounded-2xl shadow-lg bg-white"
       >
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          Login
-        </h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
 
-        {error && (
-          <div className="mb-3 text-sm text-red-500">
-            {error}
-          </div>
-        )}
+        {error && <div className="mb-3 text-sm text-red-500">{error}</div>}
 
         <div className="mb-4">
           <label className="block mb-1 text-sm">Email</label>

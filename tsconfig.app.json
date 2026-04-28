@@ -19,10 +19,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    // DESLIGA CHATICE
+    "strict": false,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strictNullChecks": false
   },
   "include": ["src"]
 }

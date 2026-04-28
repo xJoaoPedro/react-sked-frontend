@@ -2,37 +2,33 @@ import { Navigate, Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { useEffect, useState } from "react";
 import { socket } from "@/services/socket";
-import axios from "axios";
-import { jwtDecode } from 'jwt-decode'
-
-
+import { jwtDecode } from "jwt-decode";
+import { api } from "@/lib/api";
 
 export function Layout() {
   const [dados, setDados] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return <Navigate to="/login" replace />;
 
       const decoded = jwtDecode(token);
-      const id = localStorage.getItem('companyId')
-      
+      const id = localStorage.getItem("companyId");
+
       if (decoded.exp * 1000 < Date.now()) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('companyId');
+        localStorage.removeItem("token");
+        localStorage.removeItem("companyId");
         return <Navigate to="/login" replace />;
       }
-      
-      const response = (await axios.get(`${import.meta.env.VITE_BASE_URL}/api/companies/${id}/data`, {
-          headers: { Authorization: `Bearer ${token}` },
-      })).data;
+
+      const response = (await api.get(`/api/companies/${id}/data`)).data;
 
       setDados(response.data);
     }
 
     fetchData();
-    
+
     socket.connect();
 
     socket.on("connect", () => {
@@ -44,7 +40,7 @@ export function Layout() {
     };
   }, []);
 
-  if (!localStorage.getItem('token')) return <Navigate to="/login" replace />;
+  if (!localStorage.getItem("token")) return <Navigate to="/login" replace />;
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

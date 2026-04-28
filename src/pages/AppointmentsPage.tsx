@@ -1,5 +1,4 @@
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -7,144 +6,33 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { Filter, X, Calendar, Download, Eye, Edit, Trash2, Clock, User, DollarSign, } from 'lucide-react';
+import { Filter, X, Calendar, Download, Eye, Edit, Trash2, Clock, User, DollarSign, FileText, Table2, ChevronDown, ChevronUp, FileJson, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
-interface Appointment {
-  id: string;
-  date: string;
-  time: string;
-  clientName: string;
-  service: string;
-  professional: string;
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
-  price: string;
-}
-
-const mockAppointments: Appointment[] = [
-  {
-    id: 'AGD-001',
-    date: '2024-03-25',
-    time: '09:00',
-    clientName: 'Maria Silva',
-    service: 'Corte de Cabelo',
-    professional: 'João Barbeiro',
-    status: 'confirmed',
-    price: 'R$ 50,00',
-  },
-  {
-    id: 'AGD-002',
-    date: '2024-03-25',
-    time: '10:30',
-    clientName: 'João Santos',
-    service: 'Massagem Relaxante',
-    professional: 'Ana Terapeuta',
-    status: 'confirmed',
-    price: 'R$ 120,00',
-  },
-  {
-    id: 'AGD-003',
-    date: '2024-03-25',
-    time: '11:00',
-    clientName: 'Ana Paula',
-    service: 'Manicure',
-    professional: 'Carla Manicure',
-    status: 'pending',
-    price: 'R$ 40,00',
-  },
-  {
-    id: 'AGD-004',
-    date: '2024-03-24',
-    time: '14:00',
-    clientName: 'Carlos Oliveira',
-    service: 'Consulta Odontológica',
-    professional: 'Dr. Pedro',
-    status: 'completed',
-    price: 'R$ 200,00',
-  },
-  {
-    id: 'AGD-005',
-    date: '2024-03-26',
-    time: '15:30',
-    clientName: 'Beatriz Costa',
-    service: 'Depilação',
-    professional: 'Maria Estética',
-    status: 'pending',
-    price: 'R$ 80,00',
-  },
-  {
-    id: 'AGD-006',
-    date: '2024-03-26',
-    time: '16:00',
-    clientName: 'Rafael Mendes',
-    service: 'Barba',
-    professional: 'João Barbeiro',
-    status: 'cancelled',
-    price: 'R$ 30,00',
-  },
-  {
-    id: 'AGD-007',
-    date: '2024-03-27',
-    time: '09:30',
-    clientName: 'Juliana Alves',
-    service: 'Limpeza de Pele',
-    professional: 'Maria Estética',
-    status: 'confirmed',
-    price: 'R$ 150,00',
-  },
-  {
-    id: 'AGD-008',
-    date: '2024-03-27',
-    time: '13:00',
-    clientName: 'Pedro Rocha',
-    service: 'Corte de Cabelo',
-    professional: 'João Barbeiro',
-    status: 'confirmed',
-    price: 'R$ 50,00',
-  },
-  {
-    id: 'AGD-009',
-    date: '2024-03-24',
-    time: '10:00',
-    clientName: 'Fernanda Lima',
-    service: 'Massagem Relaxante',
-    professional: 'Ana Terapeuta',
-    status: 'completed',
-    price: 'R$ 120,00',
-  },
-  {
-    id: 'AGD-010',
-    date: '2024-03-28',
-    time: '11:30',
-    clientName: 'Roberto Carlos',
-    service: 'Consulta Odontológica',
-    professional: 'Dr. Pedro',
-    status: 'pending',
-    price: 'R$ 200,00',
-  },
-];
-
-const services = [
-  'Corte de Cabelo',
-  'Barba',
-  'Manicure',
-  'Depilação',
-  'Massagem Relaxante',
-  'Limpeza de Pele',
-  'Consulta Odontológica',
-];
+import { DatePicker } from '@/components/ui/datepicker';
+import { useOutletContext } from 'react-router-dom';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import * as XLSX from "xlsx";
+import { toast } from "sonner"
+import { api } from "@/lib/api";
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
   { value: 'pending', label: 'Pendente' },
-  { value: 'cancelled', label: 'Cancelado' },
+  { value: 'canceled', label: 'Cancelado' },
   { value: 'completed', label: 'Concluído' },
 ];
 
 export function AppointmentsPage() {
+  const { dados } = useOutletContext();
+  const [data, setDataState] = useState(null);
+  const [exportOpen, setExportOpen] = useState(false)
+  const [initialized, setInitialized] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  
-  // Filter states
+  const [services, setServices] = useState([]);
+  const [total, setTotal] = useState(1);
+  const [limit] = useState(50);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [filterId, setFilterId] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [filterService, setFilterService] = useState('all');
@@ -153,12 +41,21 @@ export function AppointmentsPage() {
   const [filterTimeStart, setFilterTimeStart] = useState('');
   const [filterTimeEnd, setFilterTimeEnd] = useState('');
 
-  const getStatusBadge = (status: Appointment['status']) => {
+  const fetchData = async () => {
+    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/appointments`, {params: buildQuery()})).data.data;
+
+    setDataState(response.data);
+    setPage(Number(response.page));
+    setTotal(response.total);
+    setTotalPages(response.totalPages);
+  }
+
+  const getStatusBadge = (status) => {
     const statusConfig = {
-      confirmed: { label: 'Confirmado', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
-      pending: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20' },
-      cancelled: { label: 'Cancelado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
-      completed: { label: 'Concluído', className: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20' },
+      CONFIRMED: { label: 'Confirmado', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
+      PENDING: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20' },
+      CANCELED: { label: 'Cancelado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
+      COMPLETED: { label: 'Concluído', className: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20' },
     };
     
     const config = statusConfig[status];
@@ -166,12 +63,31 @@ export function AppointmentsPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + 'T00:00:00');
+    const date = new Date(dateStr);
+    
     return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     }).format(date);
+  };
+
+  const formatTime = (timeStr: string) => {
+    const date = new Date(timeStr);
+    
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(price);
   };
 
   const clearFilters = () => {
@@ -189,54 +105,144 @@ export function AppointmentsPage() {
            filterStatus !== 'all' || filterTimeStart || filterTimeEnd;
   };
 
-  // Apply filters
-  const filteredAppointments = mockAppointments.filter((appointment) => {
-    // ID filter
-    if (filterId && !appointment.id.toLowerCase().includes(filterId.toLowerCase())) {
-      return false;
+  const buildQuery = () => {
+    return {
+      page,
+      limit,
+      ...(filterId && { id: filterId }),
+      ...(filterDate && { date: filterDate }),
+      ...(filterService !== 'all' && { service: filterService }),
+      ...(filterClient && { client: filterClient }),
+      ...(filterStatus !== 'all' && { status: filterStatus }),
+      ...(filterTimeStart && { timeStart: filterTimeStart }),
+      ...(filterTimeEnd && { timeEnd: filterTimeEnd }),      
     }
-    
-    // Date filter
-    if (filterDate && appointment.date !== filterDate) {
-      return false;
+  }
+
+  const exportCSV = () => {
+    const headers = ["ID", "Data", "Horário", "Cliente", "Serviço", "Profissional", "Status", "Valor"];
+
+    const rows = data.map((a) => [
+      a.id,
+      formatDate(a.start_time),
+      formatTime(a.start_time),
+      a.client?.name,
+      a.service?.name,
+      a.employee?.name,
+      a.status,
+      a.service?.price,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) => r.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", "agendamentos.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Agendamentos exportados em CSV com sucesso!")
+  };
+
+  const exportExcel = () => {
+    const dataToExport = data.map((a) => ({
+      ID: a.id,
+      cliente: a.client.name,
+      servico: a.service.name,
+      funcionario: a.employee.name,
+      status: a.status,
+      data: formatDate(a.start_time),
+      horario: formatTime(a.start_time),
+      preco: a.service.price,
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport)
+
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Agendamentos")
+
+    XLSX.writeFile(workbook, "agendamentos.xlsx")
+    toast.success("Agendamentos exportados em Excel com sucesso!")
+  }
+
+  const exportJson = () => {
+    const dataToExport = data.map((a) => ({
+      id: a.id,
+      cliente: a.client.name,
+      servico: a.service.name,
+      funcionario: a.employee.name,
+      status: a.status,
+      data: formatDate(a.start_time),
+      horario: formatTime(a.start_time),
+      preco: a.service.price,
+    }))
+
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
+      type: "application/json",
+    })
+
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "agendamentos.json"
+    a.click()
+
+    URL.revokeObjectURL(url)
+    toast.success("Agendamentos exportados em JSON com sucesso!")
+  }
+
+  const exportData = (type) => {
+    switch (type) {
+      case 'csv':
+        exportCSV();
+        break;
+      case 'excel':
+        exportExcel();
+        break;
+      case 'json':
+        exportJson();
+        break;
+      default:
+        toast.error("Erro no formato de exportação.")
+        break;
     }
-    
-    // Service filter
-    if (filterService !== 'all' && appointment.service !== filterService) {
-      return false;
-    }
-    
-    // Client name filter
-    if (filterClient && !appointment.clientName.toLowerCase().includes(filterClient.toLowerCase())) {
-      return false;
-    }
-    
-    // Status filter
-    if (filterStatus !== 'all' && appointment.status !== filterStatus) {
-      return false;
-    }
-    
-    // Time range filter
-    if (filterTimeStart && appointment.time < filterTimeStart) {
-      return false;
-    }
-    if (filterTimeEnd && appointment.time > filterTimeEnd) {
-      return false;
-    }
-    
-    return true;
-  });
+  };
+
+  useEffect(() => {
+    if (!dados) return;
+
+    setPage(Number(dados.appointments?.page) || 1)
+    setTotal(dados.appointments?.total || 0)
+    setServices(dados.services || [])
+    setTotalPages(dados.appointments?.totalPages || 1)
+    setInitialized(true)
+  }, [dados])
+
+  useEffect(() => {
+    if (!initialized) return
+
+    fetchData()
+  }, [initialized, page, filterId, filterDate, filterService, filterClient, filterStatus, filterTimeStart, filterTimeEnd])
+
+  if (data === null) return <div>Carregando...</div>
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <PageHeader 
         title="Agendamentos" 
-        subtitle={`${filteredAppointments.length} de ${mockAppointments.length} agendamentos`}
+        subtitle={`${data.length} de ${total} agendamentos`}
       />
 
       {/* Scrollable Content Area */}
       <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom">
-        {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Button
             onClick={() => setShowFilters(!showFilters)}
@@ -252,32 +258,57 @@ export function AppointmentsPage() {
               </Badge>
             )}
           </Button>
-          <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
-          </Button>
+
+          <Popover open={exportOpen} onOpenChange={setExportOpen}>
+            <PopoverTrigger asChild>
+              <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
+                <Download className="w-4 h-4 mr-2" />
+                Exportar
+                {exportOpen ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent side="bottom" align="end" className="w-52 p-2">
+              <div className="flex flex-col gap-1">
+                <Button className={`p-4 justify-start bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={() => exportData('csv')}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Exportar CSV
+                </Button>
+
+                <Button className={`p-4 justify-start bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={() => exportData('excel')}>
+                  <Table2 className="w-4 h-4 mr-2" />
+                  Exportar Excel
+                </Button>
+
+                <Button className={`p-4 justify-start bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={() => exportData('json')}>
+                  <FileJson className="w-4 h-4 mr-2" />
+                  Exportar JSON
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
-        <div className="flex-1 space-y-6">
-          {/* Advanced Filters */}
+        <div className="flex overflow-y-auto">
           {showFilters && (
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Filtros Avançados</h3>
-                {hasActiveFilters() && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    <X className="w-4 h-4 mr-2" />
-                    Limpar Filtros
-                  </Button>
-                )}
-              </div>
+            <Card className="p-6 mr-1">
+              <h3 className="font-semibold">Filtros Avançados</h3>
+
+              <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={clearFilters} disabled={!hasActiveFilters()}>
+                <X className="w-4 h-4 mr-2" />
+                Limpar filtros
+              </Button>             
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-6">
                 {/* ID Filter */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">ID do Agendamento</label>
                   <Input
-                    placeholder="Ex: AGD-001"
+                    placeholder="Buscar por ID"
                     value={filterId}
                     onChange={(e) => setFilterId(e.target.value)}
                   />
@@ -286,10 +317,14 @@ export function AppointmentsPage() {
                 {/* Date Filter */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Data</label>
-                  <Input
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
+                  <DatePicker
+                    value={filterDate ? new Date(filterDate) : undefined}
+                    onChange={(date) => {
+                      if (!date) return setFilterDate("")
+
+                      const iso = date.toISOString().split("T")[0]
+                      setFilterDate(iso)
+                    }}
                   />
                 </div>
 
@@ -303,8 +338,8 @@ export function AppointmentsPage() {
                     <SelectContent>
                       <SelectItem value="all">Todos os Serviços</SelectItem>
                       {services.map((service) => (
-                        <SelectItem key={service} value={service}>
-                          {service}
+                        <SelectItem key={service.id} value={service.name}>
+                          {service.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -338,37 +373,16 @@ export function AppointmentsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Time Start Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Horário Inicial</label>
-                  <Input
-                    type="time"
-                    value={filterTimeStart}
-                    onChange={(e) => setFilterTimeStart(e.target.value)}
-                  />
-                </div>
-
-                {/* Time End Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Horário Final</label>
-                  <Input
-                    type="time"
-                    value={filterTimeEnd}
-                    onChange={(e) => setFilterTimeEnd(e.target.value)}
-                  />
-                </div>
               </div>
             </Card>
           )}
 
-          {/* Appointments Table */}
-          <Card className="overflow-hidden py-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead className="font-semibold text-foreground">ID</TableHead>
+          <Card className="overflow-hidden py-0 flex-1 gap-0">
+            <div className="overflow-x-auto flex-1 min-h-0">
+              <Table className="w-full">
+                <TableHeader className="table table-fixed z-10">
+                  <TableRow className="table w-full table-fixed bg-muted/50">
+                    <TableHead className="font-semibold text-foreground w-[100px]">ID</TableHead>
                     <TableHead className="font-semibold text-foreground">Data</TableHead>
                     <TableHead className="font-semibold text-foreground">Horário</TableHead>
                     <TableHead className="font-semibold text-foreground">Cliente</TableHead>
@@ -379,11 +393,11 @@ export function AppointmentsPage() {
                     <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {filteredAppointments.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-16">
-                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <TableBody className="block overflow-y-auto">
+                  {data.length === 0 ? (
+                    <TableRow className='table table-fixed w-full h-full'>
+                      <TableCell colSpan={9} className="w-32 text-center py-16">
+                        <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
                           <Calendar className="w-12 h-12 opacity-20" />
                           <p className="font-medium">
                             {hasActiveFilters() 
@@ -399,21 +413,21 @@ export function AppointmentsPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAppointments.map((appointment) => (
-                      <TableRow key={appointment.id} className="hover:bg-muted/30 transition-colors">
-                        <TableCell className="font-mono text-sm font-semibold text-primary">
+                    data.map((appointment) => (
+                      <TableRow key={appointment.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
+                        <TableCell className="w-[100px] font-mono text-sm font-semibold text-primary">
                           {appointment.id}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span className="font-medium">{formatDate(appointment.date)}</span>
+                            <span className="font-medium">{formatDate(appointment.start_time)}</span>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 text-muted-foreground" />
-                            <span>{appointment.time}</span>
+                            <span>{formatTime(appointment.start_time)}</span>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -421,20 +435,20 @@ export function AppointmentsPage() {
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                               <User className="w-4 h-4 text-primary" />
                             </div>
-                            <span className="font-medium">{appointment.clientName}</span>
+                            <span className="font-medium">{appointment.client.name}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-muted-foreground">{appointment.service}</span>
+                          <span className="text-muted-foreground">{appointment.service.name}</span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm">{appointment.professional}</span>
+                          <span className="text-sm">{appointment.employee.name}</span>
                         </TableCell>
                         <TableCell>{getStatusBadge(appointment.status)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 font-semibold text-foreground">
                             <DollarSign className="w-4 h-4 text-primary" />
-                            {appointment.price}
+                            {formatPrice(appointment.service.price)}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -499,15 +513,51 @@ export function AppointmentsPage() {
             </div>
             
             {/* Pagination or Summary */}
-            {filteredAppointments.length > 0 && (
+            {data.length > 0 && (
               <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
                 <p className="text-sm text-muted-foreground">
-                  Mostrando <span className="font-medium text-foreground">{filteredAppointments.length}</span> de{' '}
-                  <span className="font-medium text-foreground">{mockAppointments.length}</span> agendamentos
+                  Mostrando{' '}
+                  <span className="font-medium text-foreground">
+                    {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                  </span>{' '}
+                  de{' '}
+                  <span className="font-medium text-foreground">
+                    {total}
+                  </span>{' '}
+                  agendamentos
                 </p>
+
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled>Anterior</Button>
-                  <Button variant="outline" size="sm" disabled>Próximo</Button>
+                  <span className="px-3 text-sm">
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      max={totalPages} 
+                      value={page} 
+                      onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value <= 0) setPage(1)
+                        else if (value > totalPages) setPage(totalPages)
+                        else setPage(Number(e.target.value ))
+                      }}
+                      className='w-fit'
+                    /> / {totalPages}
+                  </span>
+
+                  <Button
+                    size="sm"
+                    disabled={page === 1}
+                    onClick={() => setPage(Number(page) - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(Number(page) + 1)}
+                  >
+                    Próximo
+                  </Button>
                 </div>
               </div>
             )}

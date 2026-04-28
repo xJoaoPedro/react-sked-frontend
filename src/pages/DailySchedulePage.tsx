@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { PageHeader } from '../components/PageHeader';
 import { ChevronLeft, ChevronRight, Calendar, Plus } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
-import axios from 'axios';
+import { api } from "@/lib/api";
 
 const timeSlots = [
   '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
@@ -58,7 +58,7 @@ export function DailySchedulePage() {
 
   const updateAppointments = async (date) => {
     try {
-      const response = (await axios.get(`${import.meta.env.VITE_BASE_URL}/api/appointments/${data.id}/${date.toISOString()}`, {
+      const response = (await api.get(`${import.meta.env.VITE_BASE_URL}/api/appointments/${data.id}/${date.toISOString()}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       })).data.data;
 
