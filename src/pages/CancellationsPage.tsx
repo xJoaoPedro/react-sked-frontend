@@ -1,48 +1,18 @@
 import { PageHeader } from "../components/PageHeader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
-import {
-  Calendar,
-  TrendingDown,
-  DollarSign,
-  User,
-  Clock,
-  MessageSquare,
-  Download,
-  Filter,
-} from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-} from "recharts";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
+import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, } from "lucide-react";
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, } from "recharts";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import * as XLSX from "xlsx";
+import { toast } from "sonner"
+import { api } from "@/lib/api";
+import { formatDate, formatPrice, formatTime } from "@/lib/parsers";
+import { useOutletContext } from "react-router-dom";
 
 interface Cancellation {
   id: string;
@@ -120,61 +90,131 @@ const mockCancellations: Cancellation[] = [
   },
 ];
 
-const cancellationReasons = [
-  { name: "Imprevisto pessoal", value: 35, color: "#00A676" },
-  { name: "Mudança de horário", value: 25, color: "#E63946" },
-  { name: "Doença", value: 20, color: "#FFB800" },
-  { name: "Preço elevado", value: 12, color: "#6B7280" },
-  { name: "Profissional indisponível", value: 8, color: "#3B82F6" },
-];
-
-const cancellationTrend = [
-  { month: "Jan", cancellations: 12, total: 180 },
-  { month: "Fev", cancellations: 15, total: 195 },
-  { month: "Mar", cancellations: 18, total: 210 },
-  { month: "Abr", cancellations: 10, total: 205 },
-  { month: "Mai", cancellations: 8, total: 220 },
-  { month: "Jun", cancellations: 14, total: 225 },
-];
-
-const cancellationByService = [
-  { service: "Corte de Cabelo", cancellations: 8 },
-  { service: "Massagem", cancellations: 6 },
-  { service: "Manicure", cancellations: 5 },
-  { service: "Limpeza de Pele", cancellations: 4 },
-  { service: "Depilação", cancellations: 3 },
-];
-
-const cancellationByProfessional = [
-  { professional: "João Barbeiro", cancellations: 7, total: 85 },
-  { professional: "Ana Terapeuta", cancellations: 5, total: 72 },
-  { professional: "Maria Estética", cancellations: 6, total: 68 },
-  { professional: "Dr. Pedro", cancellations: 3, total: 45 },
-  { professional: "Carla Manicure", cancellations: 5, total: 55 },
-];
-
 export function CancellationsPage() {
+  const { dados } = useOutletContext();
+  const [data, setDataState] = useState(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState("month");
   const [filterReason, setFilterReason] = useState("all");
 
-  const totalCancellations = mockCancellations.length;
-  const totalLoss = mockCancellations.reduce((sum, c) => {
-    return sum + parseFloat(c.price.replace("R$ ", "").replace(",", "."));
-  }, 0);
-  const cancellationRate = 3.2; // Mock data
-  const avgNoticePeriod = "1.5 dias"; // Mock data
+  const exportCSV = () => {
+    const headers = ["ID", "Data", "Horário", "Cliente", "Serviço", "Profissional", "Status", "Valor"];
 
-  const filteredCancellations =
-    filterReason === "all"
-      ? mockCancellations
-      : mockCancellations.filter((c) => c.reason === filterReason);
+    const rows = data.map((a) => [
+      a.id,
+      formatDate(a.start_time),
+      formatTime(a.start_time),
+      a.client?.name,
+      a.service?.name,
+      a.employee?.name,
+      a.status,
+      a.service?.price,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) => r.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", "agendamentos.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Agendamentos exportados em CSV com sucesso!")
+  };
+
+  const exportExcel = () => {
+    const dataToExport = data.map((a) => ({
+      ID: a.id,
+      cliente: a.client.name,
+      servico: a.service.name,
+      funcionario: a.employee.name,
+      status: a.status,
+      data: formatDate(a.start_time),
+      horario: formatTime(a.start_time),
+      preco: a.service.price,
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport)
+
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Agendamentos")
+
+    XLSX.writeFile(workbook, "agendamentos.xlsx")
+    toast.success("Agendamentos exportados em Excel com sucesso!")
+  }
+
+  const exportJson = () => {
+    const dataToExport = data.map((a) => ({
+      id: a.id,
+      cliente: a.client.name,
+      servico: a.service.name,
+      funcionario: a.employee.name,
+      status: a.status,
+      data: formatDate(a.start_time),
+      horario: formatTime(a.start_time),
+      preco: a.service.price,
+    }))
+
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
+      type: "application/json",
+    })
+
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "agendamentos.json"
+    a.click()
+
+    URL.revokeObjectURL(url)
+    toast.success("Agendamentos exportados em JSON com sucesso!")
+  }
+
+  const exportData = (type) => {
+    switch (type) {
+      case 'csv':
+        exportCSV();
+        break;
+      case 'excel':
+        exportExcel();
+        break;
+      case 'json':
+        exportJson();
+        break;
+      default:
+        toast.error("Erro no formato de exportação.")
+        break;
+    }
+  };
+
+  useEffect(() => {
+    if (!dados) return;
+
+    setDataState(dados.cancellations);
+
+    console.log(dados.cancellations);
+  }, [dados])
+  
+  
+  // TODO VERIFICAR USO E REMOVER
+  // useEffect(() => {
+  //   if (!initialized) return
+
+  //   fetchData()
+  // }, [initialized, page, filterId, filterDate, filterService, filterClient, filterStatus, filterTimeStart, filterTimeEnd])
+
+  if (data === null) return <div>Carregando...</div>
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <PageHeader
-        title="Análise de Cancelamentos"
-        subtitle="Insights e estatísticas sobre cancelamentos"
-      />
+      <PageHeader title="Análise de Cancelamentos" subtitle="Insights e estatísticas sobre cancelamentos" />
       
       {/* Content */}
       <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom">
@@ -191,10 +231,39 @@ export function CancellationsPage() {
               <SelectItem value="year">Último ano</SelectItem>
             </SelectContent>
           </Select>
-          <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
-            <Download className="w-4 h-4 mr-2" />
-            Exportar Relatório
-          </Button>
+          
+          <Popover open={exportOpen} onOpenChange={setExportOpen}>
+            <PopoverTrigger asChild>
+              <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
+                <Download className="w-4 h-4 mr-2" />
+                Exportar
+                {exportOpen ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent side="bottom" align="end" className="w-52 p-2">
+              <div className="flex flex-col gap-1">
+                <Button className={`p-4 justify-start bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={() => exportData('csv')}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Exportar CSV
+                </Button>
+
+                <Button className={`p-4 justify-start bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={() => exportData('excel')}>
+                  <Table2 className="w-4 h-4 mr-2" />
+                  Exportar Excel
+                </Button>
+
+                <Button className={`p-4 justify-start bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={() => exportData('json')}>
+                  <FileJson className="w-4 h-4 mr-2" />
+                  Exportar JSON
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="space-y-6">
           {/* Stats Cards */}
@@ -213,7 +282,7 @@ export function CancellationsPage() {
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {totalCancellations}
+                  {data.totalCancellations}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Total de Cancelamentos
@@ -230,12 +299,12 @@ export function CancellationsPage() {
                   variant="outline"
                   className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                 >
-                  -{cancellationRate}%
+                  -{data.cancelRate.toFixed(1)}%
                 </Badge>
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {cancellationRate}%
+                  {data.cancelRate.toFixed(1)}%
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Taxa de Cancelamento
@@ -257,7 +326,7 @@ export function CancellationsPage() {
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  R$ {totalLoss.toFixed(2)}
+                  {formatPrice(data.lostRevenue)}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Receita Perdida
@@ -279,7 +348,7 @@ export function CancellationsPage() {
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {avgNoticePeriod}
+                  PH
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Antecedência Média
@@ -301,11 +370,12 @@ export function CancellationsPage() {
                 </p>
               </div>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={cancellationTrend}>
+                <LineChart data={data.cancellationsByMonth}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis dataKey="month" stroke="#6B7280" />
                   <YAxis stroke="#6B7280" />
                   <Tooltip
+                    labelFormatter={(label, payload) => `${label} ${payload[0]?.payload?.year ? `,${payload[0].payload.year}` : ""}`}
                     contentStyle={{
                       backgroundColor: "#fff",
                       border: "1px solid #E5E7EB",
@@ -315,10 +385,10 @@ export function CancellationsPage() {
                   <Legend />
                   <Line
                     type="monotone"
-                    dataKey="cancellations"
+                    dataKey="total"
                     stroke="#E63946"
                     strokeWidth={2}
-                    name="Cancelamentos"
+                    name="Total"
                     dot={{ fill: "#E63946", r: 4 }}
                   />
                 </LineChart>
@@ -338,22 +408,39 @@ export function CancellationsPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={cancellationReasons}
+                    data={data.cancellationsByReason.map(
+                      (
+                        entry: { reason: string; total?: number; percentage?: number; color?: string },
+                      ) => ({
+                        ...entry,
+                        total: Number(entry.total ?? entry.percentage ?? 0),
+                      })
+                    )}
+                    nameKey="reason"
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
+                    label={
+                      ({ payload, percent }: { payload?: { reason?: string; name?: string }; percent: number }) =>
+                        `${payload?.reason ?? payload?.name}: ${(percent * 100).toFixed(0)}%`
                     }
                     outerRadius={80}
                     fill="#8884d8"
-                    dataKey="value"
+                    dataKey="percentage"
                   >
-                    {cancellationReasons.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
+                    {data.cancellationsByReason.map(
+                      (
+                        entry: { reason: string; total: number; percentage?: number; color?: string },
+                        index: number
+                      ) => {
+                        const COLORS = ['#00A676', '#E63946', '#FFB800', '#6B7280', '#3B82F6', '#8B5CF6'];
+                        return <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                      }
+                    )}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip formatter={(value, _, props) => {
+                    return [`${props.payload.total} cancelamentos`, props.payload.reason]}} 
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
@@ -372,7 +459,7 @@ export function CancellationsPage() {
                 </p>
               </div>
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={cancellationByService} layout="vertical">
+                <BarChart data={data.cancellationsByService} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis type="number" stroke="#6B7280" />
                   <YAxis
@@ -389,7 +476,7 @@ export function CancellationsPage() {
                     }}
                   />
                   <Bar
-                    dataKey="cancellations"
+                    dataKey="total"
                     fill="#E63946"
                     radius={[0, 4, 4, 0]}
                   />
@@ -408,25 +495,21 @@ export function CancellationsPage() {
                 </p>
               </div>
               <div className="space-y-4">
-                {cancellationByProfessional.map((prof) => {
-                  const rate = (
-                    (prof.cancellations / prof.total) *
-                    100
-                  ).toFixed(1);
+                {data.cancellationsByProfessional.map((prof) => {
                   return (
                     <div key={prof.professional}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">
-                          {prof.professional}
+                          {prof.name}
                         </span>
                         <span className="text-sm text-muted-foreground">
-                          {prof.cancellations}/{prof.total} ({rate}%)
+                          {prof.cancellations}/{prof.total} ({prof.rate.toFixed(1)}%)
                         </span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div
                           className="bg-destructive h-2 rounded-full transition-all"
-                          style={{ width: `${rate}%` }}
+                          style={{ width: `${prof.rate.toFixed(1)}%` }}
                         />
                       </div>
                     </div>
@@ -436,8 +519,9 @@ export function CancellationsPage() {
             </Card>
           </div>
 
+          {/* TODO IMPLEMENTAR QUANDO IMPLEMENTAR O MOTIVO */}
           {/* Recent Cancellations Table */}
-          <Card className="overflow-hidden gap-0 p-0">
+          {/* <Card className="overflow-hidden gap-0 p-0">
             <div className="px-6 pt-6 pb-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
@@ -570,7 +654,7 @@ export function CancellationsPage() {
                 </TableBody>
               </Table>
             </div>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>

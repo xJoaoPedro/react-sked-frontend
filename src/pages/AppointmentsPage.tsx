@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import * as XLSX from "xlsx";
 import { toast } from "sonner"
 import { api } from "@/lib/api";
+import { formatDate, formatPrice, formatTime } from '@/lib/parsers';
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
@@ -25,7 +26,7 @@ const statusList = [
 export function AppointmentsPage() {
   const { dados } = useOutletContext();
   const [data, setDataState] = useState(null);
-  const [exportOpen, setExportOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [services, setServices] = useState([]);
@@ -60,34 +61,6 @@ export function AppointmentsPage() {
     
     const config = statusConfig[status];
     return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    
-    return new Intl.DateTimeFormat('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }).format(date);
-  };
-
-  const formatTime = (timeStr: string) => {
-    const date = new Date(timeStr);
-    
-    return new Intl.DateTimeFormat('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price);
   };
 
   const clearFilters = () => {

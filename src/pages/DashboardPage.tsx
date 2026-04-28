@@ -7,6 +7,7 @@ import { Calendar, Users, DollarSign, Clock } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { formatPrice } from "@/lib/parsers";
 
 export function DashboardPage() {
   const { dados } = useOutletContext();
@@ -45,7 +46,7 @@ export function DashboardPage() {
           />
           <StatCard
             title="Receita Mensal"
-            value={`R$ ${data.monthlyRevenue}`}
+            value={formatPrice(data.monthlyRevenue)}
             icon={DollarSign}
             trend={{ value: data.revenuePercentage.toFixed(1)}}
           />
