@@ -16,17 +16,11 @@ import { formatDate, formatLimitText, formatPrice, formatTime } from "@/lib/pars
 import { useOutletContext } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 
-interface Cancellation {
-  id: string;
-  date: string;
-  time: string;
-  clientName: string;
-  service: string;
-  professional: string;
-  reason: string;
-  cancelledBy: "client" | "business";
-  price: string;
-  noticePeriod: string; // Ex: "2 dias", "1 hora"
+const period = {
+  'week': "Esta semana",
+  'month': "Este mês",
+  '3months': "Último trimestre",
+  'year': "Este ano"
 }
 
 const reasons = {
@@ -44,110 +38,110 @@ export function CancellationsPage() {
   const [exportOpen, setExportOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState("month");
-  const [filterReason, setFilterReason] = useState("all");
   const [total, setTotal] = useState(1);
   const [limit] = useState(50);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const exportCSV = () => {
-    const headers = ["ID", "Data", "Horário", "Cliente", "Serviço", "Profissional", "Status", "Valor"];
+  // TODO IMPLEMENTAR FUTURAMENTE
+  // const exportCSV = () => {
+  //   const headers = ["ID", "Data", "Horário", "Cliente", "Serviço", "Profissional", "Status", "Valor"];
 
-    const rows = data.map((a) => [
-      a.id,
-      formatDate(a.start_time),
-      formatTime(a.start_time),
-      a.client?.name,
-      a.service?.name,
-      a.employee?.name,
-      a.status,
-      a.service?.price,
-    ]);
+  //   const rows = data.map((a) => [
+  //     a.id,
+  //     formatDate(a.start_time),
+  //     formatTime(a.start_time),
+  //     a.client?.name,
+  //     a.service?.name,
+  //     a.employee?.name,
+  //     a.status,
+  //     a.service?.price,
+  //   ]);
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((r) => r.join(",")),
-    ].join("\n");
+  //   const csvContent = [
+  //     headers.join(","),
+  //     ...rows.map((r) => r.join(",")),
+  //   ].join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement("a");
 
-    link.href = url;
-    link.setAttribute("download", "agendamentos.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("Agendamentos exportados em CSV com sucesso!")
-  };
+  //   link.href = url;
+  //   link.setAttribute("download", "agendamentos.csv");
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  //   toast.success("Agendamentos exportados em CSV com sucesso!")
+  // };
 
-  const exportExcel = () => {
-    const dataToExport = data.map((a) => ({
-      ID: a.id,
-      cliente: a.client.name,
-      servico: a.service.name,
-      funcionario: a.employee.name,
-      status: a.status,
-      data: formatDate(a.start_time),
-      horario: formatTime(a.start_time),
-      preco: a.service.price,
-    }))
+  // const exportExcel = () => {
+  //   const dataToExport = data.map((a) => ({
+  //     ID: a.id,
+  //     cliente: a.client.name,
+  //     servico: a.service.name,
+  //     funcionario: a.employee.name,
+  //     status: a.status,
+  //     data: formatDate(a.start_time),
+  //     horario: formatTime(a.start_time),
+  //     preco: a.service.price,
+  //   }))
 
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport)
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport)
 
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Agendamentos")
+  //   const workbook = XLSX.utils.book_new()
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Agendamentos")
 
-    XLSX.writeFile(workbook, "agendamentos.xlsx")
-    toast.success("Agendamentos exportados em Excel com sucesso!")
-  }
+  //   XLSX.writeFile(workbook, "agendamentos.xlsx")
+  //   toast.success("Agendamentos exportados em Excel com sucesso!")
+  // }
 
-  const exportJson = () => {
-    const dataToExport = data.map((a) => ({
-      id: a.id,
-      cliente: a.client.name,
-      servico: a.service.name,
-      funcionario: a.employee.name,
-      status: a.status,
-      data: formatDate(a.start_time),
-      horario: formatTime(a.start_time),
-      preco: a.service.price,
-    }))
+  // const exportJson = () => {
+  //   const dataToExport = data.map((a) => ({
+  //     id: a.id,
+  //     cliente: a.client.name,
+  //     servico: a.service.name,
+  //     funcionario: a.employee.name,
+  //     status: a.status,
+  //     data: formatDate(a.start_time),
+  //     horario: formatTime(a.start_time),
+  //     preco: a.service.price,
+  //   }))
 
-    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
-      type: "application/json",
-    })
+  //   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
+  //     type: "application/json",
+  //   })
 
-    const url = URL.createObjectURL(blob)
+  //   const url = URL.createObjectURL(blob)
 
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "agendamentos.json"
-    a.click()
+  //   const a = document.createElement("a")
+  //   a.href = url
+  //   a.download = "agendamentos.json"
+  //   a.click()
 
-    URL.revokeObjectURL(url)
-    toast.success("Agendamentos exportados em JSON com sucesso!")
-  }
+  //   URL.revokeObjectURL(url)
+  //   toast.success("Agendamentos exportados em JSON com sucesso!")
+  // }
 
-  const exportData = (type) => {
-    switch (type) {
-      case 'csv':
-        exportCSV();
-        break;
-      case 'excel':
-        exportExcel();
-        break;
-      case 'json':
-        exportJson();
-        break;
-      default:
-        toast.error("Erro no formato de exportação.")
-        break;
-    }
-  };
+  // const exportData = (type) => {
+  //   switch (type) {
+  //     case 'csv':
+  //       exportCSV();
+  //       break;
+  //     case 'excel':
+  //       exportExcel();
+  //       break;
+  //     case 'json':
+  //       exportJson();
+  //       break;
+  //     default:
+  //       toast.error("Erro no formato de exportação.")
+  //       break;
+  //   }
+  // };
 
-  const fetchData = async () => {
+  const fetchTableData = async () => {
     const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations`, {params: { page, limit, }})).data.data;
 
     setDataState((prev) => ({
@@ -157,6 +151,13 @@ export function CancellationsPage() {
     setPage(Number(response.page));
     setTotal(response.total);
     setTotalPages(response.totalPages);
+  }
+
+  const fetchPageData = async () => {
+    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations/summary`, {params: { time: filterPeriod }})).data.data;
+
+    setDataState(response);
+    setTotal(response.totalCancellations);
   }
 
   useEffect(() => {
@@ -171,8 +172,15 @@ export function CancellationsPage() {
   useEffect(() => {
     if (!initialized) return
 
-    fetchData()
+    fetchTableData()
   }, [initialized, page])
+
+  useEffect(() => {
+    if (!initialized) return
+
+    fetchPageData();
+
+  }, [initialized, filterPeriod])
 
   if (data === null) return <div>Carregando...</div>
 
@@ -191,12 +199,13 @@ export function CancellationsPage() {
             <SelectContent>
               <SelectItem value="week">Última semana</SelectItem>
               <SelectItem value="month">Último mês</SelectItem>
-              <SelectItem value="quarter">Último trimestre</SelectItem>
+              <SelectItem value="3months">Último trimestre</SelectItem>
               <SelectItem value="year">Último ano</SelectItem>
             </SelectContent>
           </Select>
           
-          <Popover open={exportOpen} onOpenChange={setExportOpen}>
+          {/* TODO IMPLEMENTAR FUTURAMENTE */}
+          {/* <Popover open={exportOpen} onOpenChange={setExportOpen}>
             <PopoverTrigger asChild>
               <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
                 <Download className="w-4 h-4 mr-2" />
@@ -227,11 +236,11 @@ export function CancellationsPage() {
                 </Button>
               </div>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </div>
         <div className="space-y-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
@@ -241,7 +250,7 @@ export function CancellationsPage() {
                   variant="outline"
                   className="bg-destructive/10 text-destructive border-destructive/20"
                 >
-                  Último mês
+                  {period[filterPeriod]}
                 </Badge>
               </div>
               <div>
@@ -298,7 +307,8 @@ export function CancellationsPage() {
               </div>
             </Card>
 
-            <Card className="p-6">
+            {/* TODO IMPLEMENTAR FUTURAMENTE */}
+            {/* <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
                   <Clock className="w-6 h-6 text-blue-600" />
@@ -312,13 +322,13 @@ export function CancellationsPage() {
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  PH
+                  PH IMPLEMENTAR FUTURAMENTE
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Antecedência Média
                 </p>
               </div>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Charts Row */}
