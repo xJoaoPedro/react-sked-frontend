@@ -161,4 +161,29 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(160 100% 33%) hsl(0 0% 94%);
   }
+
+  .scrollbar-custom-destructive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-custom-destructive::-webkit-scrollbar-track {
+    background: hsl(0 0% 94%);
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom-destructive::-webkit-scrollbar-thumb {
+    background: hsl(355 78% 57%);
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom-destructive::-webkit-scrollbar-thumb:hover {
+    background: hsl(355 78% 47%);
+  }
+
+  /* Firefox */
+  .scrollbar-custom-destructive {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(355 78% 57%) hsl(0 0% 94%);
+  }
 }

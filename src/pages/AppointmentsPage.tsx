@@ -266,7 +266,7 @@ export function AppointmentsPage() {
           </Popover>
         </div>
 
-        <div className="flex overflow-y-auto">
+        <div className="flex">
           {showFilters && (
             <Card className="p-6 mr-1">
               <h3 className="font-semibold">Filtros Avançados</h3>
@@ -366,7 +366,9 @@ export function AppointmentsPage() {
                     <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="block overflow-y-auto">
+
+                <div className="max-h-[650px] flex-1 flex overflow-y-auto">
+                  <TableBody className="block overflow-y-auto">
                   {data.length === 0 ? (
                     <TableRow className='table table-fixed w-full h-full'>
                       <TableCell colSpan={9} className="w-32 text-center py-16">
@@ -482,6 +484,7 @@ export function AppointmentsPage() {
                     ))
                   )}
                 </TableBody>
+                </div>
               </Table>
             </div>
             

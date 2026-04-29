@@ -5,14 +5,16 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
-import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, } from "lucide-react";
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, } from "recharts";
+import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, Eye, Edit, Trash2, } from "lucide-react";
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, } from "recharts";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as XLSX from "xlsx";
 import { toast } from "sonner"
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { api } from "@/lib/api";
-import { formatDate, formatPrice, formatTime } from "@/lib/parsers";
+import { formatDate, formatLimitText, formatPrice, formatTime } from "@/lib/parsers";
 import { useOutletContext } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 
 interface Cancellation {
   id: string;
@@ -27,75 +29,26 @@ interface Cancellation {
   noticePeriod: string; // Ex: "2 dias", "1 hora"
 }
 
-const mockCancellations: Cancellation[] = [
-  {
-    id: "AGD-006",
-    date: "2024-03-26",
-    time: "16:00",
-    clientName: "Rafael Mendes",
-    service: "Barba",
-    professional: "João Barbeiro",
-    reason: "Imprevisto pessoal",
-    cancelledBy: "client",
-    price: "R$ 30,00",
-    noticePeriod: "2 dias",
-  },
-  {
-    id: "AGD-012",
-    date: "2024-03-27",
-    time: "14:30",
-    clientName: "Amanda Costa",
-    service: "Manicure",
-    professional: "Carla Manicure",
-    reason: "Profissional indisponível",
-    cancelledBy: "business",
-    price: "R$ 40,00",
-    noticePeriod: "1 dia",
-  },
-  {
-    id: "AGD-015",
-    date: "2024-03-28",
-    time: "10:00",
-    clientName: "Lucas Silva",
-    service: "Corte de Cabelo",
-    professional: "João Barbeiro",
-    reason: "Mudança de horário",
-    cancelledBy: "client",
-    price: "R$ 50,00",
-    noticePeriod: "3 horas",
-  },
-  {
-    id: "AGD-018",
-    date: "2024-03-25",
-    time: "11:00",
-    clientName: "Patricia Lima",
-    service: "Limpeza de Pele",
-    professional: "Maria Estética",
-    reason: "Doença",
-    cancelledBy: "client",
-    price: "R$ 150,00",
-    noticePeriod: "1 hora",
-  },
-  {
-    id: "AGD-020",
-    date: "2024-03-24",
-    time: "15:00",
-    clientName: "Ricardo Santos",
-    service: "Massagem Relaxante",
-    professional: "Ana Terapeuta",
-    reason: "Preço elevado",
-    cancelledBy: "client",
-    price: "R$ 120,00",
-    noticePeriod: "5 dias",
-  },
-];
+const reasons = {
+  NO_SHOW: 'Não comparecimento',
+  SCHEDULE_CONFLICT: 'Conflito de agenda',
+  ILLNESS: 'Doença',
+  EMERGENCY: 'Emergência',
+  PROFESSIONAL_UNAVAILABLE: 'Profissional indisponível',
+  OTHER: 'Outro'
+}
 
 export function CancellationsPage() {
   const { dados } = useOutletContext();
   const [data, setDataState] = useState(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [initialized, setInitialized] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState("month");
   const [filterReason, setFilterReason] = useState("all");
+  const [total, setTotal] = useState(1);
+  const [limit] = useState(50);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const exportCSV = () => {
     const headers = ["ID", "Data", "Horário", "Cliente", "Serviço", "Profissional", "Status", "Valor"];
@@ -194,21 +147,32 @@ export function CancellationsPage() {
     }
   };
 
+  const fetchData = async () => {
+    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations`, {params: { page, limit, }})).data.data;
+
+    setDataState((prev) => ({
+      ...prev,
+      recentCancellations: response.data,
+    }));
+    setPage(Number(response.page));
+    setTotal(response.total);
+    setTotalPages(response.totalPages);
+  }
+
   useEffect(() => {
     if (!dados) return;
 
     setDataState(dados.cancellations);
-
-    console.log(dados.cancellations);
+    setTotal(dados.cancellations.totalCancellations);
+    setTotalPages(Math.ceil(dados.cancellations.totalCancellations / limit));
+    setInitialized(true)
   }, [dados])
   
-  
-  // TODO VERIFICAR USO E REMOVER
-  // useEffect(() => {
-  //   if (!initialized) return
+  useEffect(() => {
+    if (!initialized) return
 
-  //   fetchData()
-  // }, [initialized, page, filterId, filterDate, filterService, filterClient, filterStatus, filterTimeStart, filterTimeEnd])
+    fetchData()
+  }, [initialized, page])
 
   if (data === null) return <div>Carregando...</div>
 
@@ -217,7 +181,7 @@ export function CancellationsPage() {
       <PageHeader title="Análise de Cancelamentos" subtitle="Insights e estatísticas sobre cancelamentos" />
       
       {/* Content */}
-      <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom">
+      <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom-destructive">
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Select value={filterPeriod} onValueChange={setFilterPeriod}>
@@ -374,7 +338,7 @@ export function CancellationsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis dataKey="month" stroke="#6B7280" />
                   <YAxis stroke="#6B7280" />
-                  <Tooltip
+                  <RechartsTooltip
                     labelFormatter={(label, payload) => `${label} ${payload[0]?.payload?.year ? `,${payload[0].payload.year}` : ""}`}
                     contentStyle={{
                       backgroundColor: "#fff",
@@ -438,7 +402,7 @@ export function CancellationsPage() {
                       }
                     )}
                   </Pie>
-                  <Tooltip formatter={(value, _, props) => {
+                  <RechartsTooltip formatter={(value, _, props) => {
                     return [`${props.payload.total} cancelamentos`, props.payload.reason]}} 
                   />
                 </PieChart>
@@ -519,9 +483,8 @@ export function CancellationsPage() {
             </Card>
           </div>
 
-          {/* TODO IMPLEMENTAR QUANDO IMPLEMENTAR O MOTIVO */}
           {/* Recent Cancellations Table */}
-          {/* <Card className="overflow-hidden gap-0 p-0">
+          <Card className="overflow-hidden gap-0 p-0">
             <div className="px-6 pt-6 pb-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
@@ -532,129 +495,222 @@ export function CancellationsPage() {
                     Últimos cancelamentos com detalhes
                   </p>
                 </div>
-                <Select value={filterReason} onValueChange={setFilterReason}>
-                  <SelectTrigger className="bg-transparent p-4 text-foreground hover:bg-primary hover:text-popover">
+
+                {/* TODO IMPLEMENTAR FUTURAMENTE */}
+                {/* <Select value={filterReason} onValueChange={setFilterReason}>
+                  <SelectTrigger className="bg-transparent p-4 text-foreground hover:bg-primary hover:text-popover w-64">
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os motivos</SelectItem>
-                    {cancellationReasons.map((reason) => (
-                      <SelectItem key={reason.name} value={reason.name}>
-                        {reason.name}
+                    {data.cancellationsByReason.map((reason) => (
+                      <SelectItem key={reason.reason} value={reason.reason}>
+                        {reason.reason}
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+                </Select> */}
               </div>
             </div>
 
             <div>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead className="font-semibold text-foreground">
-                      ID
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      Data/Hora
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      Cliente
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      Serviço
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      Motivo
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      Cancelado Por
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      Antecedência
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      Valor
-                    </TableHead>
+              <Table className="w-full">
+                <TableHeader className="table table-fixed z-10">
+                  <TableRow className="table w-full table-fixed bg-muted/50">
+                    <TableHead className="font-semibold text-foreground w-[100px]">ID</TableHead>
+                    <TableHead className="font-semibold text-foreground">Data/Hora</TableHead>
+                    <TableHead className="font-semibold text-foreground">Cliente</TableHead>
+                    <TableHead className="font-semibold text-foreground">Serviço</TableHead>
+                    <TableHead className="font-semibold text-foreground">Profissional</TableHead>
+                    <TableHead className="font-semibold text-foreground">Motivo</TableHead>
+                    <TableHead className="font-semibold text-foreground">Cancelado por</TableHead>
+                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {filteredCancellations.map((cancellation) => (
-                    <TableRow
-                      key={cancellation.id}
-                      className="hover:bg-muted/30 transition-colors"
-                    >
-                      <TableCell className="font-mono text-sm font-semibold text-destructive">
-                        {cancellation.id}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm">
-                              {new Date(
-                                cancellation.date + "T00:00:00",
-                              ).toLocaleDateString("pt-BR")}
-                            </span>
+
+                <div className="max-h-[500px] flex overflow-y-auto">
+                  <TableBody className="block overflow-y-auto">
+                    {data.recentCancellations.length === 0 ? (
+                      <TableRow className='table table-fixed w-full h-full'>
+                        <TableCell colSpan={9} className="w-32 text-center py-16">
+                          <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
+                            <Calendar className="w-12 h-12 opacity-20" />
+                            <p className="font-medium">
+                              Nenhum cancelamento recente encontrado.
+                            </p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">
-                              {cancellation.time}
-                            </span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                            <User className="w-4 h-4 text-destructive" />
-                          </div>
-                          <span className="font-medium">
-                            {cancellation.clientName}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">{cancellation.service}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{cancellation.reason}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            cancellation.cancelledBy === "client"
-                              ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                              : "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                          }
-                        >
-                          {cancellation.cancelledBy === "client"
-                            ? "Cliente"
-                            : "Estabelecimento"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">
-                          {cancellation.noticePeriod}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-semibold text-destructive">
-                          {cancellation.price}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      data.recentCancellations.map((cancellation) => (
+                        <TableRow key={cancellation.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
+                          <TableCell className="w-[100px] font-mono text-sm font-semibold text-destructive">{cancellation.id}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm">{formatDate(cancellation.date)}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">{formatTime(cancellation.date)}</span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                                <User className="w-4 h-4 text-destructive" />
+                              </div>
+                              <span className="font-medium">{cancellation.clientName}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">{cancellation.serviceName}</span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                                <User className="w-4 h-4 text-destructive" />
+                              </div>
+                              <span className="font-medium">{cancellation.professionalName}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm">{formatLimitText(reasons[cancellation.reason], 24)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={
+                                cancellation.cancelledBy === "client"
+                                  ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                  : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                              }
+                            >
+                              {cancellation.cancelledBy === "client"
+                                ? "Cliente"
+                                : "Estabelecimento"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <Button 
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TooltipTrigger>
+
+                                <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
+                                  Visualizar
+                                </TooltipContent>
+                              </Tooltip>
+                              
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <Button  
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TooltipTrigger>
+
+                                <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                                  Editar
+                                </TooltipContent>
+                              </Tooltip>
+                              
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <Button  
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TooltipTrigger>
+
+                                <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                                  Excluir
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </div>                
               </Table>
             </div>
-          </Card> */}
+
+            {/* Pagination or Summary */}
+            {data.recentCancellations.length > 0 && (
+              <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
+                <p className="text-sm text-muted-foreground">
+                  Mostrando{' '}
+                  <span className="font-medium text-foreground">
+                    {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                  </span>{' '}
+                  de{' '}
+                  <span className="font-medium text-foreground">
+                    {total}
+                  </span>{' '}
+                  agendamentos
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <span className="px-3 text-sm">
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      max={totalPages} 
+                      value={page} 
+                      onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value <= 0) setPage(1)
+                        else if (value > totalPages) setPage(totalPages)
+                        else setPage(Number(e.target.value ))
+                      }}
+                      className='w-fit'
+                    /> / {totalPages}
+                  </span>
+
+                  <Button
+                    className="bg-destructive hover:bg-destructive/90"
+                    size="sm"
+                    disabled={page === 1}
+                    onClick={() => setPage(Number(page) - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    className="bg-destructive hover:bg-destructive/90"
+                    size="sm"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(Number(page) + 1)}
+                  >
+                    Próximo
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
         </div>
       </div>
     </div>

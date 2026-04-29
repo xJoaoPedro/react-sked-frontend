@@ -25,3 +25,11 @@ export function formatPrice(price: number) {
     currency: 'BRL',
   }).format(price);
 };
+
+export function formatLimitText(text: string, limit: number) {
+  if (text.length > limit) {
+    return text.substring(0, (limit - 3)) + '...';
+  }
+  
+  return text;
+}
