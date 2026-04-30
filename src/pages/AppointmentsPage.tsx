@@ -423,7 +423,7 @@ export function AppointmentsPage() {
                         <TableCell>
                           <div className="flex items-center gap-1.5 font-semibold text-foreground">
                             <DollarSign className="w-4 h-4 text-primary" />
-                            {formatPrice(appointment.service.price)}
+                            {formatPrice(appointment.service.price, false)}
                           </div>
                         </TableCell>
                         <TableCell>

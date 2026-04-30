@@ -19,10 +19,12 @@ export function formatTime(timeStr: string) {
   }).format(date);
 };
 
-export function formatPrice(price: number) {
+export function formatPrice(price: number, showCurrencySymbol: boolean = true) {
   return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
     currency: 'BRL',
+    style: showCurrencySymbol ? 'currency' : undefined,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(price);
 };
 

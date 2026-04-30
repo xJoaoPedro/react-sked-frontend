@@ -142,22 +142,23 @@ export function CancellationsPage() {
   // };
 
   const fetchTableData = async () => {
-    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations`, {params: { page, limit, }})).data.data;
+    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations`, {params: { page, limit, filterPeriod }})).data.data;
 
     setDataState((prev) => ({
       ...prev,
       recentCancellations: response.data,
     }));
-    setPage(Number(response.page));
     setTotal(response.total);
     setTotalPages(response.totalPages);
   }
 
   const fetchPageData = async () => {
-    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations/summary`, {params: { time: filterPeriod }})).data.data;
+    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations/summary`, {params: { page, limit, filterPeriod }})).data.data;
 
     setDataState(response);
+    setPage(1);
     setTotal(response.totalCancellations);
+    setTotalPages(Math.ceil(response.totalCancellations / limit));
   }
 
   useEffect(() => {
@@ -193,14 +194,14 @@ export function CancellationsPage() {
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Select value={filterPeriod} onValueChange={setFilterPeriod}>
-            <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-primary hover:text-popover">
+            <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-destructive hover:text-popover">
               <SelectValue className="hover:bg-white" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="week">Última semana</SelectItem>
-              <SelectItem value="month">Último mês</SelectItem>
-              <SelectItem value="3months">Último trimestre</SelectItem>
-              <SelectItem value="year">Último ano</SelectItem>
+              <SelectItem value="week" className="data-[highlighted]:bg-destructive data-[highlighted]:text-white focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none">Última semana</SelectItem>
+              <SelectItem value="month" className="data-[highlighted]:bg-destructive data-[highlighted]:text-white focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none">Último mês</SelectItem>
+              <SelectItem value="3months" className="data-[highlighted]:bg-destructive data-[highlighted]:text-white focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none">Último trimestre</SelectItem>
+              <SelectItem value="year" className="data-[highlighted]:bg-destructive data-[highlighted]:text-white focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none">Último ano</SelectItem>
             </SelectContent>
           </Select>
           
@@ -499,10 +500,10 @@ export function CancellationsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-lg mb-1">
-                    Cancelamentos Recentes
+                    Cancelamentos do período <span className="text-destructive/60">({period[filterPeriod]})</span>
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Últimos cancelamentos com detalhes
+                    Visualize os cancelamentos por cliente, serviço e motivo
                   </p>
                 </div>
 
@@ -547,7 +548,7 @@ export function CancellationsPage() {
                           <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
                             <Calendar className="w-12 h-12 opacity-20" />
                             <p className="font-medium">
-                              Nenhum cancelamento recente encontrado.
+                              Nenhum cancelamento encontrado.
                             </p>
                           </div>
                         </TableCell>
@@ -681,7 +682,7 @@ export function CancellationsPage() {
                   <span className="font-medium text-foreground">
                     {total}
                   </span>{' '}
-                  agendamentos
+                  cancelamentos
                 </p>
 
                 <div className="flex items-center gap-2">
