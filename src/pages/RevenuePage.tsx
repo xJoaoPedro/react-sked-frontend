@@ -63,7 +63,6 @@ export function RevenuePage() {
   const fetchPageData = async () => {
     const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/revenue/summary`, {params: { page, limit, filterPeriod }})).data.data;
 
-    console.log(response)
     setDataState(response);
     setTotal(response.totalTransactions);
     setPage(1);

@@ -443,7 +443,7 @@ export function CancellationsPage() {
                     width={120}
                     stroke="#6B7280"
                   />
-                  <Tooltip
+                  <RechartsTooltip
                     contentStyle={{
                       backgroundColor: "#fff",
                       border: "1px solid #E5E7EB",
