@@ -372,7 +372,7 @@ export function AppointmentsPage() {
                   </TableRow>
                 </TableHeader>
 
-                <div className="max-h-[650px] flex-1 flex overflow-y-auto">
+                <div className="h-[650px] flex-1 flex overflow-y-auto">
                   <TableBody className="block overflow-y-auto">
                   {data.length === 0 ? (
                     <TableRow className='table table-fixed w-full h-full'>

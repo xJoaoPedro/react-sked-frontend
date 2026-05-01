@@ -67,7 +67,7 @@ export function WeeklySchedule({ weekStats }: DashboardProps) {
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <div 
                   className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: `${(day.appointments / maxAppointments) * 100}%` }}
+                  style={{ width: day.appointments === 0 ? '0' : `${(day.appointments / maxAppointments) * 100}%` }}
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">

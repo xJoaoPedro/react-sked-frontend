@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { PageHeader } from '../components/PageHeader';
-import { ChevronLeft, ChevronRight, Calendar, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Plus, CalendarX } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from "@/lib/api";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 
 const timeSlots = [
   '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
@@ -159,80 +160,91 @@ export function DailySchedulePage() {
           </Button>
         </div>
 
-        {/* Schedule Grid - with both vertical and horizontal scroll */}
-        <Card className="flex-1 overflow-auto scrollbar-custom">
-          <div className="flex min-w-max">
-            {/* Time column */}
-            <div className="w-24 flex-shrink-0 border-r border-border sticky left-0 bg-background z-20">
-              <div className="h-12 border-b border-border sticky top-0 bg-white z-20" /> {/* Header spacer */}
-              {timeSlots.map((time) => (
-                <div
-                  key={time}
-                  className="h-16 border-b border-border flex items-start justify-end pr-3 pt-1"
-                >
-                  <span className="text-sm text-muted-foreground whitespace-nowrap font-medium">{time}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Professional columns */}
-            {data.professionals.map((professional) => {
-              const professionalAppointments = data.appointments.filter(apt => apt.employee_id === professional.id);
-
-              return (
-                <div key={professional.id} className="w-[350px] flex-shrink-0 border-r border-border last:border-r-0">
-                  {/* Professional header */}
-                  <div className="h-12 border-b border-border bg-background flex items-center justify-center px-4 sticky top-0 z-10">
-                    <span className="font-medium text-sm truncate">{professional.user.name}</span>
+        {data.professionals.length > 0 ? (
+          <Card className="flex-1 overflow-auto scrollbar-custom">
+            <div className="flex min-w-max">
+              {/* Time column */}
+              <div className="w-24 flex-shrink-0 border-r border-border sticky left-0 bg-background z-20">
+                <div className="h-12 border-b border-border sticky top-0 bg-white z-20" /> {/* Header spacer */}
+                {timeSlots.map((time) => (
+                  <div
+                    key={time}
+                    className="h-16 border-b border-border flex items-start justify-end pr-3 pt-1"
+                  >
+                    <span className="text-sm text-muted-foreground whitespace-nowrap font-medium">{time}</span>
                   </div>
+                ))}
+              </div>
 
-                  {/* Grid lines */}
-                  <div className="relative">
-                    {timeSlots.map((time) => (
-                      <div
-                        key={time}
-                        className="h-16 border-b border-border hover:bg-muted/20 cursor-pointer transition-colors"
-                      />
-                    ))}
+              {/* Professional columns */}
+              {data.professionals.map((professional) => {
+                const professionalAppointments = data.appointments.filter(apt => apt.employee_id === professional.id);
 
-                    {/* Appointments overlay */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      {professionalAppointments.map((appointment) => {
-                        const { top, height } = getAppointmentPosition(
-                          appointment.start_time,
-                          appointment.end_time
-                        );
-                        
-                        return (
-                          <div
-                            key={appointment.id}
-                            className={`absolute left-1 right-1 ${getStatusColor(
-                              appointment.status
-                            )} text-white rounded-lg p-2 shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow`}
-                            style={{
-                              top: `${top}px`,
-                              height: `${height}px`,
-                            }}
-                          >
-                            <div className="text-xs font-semibold truncate">
-                              {appointment.client.name}
+                return (
+                  <div key={professional.id} className="w-[350px] flex-shrink-0 border-r border-border last:border-r-0">
+                    {/* Professional header */}
+                    <div className="h-12 border-b border-border bg-background flex items-center justify-center px-4 sticky top-0 z-10">
+                      <span className="font-medium text-sm truncate">{professional.user.name}</span>
+                    </div>
+
+                    {/* Grid lines */}
+                    <div className="relative">
+                      {timeSlots.map((time) => (
+                        <div
+                          key={time}
+                          className="h-16 border-b border-border hover:bg-muted/20 cursor-pointer transition-colors"
+                        />
+                      ))}
+
+                      {/* Appointments overlay */}
+                      <div className="absolute inset-0 pointer-events-none">
+                        {professionalAppointments.map((appointment) => {
+                          const { top, height } = getAppointmentPosition(
+                            appointment.start_time,
+                            appointment.end_time
+                          );
+                          
+                          return (
+                            <div
+                              key={appointment.id}
+                              className={`absolute left-1 right-1 ${getStatusColor(
+                                appointment.status
+                              )} text-white rounded-lg p-2 shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow`}
+                              style={{
+                                top: `${top}px`,
+                                height: `${height}px`,
+                              }}
+                            >
+                              <div className="text-xs font-semibold truncate">
+                                {appointment.client.name}
+                              </div>
+                              <div className="text-xs opacity-90 truncate">
+                                {appointment.service?.name}
+                              </div>
+                              <div className="text-xs opacity-90 mt-1">
+                                {formatDate(appointment.start_time, true)} - {formatDate(appointment.end_time, true)}
+                              </div>
                             </div>
-                            <div className="text-xs opacity-90 truncate">
-                              {appointment.service?.name}
-                            </div>
-                            <div className="text-xs opacity-90 mt-1">
-                              {formatDate(appointment.start_time, true)} - {formatDate(appointment.end_time, true)}
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+                );
+              })}
+            </div>
+          </Card>
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <CalendarX />
+              </EmptyMedia>
+              <EmptyTitle className='text-muted-foreground'>Não há informações de agendamentos no dia para listar.</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        )}
+        
       </div>
     </div>
   );

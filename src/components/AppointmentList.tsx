@@ -32,15 +32,13 @@ export function AppointmentList({appointments}: AppointmentProps) {
       const config = statusConfig[status];
       return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
     };
-
-    console.log(appointments.length)
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">Próximos Agendamentos</h3>
       </div>
       
-      <div className="space-y-4 overflow-y-auto max-h-[700px] scrollbar-custom">
+      <div className="space-y-4 overflow-y-auto max-h-96 pr-2 scrollbar-custom">
         {appointments.length > 0 ? appointments.map((appointment) => (
           <div 
             key={appointment.id}
@@ -76,7 +74,7 @@ export function AppointmentList({appointments}: AppointmentProps) {
               <EmptyMedia variant="icon">
                 <Calendar />
               </EmptyMedia>
-              <EmptyTitle>Sem agendamentos futuros.</EmptyTitle>
+              <EmptyTitle className='text-muted-foreground'>Sem agendamentos futuros.</EmptyTitle>
             </EmptyHeader>
             <EmptyContent className="flex-row justify-center gap-2">
               <Button onClick={() => navigate("/appointments")}>Criar agendamento</Button>

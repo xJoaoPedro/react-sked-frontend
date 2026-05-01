@@ -5,7 +5,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
-import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, Eye, Edit, Trash2, } from "lucide-react";
+import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, Eye, Edit, Trash2, CalendarX, ChartBar, ChartPie, ChartSpline, } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, } from "recharts";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as XLSX from "xlsx";
@@ -15,6 +15,7 @@ import { api } from "@/lib/api";
 import { formatDate, formatLimitText, formatPrice, formatTime } from "@/lib/parsers";
 import { useOutletContext } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 
 const period = {
   'week': "Esta semana",
@@ -42,6 +43,7 @@ export function CancellationsPage() {
   const [limit] = useState(50);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [byMonthExists, setByMonthExists] = useState(false);
 
   // TODO IMPLEMENTAR FUTURAMENTE
   // const exportCSV = () => {
@@ -154,8 +156,10 @@ export function CancellationsPage() {
 
   const fetchPageData = async () => {
     const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/cancellations/summary`, {params: { page, limit, filterPeriod }})).data.data;
+    const byMonthExists = response.cancellationsByMonth.filter(c => c.total === 0).length === response.cancellationsByMonth.length
 
     setDataState(response);
+    setByMonthExists(byMonthExists)
     setPage(1);
     setTotal(response.totalCancellations);
     setTotalPages(Math.ceil(response.totalCancellations / limit));
@@ -163,8 +167,10 @@ export function CancellationsPage() {
 
   useEffect(() => {
     if (!dados) return;
+    const byMonthExists = dados.cancellationsByMonth?.filter(c => c.total === 0).length === dados.cancellationsByMonth?.length
 
     setDataState(dados.cancellations);
+    setByMonthExists(byMonthExists)
     setTotal(dados.cancellations.totalCancellations);
     setTotalPages(Math.ceil(dados.cancellations.totalCancellations / limit));
     setInitialized(true)
@@ -335,7 +341,7 @@ export function CancellationsPage() {
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Cancellation Trend */}
-            <Card className="p-6">
+            <Card className="p-6 h-96">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">
                   Tendência de Cancelamentos
@@ -344,34 +350,46 @@ export function CancellationsPage() {
                   Evolução mensal dos cancelamentos
                 </p>
               </div>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data.cancellationsByMonth}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="month" stroke="#6B7280" />
-                  <YAxis stroke="#6B7280" />
-                  <RechartsTooltip
-                    labelFormatter={(label, payload) => `${label} ${payload[0]?.payload?.year ? `,${payload[0].payload.year}` : ""}`}
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #E5E7EB",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="total"
-                    stroke="#E63946"
-                    strokeWidth={2}
-                    name="Total"
-                    dot={{ fill: "#E63946", r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+
+              {!byMonthExists ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={data.cancellationsByMonth}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis dataKey="month" stroke="#6B7280" />
+                    <YAxis stroke="#6B7280" />
+                    <RechartsTooltip
+                      labelFormatter={(label, payload) => `${label} ${payload[0]?.payload?.year ? `,${payload[0].payload.year}` : ""}`}
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke="#E63946"
+                      strokeWidth={2}
+                      name="Total"
+                      dot={{ fill: "#E63946", r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartSpline  />
+                    </EmptyMedia>
+                    <EmptyTitle className='text-muted-foreground'>Não há dados suficientes de cancelamentos para listar.</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
             </Card>
 
             {/* Reasons Pie Chart */}
-            <Card className="p-6">
+            <Card className="p-6 h-96 gap-0">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">
                   Motivos de Cancelamento
@@ -380,51 +398,63 @@ export function CancellationsPage() {
                   Distribuição por motivo
                 </p>
               </div>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={data.cancellationsByReason.map(
-                      (
-                        entry: { reason: string; total?: number; percentage?: number; color?: string },
-                      ) => ({
-                        ...entry,
-                        total: Number(entry.total ?? entry.percentage ?? 0),
-                      })
-                    )}
-                    nameKey="reason"
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={
-                      ({ payload, percent }: { payload?: { reason?: string; name?: string }; percent: number }) =>
-                        `${payload?.reason ?? payload?.name}: ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="percentage"
-                  >
-                    {data.cancellationsByReason.map(
-                      (
-                        entry: { reason: string; total: number; percentage?: number; color?: string },
-                        index: number
-                      ) => {
-                        const COLORS = ['#00A676', '#E63946', '#FFB800', '#6B7280', '#3B82F6', '#8B5CF6'];
-                        return <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+
+              {data.cancellationsByReason.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={data.cancellationsByReason.map(
+                        (
+                          entry: { reason: string; total?: number; percentage?: number; color?: string },
+                        ) => ({
+                          ...entry,
+                          total: Number(entry.total ?? entry.percentage ?? 0),
+                        })
+                      )}
+                      nameKey="reason"
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={
+                        ({ payload, percent }: { payload?: { reason?: string; name?: string }; percent: number }) =>
+                          `${payload?.reason ?? payload?.name}: ${(percent * 100).toFixed(0)}%`
                       }
-                    )}
-                  </Pie>
-                  <RechartsTooltip formatter={(value, _, props) => {
-                    return [`${props.payload.total} cancelamentos`, props.payload.reason]}} 
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="percentage"
+                    >
+                      {data.cancellationsByReason.map(
+                        (
+                          entry: { reason: string; total: number; percentage?: number; color?: string },
+                          index: number
+                        ) => {
+                          const COLORS = ['#00A676', '#E63946', '#FFB800', '#6B7280', '#3B82F6', '#8B5CF6'];
+                          return <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                        }
+                      )}
+                    </Pie>
+                    <RechartsTooltip formatter={(value, _, props) => {
+                      return [`${props.payload.total} cancelamentos`, props.payload.reason]}} 
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartPie  />
+                    </EmptyMedia>
+                    <EmptyTitle className='text-muted-foreground'>Não há cancelamentos por motivoes para listar!</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
             </Card>
           </div>
 
           {/* Analysis by Service and Professional */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* By Service */}
-            <Card className="p-6">
+            <Card className="p-6 h-96">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">
                   Cancelamentos por Serviço
@@ -433,34 +463,46 @@ export function CancellationsPage() {
                   Serviços com mais cancelamentos
                 </p>
               </div>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={data.cancellationsByService} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis type="number" stroke="#6B7280" />
-                  <YAxis
-                    dataKey="service"
-                    type="category"
-                    width={120}
-                    stroke="#6B7280"
-                  />
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #E5E7EB",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Bar
-                    dataKey="total"
-                    fill="#E63946"
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+
+              {data.cancellationsByService.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={data.cancellationsByService} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis type="number" stroke="#6B7280" />
+                    <YAxis
+                      dataKey="service"
+                      type="category"
+                      width={120}
+                      stroke="#6B7280"
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Bar
+                      dataKey="total"
+                      fill="#E63946"
+                      radius={[0, 4, 4, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartBar  />
+                    </EmptyMedia>
+                    <EmptyTitle className='text-muted-foreground'>Não há cancelamentos por serviço para listar!</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
             </Card>
 
             {/* By Professional */}
-            <Card className="p-6">
+            <Card className="p-6 h-96">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">
                   Taxa por Profissional
@@ -469,28 +511,40 @@ export function CancellationsPage() {
                   Percentual de cancelamento por profissional
                 </p>
               </div>
-              <div className="space-y-4">
-                {data.cancellationsByProfessional.map((prof) => {
-                  return (
-                    <div key={prof.professional}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
-                          {prof.name}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {prof.cancellations}/{prof.total} ({prof.rate.toFixed(1)}%)
-                        </span>
+
+              {data.cancellationsByProfessional.length > 0 ? (
+                <div className="space-y-4">
+                  {data.cancellationsByProfessional.map((prof) => {
+                    return (
+                      <div key={prof.professional}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">
+                            {prof.name}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {prof.cancellations}/{prof.total} ({prof.rate.toFixed(1)}%)
+                          </span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className="bg-destructive h-2 rounded-full transition-all"
+                            style={{ width: `${prof.rate.toFixed(1)}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className="bg-destructive h-2 rounded-full transition-all"
-                          style={{ width: `${prof.rate.toFixed(1)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartBar  />
+                    </EmptyMedia>
+                    <EmptyTitle className='text-muted-foreground'>Não há profissionais com cancelamentos para listar!</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
             </Card>
           </div>
 
@@ -540,17 +594,19 @@ export function CancellationsPage() {
                   </TableRow>
                 </TableHeader>
 
-                <div className="max-h-[500px] flex overflow-y-auto">
+                <div className="h-[500px] flex overflow-y-auto">
                   <TableBody className="block overflow-y-auto">
                     {data.recentCancellations.length === 0 ? (
                       <TableRow className='table table-fixed w-full h-full'>
                         <TableCell colSpan={9} className="w-32 text-center py-16">
-                          <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
-                            <Calendar className="w-12 h-12 opacity-20" />
-                            <p className="font-medium">
-                              Nenhum cancelamento encontrado.
-                            </p>
-                          </div>
+                          <Empty>
+                            <EmptyHeader>
+                              <EmptyMedia variant="icon">
+                                <CalendarX />
+                              </EmptyMedia>
+                              <EmptyTitle className='text-muted-foreground'>Não há cancelamentos para listar!</EmptyTitle>
+                            </EmptyHeader>
+                          </Empty>
                         </TableCell>
                       </TableRow>
                     ) : (

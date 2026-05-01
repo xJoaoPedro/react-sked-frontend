@@ -5,7 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { PageHeader } from '../components/PageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2 } from 'lucide-react';
+import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useOutletContext } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { api } from '@/lib/api';
 import { formatDate, formatLimitText, formatPrice, formatTime } from '@/lib/parsers';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 
 const period = {
   'week': "Esta semana",
@@ -219,81 +220,106 @@ export function RevenuePage() {
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Evolution Chart */}
-            <Card className="p-6">
+            <Card className="p-6 gap-0 h-96">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">Evolução de Receitas</h3>
                 <p className="text-sm text-muted-foreground">Últimos 7 dias</p>
               </div>
-              <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={data.revenueByMonth}>
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#00A676" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#00A676" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="month" 
-                    tick={{ fontSize: 12 }}
-                    stroke="#888"
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="#888"
-                    tickFormatter={(value) => `${formatPrice(value, false)}`}
-                  />
-                  <RechartsTooltip 
-                    formatter={(value: number) => [`${formatPrice(value)}`, 'Receita']}
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="total" 
-                    stroke="#00A676" 
-                    strokeWidth={2}
-                    fill="url(#colorRevenue)" 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+
+              {data.revenueByMonth.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart data={data.revenueByMonth}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#00A676" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#00A676" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 12 }}
+                      stroke="#888"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      stroke="#888"
+                      tickFormatter={(value) => `${formatPrice(value, false)}`}
+                    />
+                    <RechartsTooltip 
+                      formatter={(value: number) => [`${formatPrice(value)}`, 'Receita']}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="total" 
+                      stroke="#00A676" 
+                      strokeWidth={2}
+                      fill="url(#colorRevenue)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartSpline  />
+                    </EmptyMedia>
+                    <EmptyTitle className='text-muted-foreground'>Não há profissionais com cancelamentos para listar!</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
             </Card>
 
             {/* Payment Methods Chart */}
-            <Card className="p-6">
+            <Card className="p-6 gap-0 h-96">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">Receitas por Forma de Pagamento</h3>
                 <p className="text-sm text-muted-foreground">Distribuição do período</p>
               </div>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={data.revenueByPayment}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="method"
-                    tick={{ fontSize: 12 }}
-                    stroke="#888"
-                    tickFormatter={(value) => `${method[value]}`}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="#888"
-                    tickFormatter={(value) => `${formatPrice(value, false)}`}
-                  />
-                  <RechartsTooltip 
-                    formatter={(value: number) => [`${formatPrice(value)}`, 'Valor']}
-                    labelFormatter={(label) => `${method[label]}`}
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Bar dataKey="total" fill="#00A676" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+
+              {data.revenueByPayment.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={data.revenueByPayment}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="method"
+                      tick={{ fontSize: 12 }}
+                      stroke="#888"
+                      tickFormatter={(value) => `${method[value]}`}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      stroke="#888"
+                      tickFormatter={(value) => `${formatPrice(value, false)}`}
+                    />
+                    <RechartsTooltip 
+                      formatter={(value: number) => [`${formatPrice(value)}`, 'Valor']}
+                      labelFormatter={(label) => `${method[label]}`}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Bar dataKey="total" fill="#00A676" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartColumn  />
+                    </EmptyMedia>
+                    <EmptyTitle className='text-muted-foreground'>Não há transações para listar.</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
+              
             </Card>
           </div>
 
@@ -355,17 +381,19 @@ export function RevenuePage() {
                   </TableRow>
                 </TableHeader>
 
-                <div className="max-h-[500px] flex overflow-y-auto">
+                <div className="h-[500px] flex overflow-y-auto">
                   <TableBody className="block overflow-y-auto">
                     {data.recentPayments.length === 0 ? (
                       <TableRow className='table table-fixed w-full h-full'>
                         <TableCell colSpan={9} className="w-32 text-center py-16">
-                          <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
-                            <Calendar className="w-12 h-12 opacity-20" />
-                            <p className="font-medium">
-                              Nenhuma transação encontrada.
-                            </p>
-                          </div>
+                          <Empty>
+                            <EmptyHeader>
+                              <EmptyMedia variant="icon">
+                                <DollarSign  />
+                              </EmptyMedia>
+                              <EmptyTitle className='text-muted-foreground'>Não há transações para listar.</EmptyTitle>
+                            </EmptyHeader>
+                          </Empty>
                         </TableCell>
                       </TableRow>
                       ) : (

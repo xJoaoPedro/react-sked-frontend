@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import { Info, Plus, Edit, Trash2, Search, Clock, Scissors, Sparkles, Hand, Flower2, DollarSign, User, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useOutletContext } from "react-router-dom";
-import { formatPrice } from "@/lib/parsers";
+import { formatLimitText, formatPrice } from "@/lib/parsers";
 import { api } from "@/lib/api";
 import { handleServiceError } from "@/lib/errorHandlers";
 import { toast } from "sonner";
@@ -368,306 +368,320 @@ export function ServicesPage() {
           </div>
 
           <div>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead>Serviço</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Duração</TableHead>
-                  <TableHead>Preço</TableHead>
-                  <TableHead>Comissão</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
+            <Table className="w-full">
+              <TableHeader className="table table-fixed z-10">
+                <TableRow className="table w-full table-fixed bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">Serviço</TableHead>
+                  <TableHead className="font-semibold text-foreground">Categoria</TableHead>
+                  <TableHead className="font-semibold text-foreground">Duração</TableHead>
+                  <TableHead className="font-semibold text-foreground">Preço</TableHead>
+                  <TableHead className="font-semibold text-foreground">Comissão</TableHead>
+                  <TableHead className="font-semibold text-foreground">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {filteredServices.map((service) => {
-                  const Icon = serviceCategories[service.category].icon;
-
-                  return (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <Icon className="text-primary" />
+              
+              <div className="h-[600px] flex-1 flex overflow-y-auto">
+                <TableBody className="block overflow-y-auto">
+                  {filteredServices.length === 0 ? (
+                    <TableRow className='table table-fixed w-full h-full'>
+                      <TableCell colSpan={18} className="w-32 text-center py-16">
+                        <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
+                          <Wrench className="w-12 h-12 opacity-20" />
+                          <p className="font-medium">Nenhum serviço cadastrado.</p>
+                          <Button onClick={setIsAddDialogOpen}>Criar serviço</Button>
                         </div>
-                        <div>
-                          <div className="font-medium">{service.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {service.description}
+                      </TableCell>
+                    </TableRow>
+                  ) : (filteredServices.map((service) => {
+                    const Icon = serviceCategories[service.category].icon;
+                      
+                    return (
+                    <TableRow key={service.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Icon className="text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{formatLimitText(service.name, 22)}</div>
+                            {/* <div className="text-sm text-muted-foreground">
+                              {service.description}
+                            </div> */}
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {serviceCategories[service.category].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        <span>{service.duration_minutes} min</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                        <DollarSign className="w-4 h-4 text-[#00A676]" />
-                        <span className="text-sm font-semibold">{formatPrice(service.price, false)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {service.commission}%
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(service.status)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Dialog 
-                          open={editingService?.id === service.id}
-                          onOpenChange={(open) => {
-                            if (!open) {
-                              setEditingService(null);
-                              resetForm();
-                            }
-                          }}
-                        >
-                          <Tooltip disableHoverableContent>
-                            <TooltipTrigger asChild>
-                              <div>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    onClick={() => openEditDialog(service)}
-                                    size="sm"
-                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {serviceCategories[service.category].label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Clock className="w-4 h-4" />
+                          <span>{service.duration_minutes} min</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                          <DollarSign className="w-4 h-4 text-[#00A676]" />
+                          <span className="text-sm font-semibold">{formatPrice(service.price, false)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {service.commission}%
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(service.status)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Dialog 
+                            open={editingService?.id === service.id}
+                            onOpenChange={(open) => {
+                              if (!open) {
+                                setEditingService(null);
+                                resetForm();
+                              }
+                            }}
+                          >
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      onClick={() => openEditDialog(service)}
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>                          
+                                  </DialogTrigger>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                                Editar
+                              </TooltipContent>
+                            </Tooltip>
+                            <DialogContent className="sm:max-w-[600px]">
+                              <DialogHeader>
+                                <DialogTitle>Editar Serviço</DialogTitle>
+                                <DialogDescription>
+                                  Atualize as informações do serviço
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              <div className="grid grid-cols-2 gap-4 py-4">
+                                <div className="col-span-2 space-y-2">
+                                  <Label htmlFor="edit-name">
+                                    Nome do Serviço
+                                  </Label>
+                                  <Input
+                                    id="edit-name"
+                                    value={formData.name}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        name: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-category">Categoria</Label>
+                                  <Input
+                                    id="edit-category"
+                                    value={formData.category}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        category: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-duration">
+                                    Duração (minutos)
+                                  </Label>
+                                  <Select
+                                    value={String(formData.duration_minutes)}
+                                    onValueChange={(value) =>
+                                      setFormData({
+                                        ...formData,
+                                        duration_minutes: value,
+                                      })
+                                    }
                                   >
-                                    <Edit className="w-4 h-4" />
-                                  </Button>                          
-                                </DialogTrigger>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                              Editar
-                            </TooltipContent>
-                          </Tooltip>
-                          <DialogContent className="sm:max-w-[600px]">
-                            <DialogHeader>
-                              <DialogTitle>Editar Serviço</DialogTitle>
-                              <DialogDescription>
-                                Atualize as informações do serviço
-                              </DialogDescription>
-                            </DialogHeader>
+                                    <SelectTrigger id="edit-duration">
+                                      <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="15">15 min</SelectItem>
+                                      <SelectItem value="30">30 min</SelectItem>
+                                      <SelectItem value="45">45 min</SelectItem>
+                                      <SelectItem value="60">1h</SelectItem>
+                                      <SelectItem value="75">1h 15min</SelectItem>
+                                      <SelectItem value="90">1h 30min</SelectItem>
+                                      <SelectItem value="105">
+                                        1h 45min
+                                      </SelectItem>
+                                      <SelectItem value="120">2h</SelectItem>
+                                      <SelectItem value="135">
+                                        2h 15min
+                                      </SelectItem>
+                                      <SelectItem value="150">
+                                        2h 30min
+                                      </SelectItem>
+                                      <SelectItem value="165">
+                                        2h 45min
+                                      </SelectItem>
+                                      <SelectItem value="180">3h</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
 
-                            <div className="grid grid-cols-2 gap-4 py-4">
-                              <div className="col-span-2 space-y-2">
-                                <Label htmlFor="edit-name">
-                                  Nome do Serviço
-                                </Label>
-                                <Input
-                                  id="edit-name"
-                                  value={formData.name}
-                                  onChange={(e) =>
-                                    setFormData({
-                                      ...formData,
-                                      name: e.target.value,
-                                    })
-                                  }
-                                />
-                              </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-price">Preço (R$)</Label>
+                                  <Input
+                                    id="edit-price"
+                                    type="number"
+                                    step="0.01"
+                                    value={formData.price}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        price: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
 
-                              <div className="space-y-2">
-                                <Label htmlFor="edit-category">Categoria</Label>
-                                <Input
-                                  id="edit-category"
-                                  value={formData.category}
-                                  onChange={(e) =>
-                                    setFormData({
-                                      ...formData,
-                                      category: e.target.value,
-                                    })
-                                  }
-                                />
-                              </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-commission">Comissão (%)</Label>
+                                  <Input
+                                    id="edit-commission"
+                                    type="number"
+                                    step="0.01"
+                                    value={formData.commission}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        commission: Number(e.target.value),
+                                      })
+                                    }
+                                  />
+                                </div>
 
-                              <div className="space-y-2">
-                                <Label htmlFor="edit-duration">
-                                  Duração (minutos)
-                                </Label>
-                                <Select
-                                  value={String(formData.duration_minutes)}
-                                  onValueChange={(value) =>
-                                    setFormData({
-                                      ...formData,
-                                      duration_minutes: value,
-                                    })
-                                  }
-                                >
-                                  <SelectTrigger id="edit-duration">
-                                    <SelectValue placeholder="Selecione" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="15">15 min</SelectItem>
-                                    <SelectItem value="30">30 min</SelectItem>
-                                    <SelectItem value="45">45 min</SelectItem>
-                                    <SelectItem value="60">1h</SelectItem>
-                                    <SelectItem value="75">1h 15min</SelectItem>
-                                    <SelectItem value="90">1h 30min</SelectItem>
-                                    <SelectItem value="105">
-                                      1h 45min
-                                    </SelectItem>
-                                    <SelectItem value="120">2h</SelectItem>
-                                    <SelectItem value="135">
-                                      2h 15min
-                                    </SelectItem>
-                                    <SelectItem value="150">
-                                      2h 30min
-                                    </SelectItem>
-                                    <SelectItem value="165">
-                                      2h 45min
-                                    </SelectItem>
-                                    <SelectItem value="180">3h</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label htmlFor="edit-price">Preço (R$)</Label>
-                                <Input
-                                  id="edit-price"
-                                  type="number"
-                                  step="0.01"
-                                  value={formData.price}
-                                  onChange={(e) =>
-                                    setFormData({
-                                      ...formData,
-                                      price: e.target.value,
-                                    })
-                                  }
-                                />
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label htmlFor="edit-commission">Comissão (%)</Label>
-                                <Input
-                                  id="edit-commission"
-                                  type="number"
-                                  step="0.01"
-                                  value={formData.commission}
-                                  onChange={(e) =>
-                                    setFormData({
-                                      ...formData,
-                                      commission: Number(e.target.value),
-                                    })
-                                  }
-                                />
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label htmlFor="edit-status">Status</Label>
-                                <Select
-                                  value={formData.status}
-                                  onValueChange={(
-                                    value: "ACTIVE" | "DISABLED",
-                                  ) =>
-                                    setFormData({ ...formData, status: value })
-                                  }
-                                >
-                                  <SelectTrigger id="edit-status">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="ACTIVE">
-                                      Ativo
-                                    </SelectItem>
-                                    <SelectItem value="DISABLED">
-                                      Inativo
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-                              <div className="col-span-2 space-y-2">
-                                <Label htmlFor="edit-description">
-                                  Descrição
-                                </Label>
-                                <Input
-                                  id="edit-description"
-                                  value={formData.description ?? ''}
-                                  onChange={(e) =>
-                                    setFormData({
-                                      ...formData,
-                                      description: e.target.value,
-                                    })
-                                  }
-                                />
-                              </div>
-                            </div>
-
-                            <DialogFooter>
-                              <Button
-                                className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
-                                onClick={() => {
-                                  setEditingService(null);
-                                  resetForm();
-                                }}
-                              >
-                                Cancelar
-                              </Button>
-                              <Button
-                                className="bg-primary hover:bg-primary/90"
-                                onClick={() => handleEditService(service.id)}
-                              > 
-                                Salvar Alterações
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-
-                        <Popover>
-                          <Tooltip disableHoverableContent>
-                            <TooltipTrigger asChild>
-                              <div>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    className="h-8 w-8 p-0 bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-status">Status</Label>
+                                  <Select
+                                    value={formData.status}
+                                    onValueChange={(
+                                      value: "ACTIVE" | "DISABLED",
+                                    ) =>
+                                      setFormData({ ...formData, status: value })
+                                    }
                                   >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </PopoverTrigger>
+                                    <SelectTrigger id="edit-status">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="ACTIVE">
+                                        Ativo
+                                      </SelectItem>
+                                      <SelectItem value="DISABLED">
+                                        Inativo
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="col-span-2 space-y-2">
+                                  <Label htmlFor="edit-description">
+                                    Descrição
+                                  </Label>
+                                  <Input
+                                    id="edit-description"
+                                    value={formData.description ?? ''}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        description: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
                               </div>
-                            </TooltipTrigger>
 
-                            <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                              Excluir
-                            </TooltipContent>
-                          </Tooltip>
+                              <DialogFooter>
+                                <Button
+                                  className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
+                                  onClick={() => {
+                                    setEditingService(null);
+                                    resetForm();
+                                  }}
+                                >
+                                  Cancelar
+                                </Button>
+                                <Button
+                                  className="bg-primary hover:bg-primary/90"
+                                  onClick={() => handleEditService(service.id)}
+                                > 
+                                  Salvar Alterações
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
 
-                          <PopoverContent side="left">
-                            <p className="text-sm mb-2">Tem certeza que deseja excluir este serviço?</p>
+                          <Popover>
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      className="h-8 w-8 p-0 bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                </div>
+                              </TooltipTrigger>
 
-                            <div className="flex justify-end gap-2">
-                              <PopoverClose asChild>
-                                <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">Cancelar</Button>
-                              </PopoverClose>
-                              
-                              <Button
-                                size="sm"
-                                className="text-sm bg-destructive text-white hover:bg-destructive/60"
-                                onClick={() => handleDeleteService(service.id)}
-                              >
-                                Confirmar
-                              </Button>
-                            </div>
-                          </PopoverContent>
-                        </Popover> 
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )} 
-              )}
-              </TableBody>
+                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                                Excluir
+                              </TooltipContent>
+                            </Tooltip>
+
+                            <PopoverContent side="left">
+                              <p className="text-sm mb-2">Tem certeza que deseja excluir este serviço?</p>
+
+                              <div className="flex justify-end gap-2">
+                                <PopoverClose asChild>
+                                  <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">Cancelar</Button>
+                                </PopoverClose>
+                                
+                                <Button
+                                  size="sm"
+                                  className="text-sm bg-destructive text-white hover:bg-destructive/60"
+                                  onClick={() => handleDeleteService(service.id)}
+                                >
+                                  Confirmar
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover> 
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )} 
+                ))}
+                </TableBody>
+              </div>
+              
             </Table>
           </div>
         </Card>
@@ -675,3 +689,149 @@ export function ServicesPage() {
     </div>
   );
 }
+
+
+{/* <div>
+              <Table className="w-full">
+                <TableHeader className="table table-fixed z-10 w-full">
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="font-semibold text-foreground w-[100px]">ID</TableHead>
+                    <TableHead className="font-semibold text-foreground">Data/Hora</TableHead>
+                    <TableHead className="font-semibold text-foreground">Cliente</TableHead>
+                    <TableHead className="font-semibold text-foreground">Serviço</TableHead>
+                    <TableHead className="font-semibold text-foreground">Profissional</TableHead>                    
+                    <TableHead className="font-semibold text-foreground">Forma de Pagamento</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground">Valor</TableHead>
+                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <div className="h-[500px] flex overflow-y-auto">
+                  <TableBody className="block overflow-y-auto">
+                     (
+                      data.recentPayments.map((payment) => {
+                        const Icon = paymentIcons[payment.paymentMethod] || Wallet;
+                        
+                        return (
+                        <TableRow key={payment.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
+                          <TableCell className="w-[100px] font-mono text-sm font-semibold text-primary">{payment.id}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm">{formatDate(payment.date)}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">{formatTime(payment.date)}</span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <User className="w-4 h-4 text-primary" />
+                              </div>
+                              <span className="font-medium">{payment.clientName}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">{payment.serviceName}</span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <User className="w-4 h-4 text-primary" />
+                              </div>
+                              <span className="font-medium">{payment.professionalName}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Icon className="w-4 h-4 text-primary" />
+                              <span className="text-sm">{formatLimitText(method[payment.paymentMethod], 24)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={
+                                payment.status === "COMPLETED"
+                                  ? "bg-primary/10 text-primary border-primary/20"
+                                  : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                              }
+
+                            >
+                              {payment.status === "COMPLETED"
+                                ? "Pago"
+                                : "Pendente"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                              <DollarSign className="w-4 h-4 text-[#00A676]" />
+                              <span className="text-sm font-semibold">{formatPrice(payment.value, false)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <Button 
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TooltipTrigger>
+
+                                <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
+                                  Visualizar
+                                </TooltipContent>
+                              </Tooltip>
+                              
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <Button  
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TooltipTrigger>
+
+                                <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                                  Editar
+                                </TooltipContent>
+                              </Tooltip>
+                              
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <Button  
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TooltipTrigger>
+
+                                <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                                  Excluir
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )})
+                    )}
+                  </TableBody>
+                </div>
+              </Table>
+            </div> */}

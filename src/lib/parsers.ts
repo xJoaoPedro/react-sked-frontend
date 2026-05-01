@@ -20,6 +20,8 @@ export function formatTime(timeStr: string) {
 };
 
 export function formatPrice(price: number, showCurrencySymbol: boolean = true) {
+  if (isNaN(price)) return 0;
+
   return new Intl.NumberFormat('pt-BR', {
     currency: 'BRL',
     style: showCurrencySymbol ? 'currency' : undefined,
