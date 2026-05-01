@@ -61,15 +61,6 @@ export function ServicesPage() {
     setDataState(dados.services);
   }, [dados])
 
-  
-  // const [filterCategory, setFilterCategory] = useState("all");
-  // const [filterStatus, setFilterStatus] = useState("all");
-  // // Form states
-  // // Calculate metrics
-  // const totalServices = services.length;
-  // const activeServices = services.filter((s) => s.status === "active").length;
-  // const categories = Array.from(new Set(services.map((s) => s.category)));
-
   const handleEditService = async (id) => {
     try {
       await api.patch(`/services/${id}`, formData)
@@ -103,9 +94,9 @@ export function ServicesPage() {
 
   const handleAddService = async () => {
     try {
-      const response = (await api.post("/services", formData))
+      const response = (await api.post("/services", formData)).data.data
 
-      setDataState((prev) => [...prev, formData])
+      setDataState((prev) => [...prev, response])
       toast.success('Serviço adicionado com sucesso!')
       setIsAddDialogOpen(false);
       resetForm();
