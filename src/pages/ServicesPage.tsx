@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -8,237 +8,146 @@ import { PageHeader } from "../components/PageHeader";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
-import { Info, Plus, Edit, Trash2, Search, Clock, Scissors, Sparkles, Hand, Flower2, } from "lucide-react";
+import { Info, Plus, Edit, Trash2, Search, Clock, Scissors, Sparkles, Hand, Flower2, DollarSign, User, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useOutletContext } from "react-router-dom";
+import { formatPrice } from "@/lib/parsers";
+import { api } from "@/lib/api";
+import { handleServiceError } from "@/lib/errorHandlers";
+import { toast } from "sonner";
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-interface Service {
-  id: number;
-  name: string;
-  category: string;
-  duration: number; // em minutos
-  price: number;
-  commissionRate: number;
-  description: string;
-  status: "active" | "inactive";
+const serviceCategories = {
+  HAIR: { label: "Cabelo", icon: Scissors },
+  BEARD: { label: "Barba", icon: User },
+  AESTHETIC: { label: "Estética", icon: Sparkles },
+  NAILS: { label: "Unhas", icon: Hand },
+  MASSAGE: { label: "Massagem", icon: Heart },
+  THERAPY: { label: "Terapia", icon: Brain },
+  HEALTH: { label: "Saúde", icon: Stethoscope },
+  DENTAL: { label: "Odontologia", icon: Smile },
+  FITNESS: { label: "Fitness", icon: Dumbbell },
+  BEAUTY: { label: "Beleza", icon: Star },
+  AUTOMOTIVE: { label: "Automotivo", icon: Car },
+  TECHNICAL: { label: "Técnico", icon: Wrench },
+  HOME_SERVICE: { label: "Serviço Residencial", icon: Home },
+  PET: { label: "Pet", icon: PawPrint },
+  CONSULTING: { label: "Consultoria", icon: Briefcase },
+  EDUCATION: { label: "Educação", icon: GraduationCap },
+  OTHER: { label: "Outro", icon: MoreHorizontal },
 }
 
-const mockServices: Service[] = [
-  {
-    id: 1,
-    name: "Corte Masculino",
-    category: "Cabelo",
-    duration: 30,
-    price: 45,
-    commissionRate: 40,
-    description: "Corte tradicional masculino",
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Corte + Barba",
-    category: "Cabelo",
-    duration: 45,
-    price: 65,
-    commissionRate: 40,
-    description: "Corte de cabelo com barba",
-    status: "active",
-  },
-  {
-    id: 3,
-    name: "Barba",
-    category: "Barba",
-    duration: 30,
-    price: 30,
-    commissionRate: 40,
-    description: "Aparar e modelar barba",
-    status: "active",
-  },
-  {
-    id: 4,
-    name: "Coloração",
-    category: "Cabelo",
-    duration: 90,
-    price: 120,
-    commissionRate: 45,
-    description: "Coloração completa",
-    status: "active",
-  },
-  {
-    id: 5,
-    name: "Hidratação",
-    category: "Tratamento",
-    duration: 60,
-    price: 80,
-    commissionRate: 50,
-    description: "Tratamento hidratante",
-    status: "active",
-  },
-  {
-    id: 6,
-    name: "Manicure",
-    category: "Estética",
-    duration: 45,
-    price: 35,
-    commissionRate: 50,
-    description: "Manicure tradicional",
-    status: "active",
-  },
-  {
-    id: 7,
-    name: "Pedicure",
-    category: "Estética",
-    duration: 60,
-    price: 45,
-    commissionRate: 50,
-    description: "Pedicure completo",
-    status: "active",
-  },
-  {
-    id: 8,
-    name: "Massagem Relaxante",
-    category: "Spa",
-    duration: 60,
-    price: 100,
-    commissionRate: 45,
-    description: "Massagem terapêutica",
-    status: "active",
-  },
-];
-
-// Function to get icon based on category
-const getCategoryIcon = (category: string) => {
-  const icons: Record<string, typeof Scissors> = {
-    Cabelo: Scissors,
-    Barba: Scissors,
-    Tratamento: Sparkles,
-    Estética: Hand,
-    Spa: Flower2,
-  };
-
-  const IconComponent = icons[category] || Scissors;
-  return <IconComponent className="w-5 h-5 text-primary" />;
-};
-
 export function ServicesPage() {
-  const [services, setServices] = useState<Service[]>(mockServices);
+  const { dados } = useOutletContext();
+  const [data, setDataState] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-
-  // Form states
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingService, setEditingService] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
-    duration: "",
+    duration_minutes: "",
     price: "",
-    commissionRate: "",
+    commission: 0,
     description: "",
-    status: "active" as "active" | "inactive",
+    status: "ACTIVE" as "ACTIVE" | "DISABLED",
+    company_id: localStorage.getItem('companyId')
   });
 
-  // Calculate metrics
-  const totalServices = services.length;
-  const activeServices = services.filter((s) => s.status === "active").length;
-  const averagePrice =
-    services.reduce((sum, s) => sum + s.price, 0) / services.length;
-  const categories = Array.from(new Set(services.map((s) => s.category)));
+  useEffect(() => {
+    if (!dados) return;
 
-  // Filter services
-  const filteredServices = services.filter((s) => {
-    const matchSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCategory =
-      filterCategory === "all" || s.category === filterCategory;
-    const matchStatus = filterStatus === "all" || s.status === filterStatus;
-    return matchSearch && matchCategory && matchStatus;
-  });
+    setDataState(dados.services);
+  }, [dados])
 
-  const handleAddService = () => {
-    const newService: Service = {
-      id: Math.max(...services.map((s) => s.id)) + 1,
-      name: formData.name,
-      category: formData.category,
-      duration: parseInt(formData.duration),
-      price: parseFloat(formData.price),
-      commissionRate: parseFloat(formData.commissionRate),
-      description: formData.description,
-      status: formData.status,
-    };
+  
+  // const [filterCategory, setFilterCategory] = useState("all");
+  // const [filterStatus, setFilterStatus] = useState("all");
+  // // Form states
+  // // Calculate metrics
+  // const totalServices = services.length;
+  // const activeServices = services.filter((s) => s.status === "active").length;
+  // const categories = Array.from(new Set(services.map((s) => s.category)));
 
-    setServices([...services, newService]);
-    setIsAddDialogOpen(false);
-    resetForm();
-  };
+  const handleEditService = async (id) => {
+    try {
+      await api.patch(`/services/${id}`, formData)
+      const services = (await api.get("/services")).data.data
 
-  const handleEditService = () => {
-    if (!editingService) return;
-
-    setServices(
-      services.map((s) =>
-        s.id === editingService.id
-          ? {
-              ...editingService,
-              name: formData.name,
-              category: formData.category,
-              duration: parseInt(formData.duration),
-              price: parseFloat(formData.price),
-              commissionRate: parseFloat(formData.commissionRate),
-              description: formData.description,
-              status: formData.status,
-            }
-          : s,
-      ),
-    );
+      setDataState(services)
+      toast.success('Serviço alterado com sucesso!')
+      setIsAddDialogOpen(false);
+      resetForm();
+    } catch (err) {
+      handleServiceError(err)
+    }
 
     setEditingService(null);
     resetForm();
   };
 
-  const handleDeleteService = (id: number) => {
-    setServices(services.filter((s) => s.id !== id));
-  };
-
-  const openEditDialog = (service: Service) => {
+  const openEditDialog = (service) => {
     setEditingService(service);
     setFormData({
       name: service.name,
       category: service.category,
-      duration: service.duration.toString(),
-      price: service.price.toString(),
-      commissionRate: service.commissionRate.toString(),
+      duration_minutes: service.duration_minutes,
+      price: service.price,
+      commission: service.commission,
       description: service.description,
       status: service.status,
+      company_id: localStorage.getItem('companyId')
     });
+  };
+
+  const handleAddService = async () => {
+    try {
+      const response = (await api.post("/services", formData))
+
+      setDataState((prev) => [...prev, formData])
+      toast.success('Serviço adicionado com sucesso!')
+      setIsAddDialogOpen(false);
+      resetForm();
+    } catch (err) {
+      handleServiceError(err)
+    }
+  };
+
+  const handleDeleteService = async (id) => {
+    await api.delete(`/services/${id}`)
+
+    const newData = (await api.get('/services')).data.data
+    toast.success('Serviço deletado com sucesso!');
+    setDataState(newData);
   };
 
   const resetForm = () => {
     setFormData({
       name: "",
       category: "",
-      duration: "",
+      duration_minutes: "",
       price: "",
-      commissionRate: "",
+      commission: 0,
       description: "",
-      status: "active",
+      status: "ACTIVE",
+      company_id: localStorage.getItem('companyId')
     });
   };
 
-  const getStatusBadge = (service: Service) => {
-    let status = 'inactive';
-
-    if (service.status === 'active') {
-      status = 'active';
-    }
-    
+  const getStatusBadge = (service) => {
     const statusConfig = {
       active: { label: 'Ativo', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:cursor-default' },
-      inactive: { label: 'Inativo', className: 'bg-gray-400/10 text-gray-500 border border-gray-400/20 hover:bg-gray-400/20 hover:cursor-default' },
+      disabled: { label: 'Inativo', className: 'bg-gray-400/10 text-gray-500 border border-gray-400/20 hover:bg-gray-400/20 hover:cursor-default' },
     };
   
-    const config = statusConfig[status];
+    const config = statusConfig[service.toLowerCase()];
     return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
   };
+
+  if (data === null) return <div>Carregando...</div>
+
+  const filteredServices = data.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -276,8 +185,7 @@ export function ServicesPage() {
                   Lista de Serviços
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {totalServices} serviços cadastrados • {activeServices} ativos
-                  • Média R$ {averagePrice.toFixed(2)}
+                  {data.length} serviços cadastrados • {data.filter(f => f.status === "ACTIVE").length} ativos • Média {formatPrice(data.reduce((acc, curr) => acc + Number(curr.price), 0) / data.length)}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -290,34 +198,6 @@ export function ServicesPage() {
                     className="pl-10"
                   />
                 </div>
-
-                <Select
-                  value={filterCategory}
-                  onValueChange={setFilterCategory}
-                >
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue placeholder="Categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="active">Ativos</SelectItem>
-                    <SelectItem value="inactive">Inativos</SelectItem>
-                  </SelectContent>
-                </Select>
 
                 <Dialog
                   open={isAddDialogOpen}
@@ -352,28 +232,41 @@ export function ServicesPage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
-                        <Input
-                          id="category"
-                          placeholder="Ex: Cabelo"
-                          value={formData.category}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              category: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="duration">Duração (minutos)</Label>
                         <Select
-                          value={formData.duration}
+                          value={formData.category}
                           onValueChange={(value) =>
-                            setFormData({ ...formData, duration: value })
+                            setFormData({ ...formData, category: value })
                           }
                         >
                           <SelectTrigger id="duration">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-96">
+                            {Object.entries(serviceCategories).map(([value, meta]) => {
+                              const Icon = meta.icon;
+
+                              return (
+                              <SelectItem key={value} value={value} className="flex items-center gap-2 group">
+                                <div className="flex items-center gap-2">
+                                  <Icon className="text-primary group-hover:text-white" size={16} />
+                                  {meta.label}
+                                </div>
+                              </SelectItem>
+                            )
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="duration_minutes">Duração (minutos)</Label>
+                        <Select
+                          value={formData.duration_minutes}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, duration_minutes: value })
+                          }
+                        >
+                          <SelectTrigger id="duration_minutes">
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                           <SelectContent>
@@ -399,7 +292,7 @@ export function ServicesPage() {
                           id="price"
                           type="number"
                           step="0.01"
-                          placeholder="0,00"
+                          placeholder="Ex: 0,00"
                           value={formData.price}
                           onChange={(e) =>
                             setFormData({ ...formData, price: e.target.value })
@@ -408,17 +301,18 @@ export function ServicesPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="commissionRate">Comissão (%)</Label>
+                        <Label htmlFor="commission">Comissão (%)</Label>
                         <Input
-                          id="commissionRate"
+                          id="commission"
                           type="number"
                           step="0.01"
-                          placeholder="40"
-                          value={formData.commissionRate}
+                          min={0} max={100}
+                          placeholder="Ex: 40"
+                          value={formData.commission}
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              commissionRate: e.target.value,
+                              commission: Number(e.target.value),
                             })
                           }
                         />
@@ -428,16 +322,16 @@ export function ServicesPage() {
                         <Label htmlFor="status">Status</Label>
                         <Select
                           value={formData.status}
-                          onValueChange={(value: "active" | "inactive") =>
+                          onValueChange={(value: "ACTIVE" | "DISABLED") =>
                             setFormData({ ...formData, status: value })
                           }
                         >
                           <SelectTrigger id="status">
-                            <SelectValue />
+                            <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="active">Ativo</SelectItem>
-                            <SelectItem value="inactive">Inativo</SelectItem>
+                            <SelectItem value="ACTIVE">Ativo</SelectItem>
+                            <SelectItem value="DISABLED">Inativo</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -460,7 +354,7 @@ export function ServicesPage() {
 
                     <DialogFooter>
                       <Button
-                        variant="outline"
+                        className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
                         onClick={() => {
                           setIsAddDialogOpen(false);
                           resetForm();
@@ -471,12 +365,7 @@ export function ServicesPage() {
                       <Button
                         className="bg-primary hover:bg-primary/90"
                         onClick={handleAddService}
-                        disabled={
-                          !formData.name ||
-                          !formData.category ||
-                          !formData.duration ||
-                          !formData.price
-                        }
+                        disabled={!formData.name || !formData.category || !formData.duration_minutes || !formData.price || isNaN(formData.commission)}
                       >
                         Adicionar Serviço
                       </Button>
@@ -501,12 +390,15 @@ export function ServicesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredServices.map((service) => (
+                {filteredServices.map((service) => {
+                  const Icon = serviceCategories[service.category].icon;
+
+                  return (
                   <TableRow key={service.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          {getCategoryIcon(service.category)}
+                          <Icon className="text-primary" />
                         </div>
                         <div>
                           <div className="font-medium">{service.name}</div>
@@ -518,27 +410,38 @@ export function ServicesPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
-                        {service.category}
+                        {serviceCategories[service.category].label}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-muted-foreground">
                         <Clock className="w-4 h-4" />
-                        <span>{service.duration} min</span>
+                        <span>{service.duration_minutes} min</span>
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">
-                      R$ {service.price.toFixed(2)}
+                      <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                        <DollarSign className="w-4 h-4 text-[#00A676]" />
+                        <span className="text-sm font-semibold">{formatPrice(service.price, false)}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {service.commissionRate}%
+                      {service.commission}%
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(service)}
+                      {getStatusBadge(service.status)}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Dialog>
+                        <Dialog 
+                          open={editingService?.id === service.id}
+                          onOpenChange={(open) => {
+                            if (!open) {
+                              setEditingService(null);
+                              resetForm();
+                            }
+                          }}
+                        >
                           <Tooltip disableHoverableContent>
                             <TooltipTrigger asChild>
                               <div>
@@ -601,11 +504,11 @@ export function ServicesPage() {
                                   Duração (minutos)
                                 </Label>
                                 <Select
-                                  value={formData.duration}
+                                  value={String(formData.duration_minutes)}
                                   onValueChange={(value) =>
                                     setFormData({
                                       ...formData,
-                                      duration: value,
+                                      duration_minutes: value,
                                     })
                                   }
                                 >
@@ -654,18 +557,16 @@ export function ServicesPage() {
                               </div>
 
                               <div className="space-y-2">
-                                <Label htmlFor="edit-commissionRate">
-                                  Comissão (%)
-                                </Label>
+                                <Label htmlFor="edit-commission">Comissão (%)</Label>
                                 <Input
-                                  id="edit-commissionRate"
+                                  id="edit-commission"
                                   type="number"
                                   step="0.01"
-                                  value={formData.commissionRate}
+                                  value={formData.commission}
                                   onChange={(e) =>
                                     setFormData({
                                       ...formData,
-                                      commissionRate: e.target.value,
+                                      commission: Number(e.target.value),
                                     })
                                   }
                                 />
@@ -676,7 +577,7 @@ export function ServicesPage() {
                                 <Select
                                   value={formData.status}
                                   onValueChange={(
-                                    value: "active" | "inactive",
+                                    value: "ACTIVE" | "DISABLED",
                                   ) =>
                                     setFormData({ ...formData, status: value })
                                   }
@@ -685,10 +586,10 @@ export function ServicesPage() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="active">
+                                    <SelectItem value="ACTIVE">
                                       Ativo
                                     </SelectItem>
-                                    <SelectItem value="inactive">
+                                    <SelectItem value="DISABLED">
                                       Inativo
                                     </SelectItem>
                                   </SelectContent>
@@ -701,7 +602,7 @@ export function ServicesPage() {
                                 </Label>
                                 <Input
                                   id="edit-description"
-                                  value={formData.description}
+                                  value={formData.description ?? ''}
                                   onChange={(e) =>
                                     setFormData({
                                       ...formData,
@@ -714,7 +615,7 @@ export function ServicesPage() {
 
                             <DialogFooter>
                               <Button
-                                variant="outline"
+                                className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
                                 onClick={() => {
                                   setEditingService(null);
                                   resetForm();
@@ -724,35 +625,57 @@ export function ServicesPage() {
                               </Button>
                               <Button
                                 className="bg-primary hover:bg-primary/90"
-                                onClick={handleEditService}
-                              >
+                                onClick={() => handleEditService(service.id)}
+                              > 
                                 Salvar Alterações
                               </Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
 
-                        <Tooltip disableHoverableContent>
-                          <TooltipTrigger asChild>
-                            <div>
-                              <Button  
+                        <Popover>
+                          <Tooltip disableHoverableContent>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    className="h-8 w-8 p-0 bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </PopoverTrigger>
+                              </div>
+                            </TooltipTrigger>
+
+                            <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                              Excluir
+                            </TooltipContent>
+                          </Tooltip>
+
+                          <PopoverContent side="left">
+                            <p className="text-sm mb-2">Tem certeza que deseja excluir este serviço?</p>
+
+                            <div className="flex justify-end gap-2">
+                              <PopoverClose asChild>
+                                <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">Cancelar</Button>
+                              </PopoverClose>
+                              
+                              <Button
                                 size="sm"
+                                className="text-sm bg-destructive text-white hover:bg-destructive/60"
                                 onClick={() => handleDeleteService(service.id)}
-                                className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                Confirmar
                               </Button>
                             </div>
-                          </TooltipTrigger>
-
-                          <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                            Excluir
-                          </TooltipContent>
-                        </Tooltip>
+                          </PopoverContent>
+                        </Popover> 
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                )} 
+              )}
               </TableBody>
             </Table>
           </div>

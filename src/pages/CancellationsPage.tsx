@@ -142,7 +142,7 @@ export function CancellationsPage() {
   // };
 
   const fetchTableData = async () => {
-    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations`, {params: { page, limit, filterPeriod }})).data.data;
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/cancellations`, {params: { page, limit, filterPeriod }})).data.data;
 
     setDataState((prev) => ({
       ...prev,
@@ -153,7 +153,7 @@ export function CancellationsPage() {
   }
 
   const fetchPageData = async () => {
-    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/cancellations/summary`, {params: { page, limit, filterPeriod }})).data.data;
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/cancellations/summary`, {params: { page, limit, filterPeriod }})).data.data;
 
     setDataState(response);
     setPage(1);

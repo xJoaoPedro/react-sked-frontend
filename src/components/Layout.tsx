@@ -41,7 +41,7 @@ export function Layout() {
         return <Navigate to="/login" replace />;
       }
 
-      const response = (await api.get(`/api/companies/${id}/data`)).data;
+      const response = (await api.get(`/companies/${id}/data`)).data;
 
       setDados(response.data);
     }

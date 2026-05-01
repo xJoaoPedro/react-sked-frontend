@@ -58,7 +58,7 @@ export function DailySchedulePage() {
 
   const updateAppointments = async (date) => {
     try {
-      const response = (await api.get(`${import.meta.env.VITE_BASE_URL}/api/appointments/${data.id}/${date.toISOString()}`, {
+      const response = (await api.get(`/appointments/${data.id}/${date.toISOString()}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       })).data.data;
 

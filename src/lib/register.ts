@@ -1,29 +1,15 @@
 import axios from "axios"
 import { toast } from "sonner"
 
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL + '/api',
-})
-
-/**
- * REQUEST INTERCEPTOR
- * Injeta token automaticamente em todas as requisições
- */
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token")
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-
-  return config
+export const register = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL,
 })
 
 /**
  * RESPONSE INTERCEPTOR
  * Trata erros globalmente com toast
  */
-api.interceptors.response.use(
+register.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status

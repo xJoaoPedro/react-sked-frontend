@@ -50,7 +50,7 @@ export function RevenuePage() {
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchTableData = async () => {
-    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/revenue`, {params: { page, limit, filterPeriod }})).data.data;
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/revenue`, {params: { page, limit, filterPeriod }})).data.data;
 
     setDataState((prev) => ({
       ...prev,
@@ -61,7 +61,7 @@ export function RevenuePage() {
   }
 
   const fetchPageData = async () => {
-    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/revenue/summary`, {params: { page, limit, filterPeriod }})).data.data;
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/revenue/summary`, {params: { page, limit, filterPeriod }})).data.data;
 
     setDataState(response);
     setTotal(response.totalTransactions);

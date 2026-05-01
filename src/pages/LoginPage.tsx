@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { register } from "@/lib/register";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
@@ -20,7 +20,7 @@ export function LoginPage() {
     setError("");
 
     try {
-      const { data } = await api.post("/auth/companies/login", {
+      const { data } = await register.post("/auth/companies/login", {
         email,
         password,
       });

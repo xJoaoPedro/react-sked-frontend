@@ -43,7 +43,7 @@ export function AppointmentsPage() {
   const [filterTimeEnd, setFilterTimeEnd] = useState('');
 
   const fetchData = async () => {
-    const response = (await api.get(`/api/companies/${localStorage.getItem('companyId')}/appointments`, {params: buildQuery()})).data.data;
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/appointments`, {params: buildQuery()})).data.data;
 
     setDataState(response.data);
     setPage(Number(response.page));
