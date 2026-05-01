@@ -43,7 +43,7 @@ export function WeeklySchedule({ weekStats }: DashboardProps) {
   const maxAppointments = Math.max(...weekDays.map(d => d.appointments));
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 gap-0">
       <h3 className="text-xl font-semibold mb-6">Visão Semanal</h3>
       
       <div className="grid grid-cols-7 gap-3">

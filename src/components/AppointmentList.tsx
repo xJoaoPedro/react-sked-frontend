@@ -1,6 +1,9 @@
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Clock, User } from 'lucide-react';
+import { Clock, User, Calendar } from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle, } from "@/components/ui/empty"
+import { useNavigate } from 'react-router-dom';
 
 interface Appointment {
   id: string;
@@ -16,6 +19,8 @@ interface AppointmentProps {
 }
 
 export function AppointmentList({appointments}: AppointmentProps) {
+  const navigate = useNavigate();
+
   const getStatusBadge = (status: Appointment['status']) => {
       const statusConfig = {
         confirmed: { label: 'Confirmado', className: 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' },
@@ -28,6 +33,7 @@ export function AppointmentList({appointments}: AppointmentProps) {
       return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
     };
 
+    console.log(appointments.length)
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -35,7 +41,7 @@ export function AppointmentList({appointments}: AppointmentProps) {
       </div>
       
       <div className="space-y-4 overflow-y-auto max-h-[700px] scrollbar-custom">
-        {appointments.map((appointment) => (
+        {appointments.length > 0 ? appointments.map((appointment) => (
           <div 
             key={appointment.id}
             className="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
@@ -64,7 +70,19 @@ export function AppointmentList({appointments}: AppointmentProps) {
             
             {getStatusBadge(appointment.status)}
           </div>
-        ))}
+        )) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Calendar />
+              </EmptyMedia>
+              <EmptyTitle>Sem agendamentos futuros.</EmptyTitle>
+            </EmptyHeader>
+            <EmptyContent className="flex-row justify-center gap-2">
+              <Button onClick={() => navigate("/appointments")}>Criar agendamento</Button>
+            </EmptyContent>
+          </Empty>
+        )}
       </div>
     </Card>
   );

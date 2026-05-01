@@ -6,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { Filter, X, Calendar, Download, Eye, Edit, Trash2, Clock, User, DollarSign, FileText, Table2, ChevronDown, ChevronUp, FileJson, } from 'lucide-react';
+import { Filter, X, Calendar, Download, Eye, Edit, Trash2, Clock, User, DollarSign, FileText, Table2, ChevronDown, ChevronUp, FileJson, Plus, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DatePicker } from '@/components/ui/datepicker';
 import { useOutletContext } from 'react-router-dom';
@@ -264,6 +264,11 @@ export function AppointmentsPage() {
               </div>
             </PopoverContent>
           </Popover>
+
+          <Button onClick={() => toast.info('Botão ainda não implementado')} className="bg-primary hover:bg-primary/70 text-popover">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Agendamento
+          </Button>
         </div>
 
         <div className="flex">

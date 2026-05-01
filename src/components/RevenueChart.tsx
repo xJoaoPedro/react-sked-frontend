@@ -27,7 +27,7 @@ export function RevenueChart({ revenue }: RevenueProps) {
   })
   
   return (
-    <Card className="p-6">
+    <Card className="p-6 justify-start gap-0 max-h-96">
       <h3 className="text-xl font-semibold mb-6">Receita Mensal</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
@@ -40,7 +40,7 @@ export function RevenueChart({ revenue }: RevenueProps) {
           <YAxis 
             stroke="#6B6B6B"
             style={{ fontSize: '14px' }}
-            tickFormatter={(value) => `R$ ${value}`}
+            tickFormatter={(value) => `${value}`}
           />
           <Tooltip 
             contentStyle={{ 

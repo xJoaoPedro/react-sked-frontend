@@ -14,13 +14,13 @@ export function TopServices({services}: TopServicesProps) {
   const maxTotal = Math.max(...services.map(d => d.total));
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 justify-start gap-0 max-h-96">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">Serviços Mais Agendados</h3>
         <TrendingUp className="w-5 h-5 text-primary" />
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-80 overflow-y-scroll pr-1">
         {services.map((service, index) => (
           <div key={index} className="space-y-2">
             <div className="flex items-center justify-between">
