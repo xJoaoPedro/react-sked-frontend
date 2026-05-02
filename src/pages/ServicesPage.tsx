@@ -489,17 +489,31 @@ export function ServicesPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-category">Categoria</Label>
-                                  <Input
-                                    id="edit-category"
+                                  <Label>Categoria</Label>
+                                  <Select
                                     value={formData.category}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        category: e.target.value,
-                                      })
+                                    onValueChange={(value) =>
+                                      setFormData({ ...formData, category: value })
                                     }
-                                  />
+                                  >
+                                    <SelectTrigger id="duration">
+                                      <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-96">
+                                      {Object.entries(serviceCategories).map(([value, meta]) => {
+                                        const Icon = meta.icon;
+
+                                        return (
+                                        <SelectItem key={value} value={value} className="flex items-center gap-2 group">
+                                          <div className="flex items-center gap-2">
+                                            <Icon className="text-primary group-hover:text-white" size={16} />
+                                            {meta.label}
+                                          </div>
+                                        </SelectItem>
+                                      )
+                                      })}
+                                    </SelectContent>
+                                  </Select>
                                 </div>
 
                                 <div className="space-y-2">
@@ -681,7 +695,6 @@ export function ServicesPage() {
                 ))}
                 </TableBody>
               </div>
-              
             </Table>
           </div>
         </Card>
@@ -689,149 +702,3 @@ export function ServicesPage() {
     </div>
   );
 }
-
-
-{/* <div>
-              <Table className="w-full">
-                <TableHeader className="table table-fixed z-10 w-full">
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead className="font-semibold text-foreground w-[100px]">ID</TableHead>
-                    <TableHead className="font-semibold text-foreground">Data/Hora</TableHead>
-                    <TableHead className="font-semibold text-foreground">Cliente</TableHead>
-                    <TableHead className="font-semibold text-foreground">Serviço</TableHead>
-                    <TableHead className="font-semibold text-foreground">Profissional</TableHead>                    
-                    <TableHead className="font-semibold text-foreground">Forma de Pagamento</TableHead>
-                    <TableHead className="font-semibold text-foreground">Status</TableHead>
-                    <TableHead className="font-semibold text-foreground">Valor</TableHead>
-                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <div className="h-[500px] flex overflow-y-auto">
-                  <TableBody className="block overflow-y-auto">
-                     (
-                      data.recentPayments.map((payment) => {
-                        const Icon = paymentIcons[payment.paymentMethod] || Wallet;
-                        
-                        return (
-                        <TableRow key={payment.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                          <TableCell className="w-[100px] font-mono text-sm font-semibold text-primary">{payment.id}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm">{formatDate(payment.date)}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">{formatTime(payment.date)}</span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                <User className="w-4 h-4 text-primary" />
-                              </div>
-                              <span className="font-medium">{payment.clientName}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">{payment.serviceName}</span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                <User className="w-4 h-4 text-primary" />
-                              </div>
-                              <span className="font-medium">{payment.professionalName}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Icon className="w-4 h-4 text-primary" />
-                              <span className="text-sm">{formatLimitText(method[payment.paymentMethod], 24)}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={
-                                payment.status === "COMPLETED"
-                                  ? "bg-primary/10 text-primary border-primary/20"
-                                  : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
-                              }
-
-                            >
-                              {payment.status === "COMPLETED"
-                                ? "Pago"
-                                : "Pendente"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                              <DollarSign className="w-4 h-4 text-[#00A676]" />
-                              <span className="text-sm font-semibold">{formatPrice(payment.value, false)}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button 
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
-                                  Visualizar
-                                </TooltipContent>
-                              </Tooltip>
-                              
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button  
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                                  Editar
-                                </TooltipContent>
-                              </Tooltip>
-                              
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button  
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                                  Excluir
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )})
-                    )}
-                  </TableBody>
-                </div>
-              </Table>
-            </div> */}
