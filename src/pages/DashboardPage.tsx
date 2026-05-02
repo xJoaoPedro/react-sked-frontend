@@ -11,16 +11,15 @@ import { formatPrice } from "@/lib/parsers";
 
 export function DashboardPage() {
   const { dados } = useOutletContext();
-  const [data, setDataState] = useState(null)
-
+  const [data, setDataState] = useState(null);
 
   useEffect(() => {
     if (dados === null) return;
 
-    setDataState(dados.dashboard)
+    setDataState(dados.dashboard);
   }, [dados, data]);
 
-  if (data === null) return <div>Carregando...</div>
+  if (data === null) return <div>Carregando...</div>;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -48,13 +47,13 @@ export function DashboardPage() {
             title="Receita Mensal"
             value={formatPrice(data.monthlyRevenue)}
             icon={DollarSign}
-            trend={{ value: data.revenuePercentage.toFixed(1)}}
+            trend={{ value: data.revenuePercentage.toFixed(1) }}
           />
           <StatCard
             title="Taxa de Cancelamento"
             value={`${data.cancelRate.toFixed(1)}%`}
             icon={Clock}
-            trend={{ value: data.cancelPercentage.toFixed(1), inverted: true}}
+            trend={{ value: data.cancelPercentage.toFixed(1), inverted: true }}
           />
         </div>
 
