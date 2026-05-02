@@ -8,7 +8,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
-import { DollarSign, Package, ShoppingCart, Plus, Edit, Trash2, Search, AlertTriangle, Package2, X, Scissors, User, Sparkles, Hand, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, } from 'lucide-react';
+import { DollarSign, Package, ShoppingCart, Plus, Edit, Trash2, Search, AlertTriangle, Package2, X, Scissors, User, Sparkles, Hand, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, Minus, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useOutletContext } from 'react-router-dom';
 import { formatLimitText, formatPrice } from '@/lib/parsers';
@@ -129,9 +129,7 @@ export function InventoryPage() {
       await fetchPageData();
       setEditingProduct(null);
       resetForm();
-    }
-
-    
+    }    
   };
 
   const handleDeleteProduct = async (id) => {
@@ -146,6 +144,27 @@ export function InventoryPage() {
     }
     
   };
+
+  const changeQuantity = async (id, quantity) => {
+    try {
+      if (quantity < 0 || quantity > 999) {
+        toast.error('Quantidade fora do alcance.');
+        return;
+      }
+
+      await api.patch(`/products/${id}`, {id, quantity});
+
+      toast.success('Quantidade alterada com sucesso!');
+      setIsAddDialogOpen(false);
+      resetForm();
+    } catch (err) {
+      handleProductError(err)
+    } finally {
+      await fetchPageData();
+      setEditingProduct(null);
+      resetForm();
+    }
+  }
 
   if (data === null) return <div>Carregando...</div>
 
@@ -397,7 +416,11 @@ export function InventoryPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="font-medium">
-                            {product.quantity} un
+                            <div className='w-32 flex justify-between items-center'>
+                              <Button variant='secondary' size='xs' className='w-8 mr-1' onClick={() => changeQuantity(product.id, product.quantity - 1)}><Minus /></Button>
+                              {product.quantity} un
+                              <Button variant='secondary' size='xs' className='w-8 ml-1' onClick={() => changeQuantity(product.id, product.quantity + 1)}><Plus /></Button>
+                            </div>
                           </TableCell>
                           <TableCell>
                             {getStatusBadge(product.quantity)}

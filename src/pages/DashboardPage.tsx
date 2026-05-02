@@ -25,7 +25,7 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <PageHeader
-        title="Painel"
+        title={`Painel ${data.companyName}`}
         subtitle="Bem-vindo de volta! Aqui está o resumo de hoje."
       />
 
