@@ -687,7 +687,7 @@ export function ServicesPage() {
                                 </Button>
                               </div>
                             </PopoverContent>
-                          </Popover> 
+                          </Popover>
                         </div>
                       </TableCell>
                     </TableRow>
