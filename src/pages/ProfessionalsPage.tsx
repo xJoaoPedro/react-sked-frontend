@@ -17,6 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from "date-fns/locale";
+import { LoadingPage } from './LoadingPage';
 
 interface WorkSchedule {
   [key: string]: {
@@ -236,7 +237,7 @@ export function ProfessionalsPage() {
     resetForm();
   };
 
-  if (data === null) return <div>Carregando...</div>
+  if (data === null) return <LoadingPage />
 
   const filteredProfessionals = data.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -453,92 +454,6 @@ export function ProfessionalsPage() {
                           </Table>
                         </div>
                       </div>
-
-                      {/* <div className="space-y-3">
-                        <h3 className="font-semibold text-lg">Agenda</h3>
-                        <div className="border border-border rounded-lg overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                <TableHead className="w-[140px]">Dia</TableHead>
-                                <TableHead>Manhã</TableHead>
-                                <TableHead>Tarde</TableHead>
-                                <TableHead>Noite</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {weekDays.map(day => (
-                                <TableRow key={day.key}>
-                                  <TableCell className="font-medium">{day.label}</TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2">
-                                      <Input
-                                        type="time"
-                                        value={schedule[day.key]?.manha?.start || '09:00'}
-                                        onChange={e =>
-                                          handleScheduleChange(day.key, 'manha', 'start', e.target.value)
-                                        }
-                                        className="w-28"
-                                      />
-                                      <span className="text-xs text-muted-foreground">até</span>
-                                      <Input
-                                        type="time"
-                                        value={schedule[day.key]?.manha?.end || '12:00'}
-                                        onChange={e =>
-                                          handleScheduleChange(day.key, 'manha', 'end', e.target.value)
-                                        }
-                                        className="w-28"
-                                      />
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2">
-                                      <Input
-                                        type="time"
-                                        value={schedule[day.key]?.tarde?.start || '14:00'}
-                                        onChange={e =>
-                                          handleScheduleChange(day.key, 'tarde', 'start', e.target.value)
-                                        }
-                                        className="w-28"
-                                      />
-                                      <span className="text-xs text-muted-foreground">até</span>
-                                      <Input
-                                        type="time"
-                                        value={schedule[day.key]?.tarde?.end || '18:00'}
-                                        onChange={e =>
-                                          handleScheduleChange(day.key, 'tarde', 'end', e.target.value)
-                                        }
-                                        className="w-28"
-                                      />
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2">
-                                      <Input
-                                        type="time"
-                                        value={schedule[day.key]?.noite?.start || '19:00'}
-                                        onChange={e =>
-                                          handleScheduleChange(day.key, 'noite', 'start', e.target.value)
-                                        }
-                                        className="w-28"
-                                      />
-                                      <span className="text-xs text-muted-foreground">até</span>
-                                      <Input
-                                        type="time"
-                                        value={schedule[day.key]?.noite?.end || '22:00'}
-                                        onChange={e =>
-                                          handleScheduleChange(day.key, 'noite', 'end', e.target.value)
-                                        }
-                                        className="w-28"
-                                      />
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </div> */}
                     </div>
 
                     <DialogFooter>

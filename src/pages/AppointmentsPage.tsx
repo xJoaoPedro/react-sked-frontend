@@ -15,6 +15,7 @@ import * as XLSX from "xlsx";
 import { toast } from "sonner"
 import { api } from "@/lib/api";
 import { formatDate, formatPrice, formatTime } from '@/lib/parsers';
+import { LoadingPage } from './LoadingPage';
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
@@ -205,7 +206,7 @@ export function AppointmentsPage() {
     fetchData()
   }, [initialized, page, filterId, filterDate, filterService, filterClient, filterStatus, filterTimeStart, filterTimeEnd])
 
-  if (data === null) return <div>Carregando...</div>
+  if (data === null) return <LoadingPage />
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

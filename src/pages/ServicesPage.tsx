@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import { handleServiceError } from "@/lib/errorHandlers";
 import { toast } from "sonner";
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { LoadingPage } from "./LoadingPage";
 
 const serviceCategories = {
   HAIR: { label: "Cabelo", icon: Scissors },
@@ -136,7 +137,7 @@ export function ServicesPage() {
     return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
   };
 
-  if (data === null) return <div>Carregando...</div>
+  if (data === null) return <LoadingPage />
 
   const filteredServices = data.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
 

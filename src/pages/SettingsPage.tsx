@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "
 import { Building2, Calendar, Bell, CreditCard, Palette, Shield, Upload, Save, Mail, Phone, Globe, Clock, DollarSign, Check, MessageCircle, HelpCircle, Copy, Lock, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText, } from "@/components/ui/input-group";
+import { LoadingPage } from "./LoadingPage";
 
 
 export function SettingsPage() {
@@ -65,6 +66,8 @@ export function SettingsPage() {
     console.log(`Salvando seção: ${sectionName}`);
     alert(`Configurações de ${sectionName} salvas com sucesso!`);
   };
+
+  if (data === null) return <LoadingPage />
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

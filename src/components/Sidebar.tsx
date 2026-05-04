@@ -36,8 +36,9 @@ const menuCategories: MenuCategory[] = [
     title: 'Caixa',
     items: [
       { icon: DollarSign, label: 'Receitas', path: '/revenue' },
-      { icon: Percent, label: 'Comissões', path: '/commissions' },
-      { icon: BarChart3, label: 'Relatórios', path: '/reports' },
+      // TODO IMPLEMENTAR FUTURAMENTE
+      // { icon: Percent, label: 'Comissões', path: '/commissions' },
+      // { icon: BarChart3, label: 'Relatórios', path: '/reports' },
     ],
   },
   {

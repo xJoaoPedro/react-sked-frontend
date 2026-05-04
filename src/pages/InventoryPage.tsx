@@ -16,6 +16,7 @@ import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { handleProductError } from '@/lib/errorHandlers';
+import { LoadingPage } from './LoadingPage';
 
 const productCategories = {
   HAIR: { label: "Cabelo", icon: Scissors },
@@ -166,7 +167,7 @@ export function InventoryPage() {
     }
   }
 
-  if (data === null) return <div>Carregando...</div>
+  if (data === null) return <LoadingPage />
 
   const filteredProducts = data.products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 

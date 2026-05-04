@@ -26,8 +26,9 @@ export const router = createBrowserRouter([
       { path: "daily-schedule", element: <DailySchedulePage /> },
       { path: "appointments", element: <AppointmentsPage /> },
       { path: "cancellations", element: <CancellationsPage /> },
-      { path: "commissions", element: <CommissionsPage /> },
-      { path: "revenue", element: <RevenuePage /> },
+      // TODO IMPLEMENTAR FUTURAMENTE
+      // { path: "commissions", element: <CommissionsPage /> },
+      // { path: "revenue", element: <RevenuePage /> },
       { path: "reports", element: <ReportsPage /> },
       { path: "inventory", element: <InventoryPage /> },
       { path: "services", element: <ServicesPage /> },

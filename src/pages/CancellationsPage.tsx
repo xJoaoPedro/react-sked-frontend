@@ -16,6 +16,7 @@ import { formatDate, formatLimitText, formatPrice, formatTime } from "@/lib/pars
 import { useOutletContext } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { LoadingPage } from "./LoadingPage";
 
 const period = {
   'week': "Esta semana",
@@ -189,7 +190,7 @@ export function CancellationsPage() {
 
   }, [initialized, filterPeriod])
 
-  if (data === null) return <div>Carregando...</div>
+  if (data === null) return <LoadingPage color="text-destructive" />
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
