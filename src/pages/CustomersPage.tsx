@@ -1,232 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-// TODO VERIFICAR USO
-// import { Input } from "../components/ui/input";
-// import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import { PageHeader } from "../components/PageHeader";
-// import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
-import {
-  User,
-  Users,
-  UserPlus,
-  Cake,
-  Gift,
-  Repeat,
-  UserRoundX,
-} from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
+import { User, Users, UserPlus, Cake, Gift, Repeat, UserRoundX, UserX, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  photo?: string;
-  birthDate: string;
-  registeredAt: string;
-  totalVisits: number;
-  lastVisit?: string;
-}
-
-const mockCustomers: Customer[] = [
-  {
-    id: 1,
-    name: "Ana Paula Santos",
-    email: "ana.santos@gmail.com",
-    phone: "(11) 98765-4321",
-    birthDate: "1990-03-31",
-    registeredAt: "2024-01-15",
-    totalVisits: 12,
-    lastVisit: "2026-03-20",
-  },
-  {
-    id: 2,
-    name: "Carlos Eduardo Silva",
-    email: "carlos.silva@outlook.com",
-    phone: "(21) 97654-3210",
-    birthDate: "1985-03-31",
-    registeredAt: "2024-02-10",
-    totalVisits: 8,
-    lastVisit: "2026-03-15",
-  },
-  {
-    id: 3,
-    name: "Beatriz Costa",
-    email: "bia.costa@hotmail.com",
-    phone: "(31) 96543-2109",
-    birthDate: "1995-05-20",
-    registeredAt: "2024-03-05",
-    totalVisits: 15,
-    lastVisit: "2026-03-25",
-  },
-  {
-    id: 4,
-    name: "Daniel Oliveira",
-    email: "daniel.oliveira@yahoo.com",
-    phone: "(41) 95432-1098",
-    birthDate: "1988-08-12",
-    registeredAt: "2024-01-20",
-    totalVisits: 20,
-    lastVisit: "2026-03-28",
-  },
-  {
-    id: 5,
-    name: "Fernanda Lima",
-    email: "fernanda.lima@gmail.com",
-    phone: "(51) 94321-0987",
-    birthDate: "1992-11-30",
-    registeredAt: "2024-02-25",
-    totalVisits: 10,
-    lastVisit: "2026-03-18",
-  },
-  {
-    id: 6,
-    name: "Gabriel Martins",
-    email: "gabriel.martins@icloud.com",
-    phone: "(61) 93210-9876",
-    birthDate: "1987-03-31",
-    registeredAt: "2024-03-10",
-    totalVisits: 6,
-    lastVisit: "2026-03-22",
-  },
-];
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("pt-BR");
-};
-
-const isBirthdayToday = (birthDate: string) => {
-  const today = new Date("2026-03-31"); // Today's date from context
-  const birth = new Date(birthDate);
-  return (
-    today.getMonth() === birth.getMonth() && today.getDate() === birth.getDate()
-  );
-};
+import { LoadingPage } from "./LoadingPage";
+import { useOutletContext } from "react-router-dom";
+import { formatDate, formatPhone } from "@/lib/parsers";
+import { api } from "@/lib/api";
 
 export function CustomersPage() {
-  const [customers] = useState<Customer[]>(mockCustomers);
-  // TODO VERIFICAR USO
-  // const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  // const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const { dados } = useOutletContext();
+  const [data, setDataState] = useState(null);
+  const [limit] = useState(50);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [initialized, setInitialized] = useState(false);
 
-  // Form states TODO VERIFICAR USO
-  // const [formData, setFormData] = useState({
-  //   name: "",
-  //   email: "",
-  //   phone: "",
-  //   birthDate: "",
-  //   photo: "",
-  // });
+  const fetchTableData = async () => {
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/customers`, {params: { page, limit }})).data.data;
 
-  const birthdayCustomers = customers.filter((c) =>
-    isBirthdayToday(c.birthDate),
-  );
-  const totalCustomers = customers.length;
-  const newThisMonth = customers.filter((c) => {
-    const registered = new Date(c.registeredAt);
-    const now = new Date("2026-03-31");
-    return (
-      registered.getMonth() === now.getMonth() &&
-      registered.getFullYear() === now.getFullYear()
-    );
-  }).length;
+    setDataState((prev) => ({
+      ...prev,
+      customers: response.data,
+    }));
+    setTotalPages(response.totalPages);
+  }
 
-  // Calculate return rate (customers who have visited more than once)
-  const returningCustomers = customers.filter((c) => c.totalVisits > 1).length;
-  const returnRate =
-    totalCustomers > 0
-      ? Math.round((returningCustomers / totalCustomers) * 100)
-      : 0;
+  useEffect(() => {
+    if (!dados) return;
 
-  // TODO VERIFICAR USO
-  // const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setFormData({ ...formData, photo: reader.result as string });
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
+    setDataState(dados.customers);
+    setInitialized(true);
+  }, [dados])
 
-  // const handleAddCustomer = () => {
-  //   const newCustomer: Customer = {
-  //     id: Math.max(...customers.map((c) => c.id)) + 1,
-  //     name: formData.name,
-  //     email: formData.email,
-  //     phone: formData.phone,
-  //     birthDate: formData.birthDate,
-  //     photo: formData.photo,
-  //     registeredAt: new Date().toISOString().split("T")[0],
-  //     totalVisits: 0,
-  //   };
+  useEffect(() => {
+    if (!initialized) return
 
-  //   setCustomers([...customers, newCustomer]);
-  //   setIsAddDialogOpen(false);
-  //   resetForm();
-  // };
+    fetchTableData()
+  }, [initialized, page])
 
-  // TODO VERIFICAR USO
-  // const handleEditCustomer = () => {
-  //   if (!editingCustomer) return;
+  if (data === null) return <LoadingPage />
 
-  //   setCustomers(
-  //     customers.map((c) =>
-  //       c.id === editingCustomer.id
-  //         ? {
-  //             ...editingCustomer,
-  //             name: formData.name,
-  //             email: formData.email,
-  //             phone: formData.phone,
-  //             birthDate: formData.birthDate,
-  //             photo: formData.photo,
-  //           }
-  //         : c,
-  //     ),
-  //   );
-
-  //   setEditingCustomer(null);
-  //   resetForm();
-  // };
-
-  // TODO VERIFICAR USO
-  // const openEditDialog = (customer: Customer) => {
-  //   setEditingCustomer(customer);
-  //   setFormData({
-  //     name: customer.name,
-  //     email: customer.email,
-  //     phone: customer.phone,
-  //     birthDate: customer.birthDate,
-  //     photo: customer.photo || "",
-  //   });
-  // };
-
-  // const resetForm = () => {
-  //   setFormData({
-  //     name: "",
-  //     email: "",
-  //     phone: "",
-  //     birthDate: "",
-  //     photo: "",
-  //   });
-  // };
-
-  const handleSendBirthdayCoupon = () => {
-    alert(
-      `Cupom de desconto enviado para ${birthdayCustomers.length} aniversariante(s)! 🎉`,
-    );
-  };
+  console.log(data)
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -237,8 +57,7 @@ export function CustomersPage() {
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         <div className="p-6 space-y-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Total Customers */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -246,7 +65,7 @@ export function CustomersPage() {
                     Total de Clientes
                   </p>
                   <h3 className="text-3xl font-bold text-foreground">
-                    {totalCustomers}
+                    {data.totalCustomers}
                   </h3>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -255,7 +74,6 @@ export function CustomersPage() {
               </div>
             </Card>
 
-            {/* New This Month */}
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -263,7 +81,7 @@ export function CustomersPage() {
                     Novos este mês
                   </p>
                   <h3 className="text-3xl font-bold text-foreground">
-                    {newThisMonth}
+                    {data.newCustomers}
                   </h3>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -272,7 +90,6 @@ export function CustomersPage() {
               </div>
             </Card>
 
-            {/* Return Rate */}
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -280,10 +97,10 @@ export function CustomersPage() {
                     Taxa de Retorno
                   </p>
                   <h3 className="text-3xl font-bold text-foreground">
-                    {returnRate}%
+                    {data.totalCustomers > 0 ? ((data.returningCustomers / data.totalCustomers) * 100).toFixed(1) : 0}%
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {returningCustomers} de {totalCustomers} voltaram
+                    {data.returningCustomers} de {data.totalCustomers} voltaram
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
@@ -291,89 +108,7 @@ export function CustomersPage() {
                 </div>
               </div>
             </Card>
-
-            {/* Birthday Today */}
-            <Card className="p-6 bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Aniversariantes Hoje
-                  </p>
-                  <h3 className="text-3xl font-bold text-foreground">
-                    {birthdayCustomers.length}
-                  </h3>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center">
-                  <Cake className="w-6 h-6 text-pink-500" />
-                </div>
-              </div>
-            </Card>
           </div>
-
-          {/* Birthday Customers Card */}
-          {birthdayCustomers.length > 0 && (
-            <Card className="p-6 border-2 border-pink-200 bg-gradient-to-br from-pink-50 to-purple-50">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center">
-                    <Gift className="w-5 h-5 text-pink-500" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">
-                      🎉 Aniversariantes do Dia
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Envie um cupom especial para celebrar
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  className="bg-pink-500 hover:bg-pink-600 text-popover"
-                  onClick={handleSendBirthdayCoupon}
-                >
-                  <Gift className="w-4 h-4 mr-2" />
-                  Enviar Cupom de Desconto
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {birthdayCustomers.map((customer) => (
-                  <div
-                    key={customer.id}
-                    className="flex items-center gap-4 p-4 bg-white rounded-lg border border-pink-200"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {customer.photo ? (
-                        <img
-                          src={customer.photo}
-                          alt={customer.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-5 h-5 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">{customer.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {customer.email} • {customer.phone}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-pink-600">
-                        🎂 Aniversário
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date("2026-03-31").getFullYear() -
-                          new Date(customer.birthDate).getFullYear()}{" "}
-                        anos
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
 
           {/* Customers Table */}
           <Card className="overflow-hidden gap-0">
@@ -384,374 +119,143 @@ export function CustomersPage() {
                     Todos os Clientes
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {customers.length} clientes cadastrados
+                    {data.totalCustomers} clientes cadastrados
                   </p>
                 </div>
-                {/* TODO VERIFICAR USO */}
-                {/* <Dialog
-                  open={isAddDialogOpen}
-                  onOpenChange={setIsAddDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Cadastrar cliente
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[700px]">
-                    <DialogHeader>
-                      <DialogTitle>Adicionar Novo Cliente</DialogTitle>
-                    </DialogHeader>
-
-                    <div className="space-y-6 py-4">
-                      <div className="flex gap-6">
-                        <div className="flex-shrink-0">
-                          <Label
-                            htmlFor="photo-upload"
-                            className="cursor-pointer block"
-                          >
-                            <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-full">
-                              {formData.photo ? (
-                                <img
-                                  src={formData.photo}
-                                  alt="Preview"
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                  <Upload className="w-8 h-8 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground text-center px-2">
-                                    Carregar foto
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </Label>
-                          <Input
-                            id="photo-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoUpload}
-                            className="hidden"
-                          />
-                        </div>
-
-                        <div className="flex-1 space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="name">Nome completo</Label>
-                            <Input
-                              id="name"
-                              placeholder="Ex: João Silva"
-                              value={formData.name}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  name: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="email">E-mail</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              placeholder="joao@exemplo.com"
-                              value={formData.email}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  email: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Telefone</Label>
-                          <Input
-                            id="phone"
-                            placeholder="(00) 00000-0000"
-                            value={formData.phone}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                phone: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="birthDate">Data de nascimento</Label>
-                          <Input
-                            id="birthDate"
-                            type="date"
-                            value={formData.birthDate}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                birthDate: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setIsAddDialogOpen(false);
-                          resetForm();
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        className="bg-primary hover:bg-primary/90"
-                        onClick={handleAddCustomer}
-                        disabled={
-                          !formData.name || !formData.email || !formData.phone
-                        }
-                      >
-                        Adicionar Cliente
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog> */}
               </div>
             </div>
 
             <div>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Contato</TableHead>
-                    <TableHead>Aniversário</TableHead>
-                    <TableHead>Visitas</TableHead>
-                    <TableHead>Última Visita</TableHead>
-                    <TableHead>Ações</TableHead>
+              <Table className="w-full">
+                <TableHeader className="table table-fixed z-10">
+                  <TableRow className="table w-full table-fixed bg-muted/50">
+                    <TableHead className="font-semibold text-foreground">Nome</TableHead>
+                    <TableHead className="font-semibold text-foreground">Contato</TableHead>
+                    <TableHead className="font-semibold text-foreground">Visitas</TableHead>
+                    <TableHead className="font-semibold text-foreground">Última Visita</TableHead>
+                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {customers.map((customer) => (
-                    <TableRow key={customer.id}>
-                      <TableCell className="font-medium py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {customer.photo ? (
-                              <img
-                                src={customer.photo}
-                                alt={customer.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
+
+                <div className="h-[500px] flex-1 flex overflow-y-auto">
+                  <TableBody className="block overflow-y-auto">
+                    {data.customers.length === 0 ? (
+                      <TableRow className='table table-fixed w-full h-full'>
+                        <TableCell colSpan={18} className="w-32 text-center py-16">
+                          <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
+                            <UserX className="w-12 h-12 opacity-20" />
+                            <p className="font-medium">Nenhum cliente encontrado.</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (data.customers.map((customer) => (
+                      <TableRow key={customer.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
+                        <TableCell className="font-medium py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
                               <User className="w-4 h-4 text-muted-foreground" />
-                            )}
-                          </div>
-                          <div>
-                            <div className="font-medium flex items-center gap-2">
-                              {customer.name}
-                              {isBirthdayToday(customer.birthDate) && (
-                                <span className="text-xs">🎂</span>
-                              )}
                             </div>
-                            <div className="text-sm text-muted-foreground">
-                              Cliente desde {formatDate(customer.registeredAt)}
+                            <div>
+                              <div className="font-medium flex items-center gap-2">
+                                {customer.name}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {/* Cliente desde {formatDate(customer.registeredAt)} */}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{customer.email}</div>
-                          <div className="text-muted-foreground">
-                            {customer.phone}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{customer.email}</div>
+                            <div className="text-muted-foreground">
+                              {formatPhone(customer.phone)}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{formatDate(customer.birthDate)}</TableCell>
-                      <TableCell>
-                        <span className="w-full px-2 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                          {customer.totalVisits}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {customer.lastVisit
-                          ? formatDate(customer.lastVisit)
-                          : "Nunca"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-2">
-                          {/* TODO VERIFICAR USO Edit Dialog */}
-                          {/* <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openEditDialog(customer)}
-                                className="text-foreground border-foreground/20 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[700px]">
-                              <DialogHeader>
-                                <DialogTitle>Editar Cliente</DialogTitle>
-                              </DialogHeader>
-
-                              <div className="space-y-6 py-4">
-                                <div className="flex gap-6">
-                                  <div className="flex-shrink-0">
-                                    <Label
-                                      htmlFor="edit-photo-upload"
-                                      className="cursor-pointer block"
-                                    >
-                                      <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-full">
-                                        {formData.photo ? (
-                                          <img
-                                            src={formData.photo}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                          />
-                                        ) : (
-                                          <div className="flex flex-col items-center gap-2">
-                                            <Upload className="w-8 h-8 text-muted-foreground" />
-                                            <span className="text-xs text-muted-foreground text-center px-2">
-                                              Carregar foto
-                                            </span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </Label>
-                                    <Input
-                                      id="edit-photo-upload"
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={handlePhotoUpload}
-                                      className="hidden"
-                                    />
-                                  </div>
-
-                                  <div className="flex-1 space-y-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-name">
-                                        Nome completo
-                                      </Label>
-                                      <Input
-                                        id="edit-name"
-                                        value={formData.name}
-                                        onChange={(e) =>
-                                          setFormData({
-                                            ...formData,
-                                            name: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-email">E-mail</Label>
-                                      <Input
-                                        id="edit-email"
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) =>
-                                          setFormData({
-                                            ...formData,
-                                            email: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
-                                  </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="w-full px-2 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                            {customer.visits}
+                          </span>
+                        </TableCell>
+                        <TableCell>{formatDate(customer.lastVisit)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                  >
+                                    <UserRoundX className="w-4 h-4" />
+                                  </Button>
                                 </div>
+                              </TooltipTrigger>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-phone">Telefone</Label>
-                                    <Input
-                                      id="edit-phone"
-                                      value={formData.phone}
-                                      onChange={(e) =>
-                                        setFormData({
-                                          ...formData,
-                                          phone: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  </div>
-
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-birthDate">
-                                      Data de nascimento
-                                    </Label>
-                                    <Input
-                                      id="edit-birthDate"
-                                      type="date"
-                                      value={formData.birthDate}
-                                      onChange={(e) =>
-                                        setFormData({
-                                          ...formData,
-                                          birthDate: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <DialogFooter>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => {
-                                    setEditingCustomer(null);
-                                    resetForm();
-                                  }}
-                                >
-                                  Cancelar
-                                </Button>
-                                <Button
-                                  className="bg-primary hover:bg-primary/90"
-                                  onClick={handleEditCustomer}
-                                >
-                                  Salvar Alterações
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog> */}
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
-                                >
-                                  <UserRoundX className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </TooltipTrigger>
-
-                            <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive text-white">
-                              Bloquear usuário
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive text-white">
+                                Bloquear usuário
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )))}
+                  </TableBody>
+                </div>
               </Table>
             </div>
+
+            {data.customers.length > 0 && (
+              <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
+                <p className="text-sm text-muted-foreground">
+                  Mostrando{' '}
+                  <span className="font-medium text-foreground">
+                    {(page - 1) * limit + 1}-{Math.min(page * limit, data.totalCustomers)}
+                  </span>{' '}
+                  de{' '}
+                  <span className="font-medium text-foreground">
+                    {data.totalCustomers}
+                  </span>{' '}
+                  cancelamentos
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <span className="px-3 text-sm">
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      max={totalPages} 
+                      value={page} 
+                      onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value <= 0) setPage(1)
+                        else if (value > totalPages) setPage(totalPages)
+                        else setPage(Number(e.target.value ))
+                      }}
+                      className='w-fit'
+                    /> / {totalPages}
+                  </span>
+
+                  <Button
+                    
+                    size="sm"
+                    disabled={page === 1}
+                    onClick={() => setPage(Number(page) - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(Number(page) + 1)}
+                  >
+                    Próximo
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         </div>
       </div>
