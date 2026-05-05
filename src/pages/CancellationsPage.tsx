@@ -6,7 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
 import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, Eye, Edit, Trash2, CalendarX, ChartBar, ChartPie, ChartSpline, } from "lucide-react";
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, } from "recharts";
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart, } from "recharts";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as XLSX from "xlsx";
 import { toast } from "sonner"
@@ -342,7 +342,7 @@ export function CancellationsPage() {
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Cancellation Trend */}
-            <Card className="p-6 h-96">
+            <Card className="p-6 h-96 flex flex-col">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">
                   Tendência de Cancelamentos
@@ -354,28 +354,39 @@ export function CancellationsPage() {
 
               {!byMonthExists ? (
                 <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={data.cancellationsByMonth}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="month" stroke="#6B7280" />
-                    <YAxis stroke="#6B7280" />
+                  <AreaChart data={data.cancellationsByMonth}>
+                    <defs>
+                      <linearGradient id="colorCancellations" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#E63946" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#E63946" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12 }}
+                      stroke="#888"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      stroke="#888"
+                    />
                     <RechartsTooltip
                       labelFormatter={(label, payload) => `${label} ${payload[0]?.payload?.year ? `,${payload[0].payload.year}` : ""}`}
                       contentStyle={{
-                        backgroundColor: "#fff",
-                        border: "1px solid #E5E7EB",
+                        backgroundColor: "white",
+                        border: "1px solid #e5e7eb",
                         borderRadius: "8px",
                       }}
                     />
-                    <Legend />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="total"
                       stroke="#E63946"
                       strokeWidth={2}
-                      name="Total"
-                      dot={{ fill: "#E63946", r: 4 }}
+                      fill="url(#colorCancellations)"
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               ) : (
                 <Empty>
@@ -514,7 +525,8 @@ export function CancellationsPage() {
               </div>
 
               {data.cancellationsByProfessional.length > 0 ? (
-                <div className="space-y-4">
+                <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+                  <div className="space-y-4">
                   {data.cancellationsByProfessional.map((prof) => {
                     return (
                       <div key={prof.professional}>
@@ -535,6 +547,7 @@ export function CancellationsPage() {
                       </div>
                     );
                   })}
+                  </div>
                 </div>
               ) : (
                 <Empty>
