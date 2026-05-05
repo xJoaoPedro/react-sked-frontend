@@ -8,6 +8,7 @@ import { PageHeader } from "../components/PageHeader";
 import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/parsers";
+import { LoadingPage } from "./LoadingPage";
 
 export function DashboardPage() {
   const { dados } = useOutletContext();
@@ -19,7 +20,7 @@ export function DashboardPage() {
     setDataState(dados.dashboard);
   }, [dados, data]);
 
-  if (data === null) return <div>Carregando...</div>;
+  if (data === null) return <LoadingPage />
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

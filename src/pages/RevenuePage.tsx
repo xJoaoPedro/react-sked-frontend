@@ -14,6 +14,7 @@ import { formatDate, formatLimitText, formatPrice, formatTime } from '@/lib/pars
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { LoadingPage } from './LoadingPage';
 
 const period = {
   'week': "Esta semana",
@@ -94,7 +95,7 @@ export function RevenuePage() {
     fetchPageData();
   }, [initialized, filterPeriod])
 
-  if (data === null) return <div>Carregando...</div>
+  if (data === null) return <LoadingPage />
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

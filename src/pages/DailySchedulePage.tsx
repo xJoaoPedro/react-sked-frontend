@@ -5,7 +5,8 @@ import { PageHeader } from "../components/PageHeader";
 import { ChevronLeft, ChevronRight, Calendar, Plus, CalendarX, } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 import { api } from "@/lib/api";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, } from "@/components/ui/empty";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { LoadingPage } from './LoadingPage';
 
 const timeSlots = [
   "06:00", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -122,6 +123,8 @@ export function DailySchedulePage() {
     };
   };
 
+  if (data === null) return <LoadingPage />
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <PageHeader title="Agenda do Dia" subtitle={formatDate(selectedDate)} />
@@ -195,9 +198,7 @@ export function DailySchedulePage() {
                   >
                     {/* Professional header */}
                     <div className="h-12 border-b border-border bg-background flex items-center justify-center px-4 sticky top-0 z-10">
-                      <span className="font-medium text-sm truncate">
-                        {professional.user.name}
-                      </span>
+                      <span className="font-medium text-sm truncate">{professional.name}</span>
                     </div>
 
                     {/* Grid lines */}

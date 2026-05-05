@@ -3,9 +3,9 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { DailySchedulePage } from "./pages/DailySchedulePage";
 import { AppointmentsPage } from "./pages/AppointmentsPage";
 import { CancellationsPage } from "./pages/CancellationsPage";
-import { CommissionsPage } from "./pages/CommissionsPage";
+// import { CommissionsPage } from "./pages/CommissionsPage";
+// import { ReportsPage } from "./pages/ReportsPage";
 import { RevenuePage } from "./pages/RevenuePage";
-import { ReportsPage } from "./pages/ReportsPage";
 import { InventoryPage } from "./pages/InventoryPage";
 import { ServicesPage } from "./pages/ServicesPage";
 import { ProfessionalsPage } from "./pages/ProfessionalsPage";
@@ -26,9 +26,10 @@ export const router = createBrowserRouter([
       { path: "daily-schedule", element: <DailySchedulePage /> },
       { path: "appointments", element: <AppointmentsPage /> },
       { path: "cancellations", element: <CancellationsPage /> },
-      { path: "commissions", element: <CommissionsPage /> },
+      // TODO IMPLEMENTAR FUTURAMENTE
+      // { path: "commissions", element: <CommissionsPage /> },
+      // { path: "reports", element: <ReportsPage /> },
       { path: "revenue", element: <RevenuePage /> },
-      { path: "reports", element: <ReportsPage /> },
       { path: "inventory", element: <InventoryPage /> },
       { path: "services", element: <ServicesPage /> },
       { path: "professionals", element: <ProfessionalsPage /> },
