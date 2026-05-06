@@ -3,19 +3,23 @@ import { PageHeader } from '../components/PageHeader';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { Filter, X, Calendar, Download, Eye, Edit, Trash2, Clock, User, DollarSign, FileText, Table2, ChevronDown, ChevronUp, FileJson, Plus, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { DatePicker } from '@/components/ui/datepicker';
+import { DatePicker as CalendarDatePicker } from '@/components/ui/datepicker';
 import { useOutletContext } from 'react-router-dom';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import * as XLSX from "xlsx";
 import { toast } from "sonner"
 import { api } from "@/lib/api";
-import { formatDate, formatPrice, formatTime } from '@/lib/parsers';
+import { formatDate, formatPhone, formatPrice, formatTime } from '@/lib/parsers';
 import { LoadingPage } from './LoadingPage';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale";
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
@@ -24,17 +28,39 @@ const statusList = [
   { value: 'completed', label: 'Concluído' },
 ];
 
+const appointmentStatusOptions = [
+  { value: 'PENDING', label: 'Pendente' },
+  { value: 'CONFIRMED', label: 'Confirmado' },
+  { value: 'COMPLETED', label: 'Concluído' },
+  { value: 'CANCELED', label: 'Cancelado' },
+];
+
 export function AppointmentsPage() {
-  const { dados } = useOutletContext();
+  const { dados, refreshDados } = useOutletContext();
   const [data, setDataState] = useState(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [professionals, setProfessionals] = useState([]);
   const [services, setServices] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState(null);
   const [total, setTotal] = useState(1);
   const [limit] = useState(50);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [formData, setFormData] = useState({
+    company_id: localStorage.getItem('companyId'),
+    client_id: '',
+    client_name: '',
+    client_email: '',
+    client_contact: '',
+    employee_id: '',
+    service_id: '',
+    appointment_date: '',
+    appointment_time: '',
+    status: 'PENDING',
+  });
   const [filterId, setFilterId] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [filterService, setFilterService] = useState('all');
@@ -51,6 +77,156 @@ export function AppointmentsPage() {
     setTotal(response.total);
     setTotalPages(response.totalPages);
   }
+
+  const resetForm = () => {
+    setFormData({
+      company_id: localStorage.getItem('companyId'),
+      client_id: '',
+      client_name: '',
+      client_email: '',
+      client_contact: '',
+      employee_id: '',
+      service_id: '',
+      appointment_date: '',
+      appointment_time: '',
+      status: 'PENDING',
+    });
+    setEditingAppointment(null);
+  };
+
+  const toLocalDateInput = (value) => {
+    if (!value) return '';
+
+    const date = new Date(value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const timeToDate = (time) => {
+    if (!time) return null;
+
+    const [h, m] = time.split(':').map(Number);
+    return new Date(2000, 0, 1, h, m, 0, 0);
+  };
+
+  const dateToTime = (date) => {
+    if (!date) return '';
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  };
+
+  const getSelectedService = () =>
+    services.find((service) => String(service.id) === String(formData.service_id));
+
+  const buildAppointmentPayload = () => {
+    const selectedService = getSelectedService();
+
+    if (!selectedService) {
+      throw new Error('Selecione um serviço válido.');
+    }
+
+    const startAt = new Date(`${formData.appointment_date}T${formData.appointment_time}:00`);
+
+    if (Number.isNaN(startAt.getTime())) {
+      throw new Error('Selecione uma data e horário válidos.');
+    }
+
+    const duration = Number(selectedService.duration_minutes || 0);
+    const endAt = new Date(startAt.getTime() + duration * 60 * 1000);
+
+    return {
+      company_id: formData.company_id,
+      client_id: Number(formData.client_id),
+      employee_id: Number(formData.employee_id),
+      service_id: Number(formData.service_id),
+      start_time: startAt.toISOString(),
+      end_time: endAt.toISOString(),
+      status: formData.status,
+    };
+  };
+
+  const openAddDialog = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (appointment) => {
+    setEditingAppointment(appointment);
+    setFormData({
+      company_id: localStorage.getItem('companyId'),
+      client_id: String(appointment.client?.id ?? ''),
+      client_name: appointment.client?.name ?? '',
+      client_email: appointment.client?.email ?? '',
+      client_contact: appointment.client?.contact ?? '',
+      employee_id: String(appointment.employee?.id ?? ''),
+      service_id: String(appointment.service?.id ?? ''),
+      appointment_date: toLocalDateInput(appointment.start_time),
+      appointment_time: formatTime(appointment.start_time),
+      status: appointment.status ?? 'PENDING',
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleClientPhoneChange = (value) => {
+    const cleanedPhone = value.replace(/\D/g, "").slice(0, 11);
+
+    setFormData((prev) => ({ ...prev, client_contact: cleanedPhone }));
+  };
+
+  const handleSubmitAppointment = async () => {
+    try {
+      let clientId = Number(formData.client_id);
+
+      const clientPayload = {
+        company_id: formData.company_id,
+        name: formData.client_name,
+        email: formData.client_email,
+        contact: formData.client_contact,
+      };
+
+      if (editingAppointment && clientId) {
+        await api.patch(`/customers/${clientId}`, clientPayload);
+      } else {
+        const createdCustomer = (await api.post('/customers', clientPayload)).data.data;
+        clientId = createdCustomer.id;
+      }
+
+      setFormData((prev) => ({ ...prev, client_id: String(clientId) }));
+
+      const payload = buildAppointmentPayload();
+      payload.client_id = clientId;
+
+      if (editingAppointment) {
+        await api.patch(`/appointments/${editingAppointment.id}`, payload);
+        toast.success('Agendamento alterado com sucesso!');
+      } else {
+        await api.post('/appointments', payload);
+        toast.success('Agendamento criado com sucesso!');
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      await Promise.all([fetchData(), refreshDados()]);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message || 'Não foi possível salvar o agendamento.');
+    }
+  };
+
+  const handleDeleteAppointment = async (id) => {
+    try {
+      await api.delete(`/appointments/${id}`);
+      toast.success('Agendamento deletado com sucesso!');
+      await Promise.all([fetchData(), refreshDados()]);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Não foi possível deletar o agendamento.');
+    }
+  };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -196,6 +372,7 @@ export function AppointmentsPage() {
 
     setPage(Number(dados.appointments?.page) || 1)
     setTotal(dados.appointments?.total || 0)
+    setProfessionals(dados.professionals || [])
     setServices(dados.services || [])
     setTotalPages(dados.appointments?.totalPages || 1)
     setInitialized(true)
@@ -267,7 +444,7 @@ export function AppointmentsPage() {
             </PopoverContent>
           </Popover>
 
-          <Button onClick={() => toast.info('Botão ainda não implementado')} className="bg-primary hover:bg-primary/70 text-popover">
+          <Button onClick={openAddDialog} className="bg-primary hover:bg-primary/70 text-popover">
             <Plus className="w-4 h-4 mr-2" />
             Novo Agendamento
           </Button>
@@ -297,7 +474,7 @@ export function AppointmentsPage() {
                 {/* Date Filter */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Data</label>
-                  <DatePicker
+                  <CalendarDatePicker
                     value={filterDate ? new Date(filterDate) : undefined}
                     onChange={(date) => {
                       if (!date) return setFilterDate("")
@@ -358,27 +535,26 @@ export function AppointmentsPage() {
           )}
 
           <Card className="overflow-hidden py-0 flex-1 gap-0">
-            <div className="overflow-x-auto flex-1 min-h-0">
-              <Table className="w-full">
-                <TableHeader className="table table-fixed z-10">
-                  <TableRow className="table w-full table-fixed bg-muted/50">
-                    <TableHead className="font-semibold text-foreground w-[100px]">ID</TableHead>
-                    <TableHead className="font-semibold text-foreground">Data</TableHead>
-                    <TableHead className="font-semibold text-foreground">Horário</TableHead>
-                    <TableHead className="font-semibold text-foreground">Cliente</TableHead>
-                    <TableHead className="font-semibold text-foreground">Serviço</TableHead>
-                    <TableHead className="font-semibold text-foreground">Profissional</TableHead>
-                    <TableHead className="font-semibold text-foreground">Status</TableHead>
-                    <TableHead className="font-semibold text-foreground">Valor</TableHead>
-                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
+            <div className="h-[700px] overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
+                  <tr className="border-b transition-colors">
+                    <th className="h-10 w-[100px] px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">ID</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Data</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Horário</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Cliente</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Serviço</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Profissional</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Status</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Valor</th>
+                    <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
+                  </tr>
+                </thead>
 
-                <div className="h-[650px] flex-1 flex overflow-y-auto">
-                  <TableBody className="block overflow-y-auto">
+                <tbody className="[&_tr:last-child]:border-0">
                   {data.length === 0 ? (
-                    <TableRow className='table table-fixed w-full h-full'>
-                      <TableCell colSpan={9} className="w-32 text-center py-16">
+                    <tr className="border-b transition-colors">
+                      <td colSpan={9} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
                         <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
                           <Calendar className="w-12 h-12 opacity-20" />
                           <p className="font-medium">
@@ -392,71 +568,55 @@ export function AppointmentsPage() {
                             </Button>
                           )}
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ) : (
                     data.map((appointment) => (
-                      <TableRow key={appointment.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                        <TableCell className="w-[100px] font-mono text-sm font-semibold text-primary">
+                      <tr key={appointment.id} className="border-b transition-colors hover:bg-muted/30">
+                        <td className="w-[100px] p-2 align-middle whitespace-nowrap font-mono text-sm font-semibold text-primary">
                           {appointment.id}
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-muted-foreground" />
                             <span className="font-medium">{formatDate(appointment.start_time)}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 text-muted-foreground" />
                             <span>{formatTime(appointment.start_time)}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                               <User className="w-4 h-4 text-primary" />
                             </div>
                             <span className="font-medium">{appointment.client.name}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <span className="text-muted-foreground">{appointment.service.name}</span>
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <span className="text-sm">{appointment.employee.name}</span>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">{getStatusBadge(appointment.status)}</td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <div className="flex items-center gap-1.5 font-semibold text-foreground">
                             <DollarSign className="w-4 h-4 text-primary" />
                             {formatPrice(appointment.service.price, false)}
                           </div>
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <div className="flex items-center gap-1">
-                            <Tooltip disableHoverableContent>
-                              <TooltipTrigger asChild>
-                                <div>
-                                  <Button 
-                                    size="sm"
-                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TooltipTrigger>
-
-                              <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
-                                Visualizar
-                              </TooltipContent>
-                            </Tooltip>
-                            
                             <Tooltip disableHoverableContent>
                               <TooltipTrigger asChild>
                                 <div>
                                   <Button  
                                     size="sm"
+                                    onClick={() => openEditDialog(appointment)}
                                     className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
                                   >
                                     <Edit className="w-4 h-4" />
@@ -469,30 +629,53 @@ export function AppointmentsPage() {
                               </TooltipContent>
                             </Tooltip>
                             
-                            <Tooltip disableHoverableContent>
-                              <TooltipTrigger asChild>
-                                <div>
-                                  <Button  
+                            <Popover>
+                              <Tooltip disableHoverableContent>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <PopoverTrigger asChild>
+                                      <Button  
+                                        size="sm"
+                                        className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </PopoverTrigger>
+                                  </div>
+                                </TooltipTrigger>
+
+                                <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                                  Excluir
+                                </TooltipContent>
+                              </Tooltip>
+
+                              <PopoverContent side="left">
+                                <p className="text-sm mb-2">Tem certeza que deseja excluir este agendamento?</p>
+
+                                <div className="flex justify-end gap-2">
+                                  <PopoverClose asChild>
+                                    <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">
+                                      Cancelar
+                                    </Button>
+                                  </PopoverClose>
+
+                                  <Button
                                     size="sm"
-                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                    className="text-sm bg-destructive text-white hover:bg-destructive/60"
+                                    onClick={() => handleDeleteAppointment(appointment.id)}
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    Confirmar
                                   </Button>
                                 </div>
-                              </TooltipTrigger>
-
-                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                                Excluir
-                              </TooltipContent>
-                            </Tooltip>
+                              </PopoverContent>
+                            </Popover>
                           </div>
-                        </TableCell>
-                      </TableRow>
+                        </td>
+                      </tr>
                     ))
                   )}
-                </TableBody>
-                </div>
-              </Table>
+                </tbody>
+              </table>
             </div>
             
             {/* Pagination or Summary */}
@@ -547,6 +730,194 @@ export function AppointmentsPage() {
           </Card>
         </div>
       </div>
+
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) resetForm();
+        }}
+      >
+        <DialogContent className="sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingAppointment ? 'Editar Agendamento' : 'Novo Agendamento'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingAppointment
+                ? 'Atualize os dados do agendamento.'
+                : 'Preencha as informações para criar um novo agendamento.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="appointment-client-name">Nome do cliente</Label>
+              <Input
+                id="appointment-client-name"
+                placeholder="Nome do cliente"
+                value={formData.client_name}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, client_name: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="appointment-client-email">E-mail do cliente</Label>
+              <Input
+                id="appointment-client-email"
+                type="email"
+                placeholder="cliente@email.com"
+                value={formData.client_email}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, client_email: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="appointment-client-phone">Telefone do cliente</Label>
+              <Input
+                id="appointment-client-phone"
+                type="tel"
+                inputMode="numeric"
+                placeholder="(11) 99999-9999"
+                value={formatPhone(formData.client_contact)}
+                onChange={(e) => handleClientPhoneChange(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="appointment-service">Serviço</Label>
+              <Select
+                value={formData.service_id}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, service_id: value }))
+                }
+              >
+                <SelectTrigger id="appointment-service">
+                  <SelectValue placeholder="Selecione o serviço" />
+                </SelectTrigger>
+                <SelectContent>
+                  {services.map((service) => (
+                    <SelectItem key={service.id} value={String(service.id)}>
+                      {service.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="appointment-professional">Profissional</Label>
+              <Select
+                value={formData.employee_id}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, employee_id: value }))
+                }
+              >
+                <SelectTrigger id="appointment-professional">
+                  <SelectValue placeholder="Selecione o profissional" />
+                </SelectTrigger>
+                <SelectContent>
+                  {professionals.map((professional) => (
+                    <SelectItem key={professional.id} value={String(professional.id)}>
+                      {professional.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="appointment-date">Data</Label>
+              <CalendarDatePicker
+                value={formData.appointment_date ? new Date(`${formData.appointment_date}T12:00:00`) : undefined}
+                onChange={(date) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    appointment_date: date ? toLocalDateInput(date) : '',
+                  }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="appointment-time">Horário</Label>
+              <DatePicker
+                selected={timeToDate(formData.appointment_time)}
+                onChange={(date) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    appointment_time: dateToTime(date),
+                  }))
+                }
+                showTimeSelect
+                showTimeSelectOnly
+                timeIntervals={30}
+                dateFormat="HH:mm"
+                locale={ptBR}
+                placeholderText="HH:mm"
+                isClearable
+                minTime={new Date(2000, 0, 1, 6, 0, 0)}
+                maxTime={new Date(2000, 0, 1, 23, 59, 0)}
+                className="w-full rounded-md border border-primary px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="appointment-status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, status: value }))
+                }
+              >
+                <SelectTrigger id="appointment-status">
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {appointmentStatusOptions.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              size="sm"
+              className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive"
+              type="button"
+              onClick={() => {
+                setIsDialogOpen(false);
+                resetForm();
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmitAppointment}
+              disabled={
+                !formData.client_name ||
+                !formData.client_email ||
+                !formData.client_contact ||
+                !formData.employee_id ||
+                !formData.service_id ||
+                !formData.appointment_date ||
+                !formData.appointment_time
+              }
+            >
+              {editingAppointment ? 'Salvar alterações' : 'Criar agendamento'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
