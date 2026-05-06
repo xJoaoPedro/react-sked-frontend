@@ -41,15 +41,19 @@ export function formatLimitText(text: string, limit: number) {
 export function formatPhone(phone: string) {
   if (!phone) return '';
 
-  const cleaned = phone.replace(/\D/g, '');
+  const cleaned = phone.replace(/\D/g, '').slice(0, 11);
 
-  if (cleaned.length === 11) {
-    return cleaned.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+  if (cleaned.length <= 2) {
+    return cleaned.length === 0 ? '' : `(${cleaned}`;
   }
 
-  if (cleaned.length === 10) {
-    return cleaned.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+  if (cleaned.length <= 6) {
+    return cleaned.replace(/^(\d{2})(\d+)$/, '($1) $2');
   }
 
-  return cleaned;
+  if (cleaned.length <= 10) {
+    return cleaned.replace(/^(\d{2})(\d{4})(\d+)$/, '($1) $2-$3');
+  }
+
+  return cleaned.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
 }

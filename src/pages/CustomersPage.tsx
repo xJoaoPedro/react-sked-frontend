@@ -169,7 +169,7 @@ export function CustomersPage() {
                           <div className="text-sm">
                             <div>{customer.email}</div>
                             <div className="text-muted-foreground">
-                              {formatPhone(customer.phone)}
+                              {formatPhone(customer.contact)}
                             </div>
                           </div>
                         </TableCell>

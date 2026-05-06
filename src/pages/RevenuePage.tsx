@@ -224,7 +224,7 @@ export function RevenuePage() {
             <Card className="p-6 gap-0 h-96">
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-1">Evolução de Receitas</h3>
-                <p className="text-sm text-muted-foreground">Últimos 7 dias</p>
+                <p className="text-sm text-muted-foreground">Últimos 6 meses</p>
               </div>
 
               {data.revenueByMonth.length > 0 ? (

@@ -39,7 +39,7 @@ const serviceCategories = {
 }
 
 export function ServicesPage() {
-  const { dados } = useOutletContext();
+  const { dados, refreshDados } = useOutletContext();
   const [data, setDataState] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -68,6 +68,7 @@ export function ServicesPage() {
       const services = (await api.get("/services")).data.data
 
       setDataState(services)
+      await refreshDados();
       toast.success('Serviço alterado com sucesso!')
       setIsAddDialogOpen(false);
       resetForm();
@@ -98,6 +99,7 @@ export function ServicesPage() {
       const response = (await api.post("/services", formData)).data.data
 
       setDataState((prev) => [...prev, response])
+      await refreshDados();
       toast.success('Serviço adicionado com sucesso!')
       setIsAddDialogOpen(false);
       resetForm();
@@ -110,6 +112,7 @@ export function ServicesPage() {
     await api.delete(`/services/${id}`)
 
     const newData = (await api.get('/services')).data.data
+    await refreshDados();
     toast.success('Serviço deletado com sucesso!');
     setDataState(newData);
   };

@@ -49,7 +49,7 @@ const weekDays = [
 ];
 
 export function ProfessionalsPage() {
-  const { dados } = useOutletContext();
+  const { dados, refreshDados } = useOutletContext();
   const [data, setDataState] = useState(null);
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -107,7 +107,7 @@ export function ProfessionalsPage() {
     await api.patch(`/professionals/${id}`, formData)
     
     toast.success('Funcionário editado com sucesso!')
-    await fetchProfessionals();
+    await Promise.all([fetchProfessionals(), refreshDados()]);
     setEditingProfessional(null);
     resetForm();
   };
@@ -116,6 +116,7 @@ export function ProfessionalsPage() {
     await api.delete(`/professionals/${id}`)
 
     const newData = (await api.get(`/companies/${localStorage.getItem('companyId')}/professionals`)).data.data
+    await refreshDados();
     toast.success('Funcionário deletado com sucesso!');
     setDataState(newData);
   };
@@ -232,7 +233,7 @@ export function ProfessionalsPage() {
     const response = (await api.post('/professionals', formData)).data.data
 
     toast.success('Funcionário adicionado com sucesso')
-    await fetchProfessionals();
+    await Promise.all([fetchProfessionals(), refreshDados()]);
     setIsAddDialogOpen(false);
     resetForm();
   };

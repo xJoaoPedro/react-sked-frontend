@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { socket } from "@/services/socket";
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, } from 'react-router-dom';
 import skedLogo from '../assets/skedLogo.svg';
-import { Users, BarChart3, Menu, LayoutDashboard, CalendarCheck, CalendarX, DollarSign, Package, Wrench, UserCog, CalendarDays, Percent, LogOut, LucideIcon, } from 'lucide-react';
+import { Users, Menu, LayoutDashboard, CalendarCheck, CalendarX, DollarSign, Package, Wrench, UserCog, CalendarDays, Percent, LogOut, LucideIcon, User, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider, } from './ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from './ui/alert-dialog';
 
@@ -52,7 +52,7 @@ const menuCategories: MenuCategory[] = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ dados }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const location = useLocation();
@@ -182,12 +182,20 @@ export function Sidebar() {
                   : 'hover:bg-sidebar-accent text-secondary'
               }`}
             >
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                <span className="text-popover text-sm font-medium">AD</span>
+              <div className={`w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 ${location.pathname === '/settings' ? 'bg-white' : 'bg-primary'}`}>
+                {dados.photo ? (
+                  <img
+                    src={dados.photo}
+                    alt={dados.fantasy_name ?? "Foto do perfil"}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <User className={`w-4 h-4 ${location.pathname === '/settings' ? 'text-primary' : 'text-white' }`} />
+                )}
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium truncate">Admin User</p>
-                <p className="text-xs text-[#6B6B6B] truncate">admin@agendify.com</p>
+                <p className="text-sm font-medium truncate">{dados.fantasy_name}</p>
+                <p className="text-xs text-[#6B6B6B] truncate">{dados.email }</p>
               </div>
               <button
                 onClick={(e) => {

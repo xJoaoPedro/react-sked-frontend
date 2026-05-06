@@ -39,7 +39,7 @@ const productCategories = {
 }
 
 export function InventoryPage() {
-  const { dados } = useOutletContext();
+  const { dados, refreshDados } = useOutletContext();
   const [data, setDataState] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -102,7 +102,7 @@ export function InventoryPage() {
     } catch (err) {
       handleProductError(err)
     } finally {
-      await fetchPageData()
+      await Promise.all([fetchPageData(), refreshDados()])
     }
   };
 
@@ -127,7 +127,7 @@ export function InventoryPage() {
     } catch (err) {
       handleProductError(err)
     } finally {
-      await fetchPageData();
+      await Promise.all([fetchPageData(), refreshDados()]);
       setEditingProduct(null);
       resetForm();
     }    
@@ -141,7 +141,7 @@ export function InventoryPage() {
     } catch (err) {
       handleProductError(err)
     } finally {
-      await fetchPageData();
+      await Promise.all([fetchPageData(), refreshDados()]);
     }
     
   };
@@ -161,7 +161,7 @@ export function InventoryPage() {
     } catch (err) {
       handleProductError(err)
     } finally {
-      await fetchPageData();
+      await Promise.all([fetchPageData(), refreshDados()]);
       setEditingProduct(null);
       resetForm();
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -10,62 +10,39 @@ import { Building2, Calendar, Bell, CreditCard, Palette, Shield, Upload, Save, M
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText, } from "@/components/ui/input-group";
 import { LoadingPage } from "./LoadingPage";
+import { useOutletContext } from "react-router-dom";
+import { formatPhone } from "@/lib/parsers";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 
 export function SettingsPage() {
-  // Company Profile State
-  const [companyName, setCompanyName] = useState("Agendify Salão de Beleza");
-  const [companyEmail, setCompanyEmail] = useState("contato@agendify.com.br");
-  const [companyPhone, setCompanyPhone] = useState("(11) 98765-4321");
-  const [companyWebsite, setCompanyWebsite] = useState("www.agendify.com.br");
-  const [companyLogo, setCompanyLogo] = useState("");
+  const { dados, updateDados } = useOutletContext();
+  const [data, setDataState] = useState(null);
 
-  // Scheduling Settings
-  const [appointmentInterval, setAppointmentInterval] = useState("15");
-  const [minAdvanceBooking, setMinAdvanceBooking] = useState("2");
-  const [maxAdvanceBooking, setMaxAdvanceBooking] = useState("30");
-  const [cancellationDeadline, setCancellationDeadline] = useState("24");
-  const [autoConfirm, setAutoConfirm] = useState(true);
+  useEffect(() => {
+    if (!dados) return;
 
-  // Notification Settings
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [smsNotifications, setSmsNotifications] = useState(false);
-  const [reminderBefore, setReminderBefore] = useState("24");
-  const [notifyNewAppointment, setNotifyNewAppointment] = useState(true);
-  const [notifyCancellation, setNotifyCancellation] = useState(true);
+    setDataState(dados.settings);
+  }, [dados])
 
-  // Financial Settings
-  const [acceptCash, setAcceptCash] = useState(true);
-  const [acceptDebit, setAcceptDebit] = useState(true);
-  const [acceptCredit, setAcceptCredit] = useState(true);
-  const [acceptPix, setAcceptPix] = useState(true);
+  const   handlePhoneChange = (value: string) => {
+    const cleanedPhone = value.replace(/\D/g, "").slice(0, 11);
 
-  // Appearance Settings
-  const [primaryColor, setPrimaryColor] = useState("#00A676");
-  const [bookingPageUrl, setBookingPageUrl] = useState("salon-beleza");
-  const [showPrices, setShowPrices] = useState(true);
-  const [requireLogin, setRequireLogin] = useState(false);
-
-  // Security Settings
-  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
-  const [sessionTimeout, setSessionTimeout] = useState("30");
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCompanyLogo(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    setDataState((prev) => ({ ...prev, phone: cleanedPhone }));
   };
 
-  const handleSaveSection = (sectionName: string) => {
-    // Simular salvamento
-    console.log(`Salvando seção: ${sectionName}`);
-    alert(`Configurações de ${sectionName} salvas com sucesso!`);
-  };
+  const handleSaveData = async () => {
+    await api.patch(`/companies/${localStorage.getItem('companyId')}`, data)
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/settings`)).data.data
+    
+    toast.success('Dados da empresa alterados com sucesso!')
+    setDataState(response)
+    updateDados((prev) => ({
+      ...prev,
+      settings: response,
+    }));
+  }
 
   if (data === null) return <LoadingPage />
 
@@ -102,9 +79,9 @@ export function SettingsPage() {
                 <div className="flex-shrink-0">
                   <Label htmlFor="logo-upload" className="cursor-pointer block">
                     <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-lg">
-                      {companyLogo ? (
+                      {data.photo ? (
                         <img
-                          src={companyLogo}
+                          src={data.photo}
                           alt="Logo"
                           className="w-full h-full object-cover"
                         />
@@ -122,7 +99,7 @@ export function SettingsPage() {
                     id="logo-upload"
                     type="file"
                     accept="image/*"
-                    onChange={handleLogoUpload}
+                    // onChange={handleLogoUpload}
                     className="hidden"
                   />
                 </div>
@@ -133,8 +110,10 @@ export function SettingsPage() {
                     <Label htmlFor="company-name">Nome da empresa</Label>
                     <Input
                       id="company-name"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
+                      value={data.fantasy_name}
+                      onChange={(e) =>
+                        setDataState((prev) => ({ ...prev, fantasy_name: e.target.value }))
+                      }
                       placeholder="Nome do seu negócio"
                     />
                   </div>
@@ -146,8 +125,10 @@ export function SettingsPage() {
                       <Input
                         id="company-email"
                         type="email"
-                        value={companyEmail}
-                        onChange={(e) => setCompanyEmail(e.target.value)}
+                        value={data.email}
+                        onChange={(e) =>
+                          setDataState((prev) => ({ ...prev, email: e.target.value }))
+                        }
                         className="pl-10"
                       />
                     </div>
@@ -159,8 +140,12 @@ export function SettingsPage() {
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="company-phone"
-                        value={companyPhone}
-                        onChange={(e) => setCompanyPhone(e.target.value)}
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={15}
+                        placeholder="(11) 99999-9999"
+                        value={formatPhone(data.phone ?? "")}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
                         className="pl-10"
                       />
                     </div>
@@ -172,8 +157,10 @@ export function SettingsPage() {
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="company-website"
-                        value={companyWebsite}
-                        onChange={(e) => setCompanyWebsite(e.target.value)}
+                        value={data.website}
+                        onChange={(e) =>
+                          setDataState((prev) => ({ ...prev, website: e.target.value }))
+                        }
                         className="pl-10"
                       />
                     </div>
@@ -184,263 +171,7 @@ export function SettingsPage() {
               <div className="flex justify-end">
                 <Button
                   className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleSaveSection("Perfil da Empresa")}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Scheduling Settings */}
-          <Card className="gap-0">
-            <div className="px-6 py-4 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Agendamento</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Configure regras para reservas e cancelamentos
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="appointment-interval">
-                    Intervalo entre atendimentos
-                  </Label>
-                  <Select
-                    value={appointmentInterval}
-                    onValueChange={setAppointmentInterval}
-                  >
-                    <SelectTrigger id="appointment-interval" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Nenhum</SelectItem>
-                      <SelectItem value="15">15 minutos</SelectItem>
-                      <SelectItem value="30">30 minutos</SelectItem>
-                      <SelectItem value="45">45 minutos</SelectItem>
-                      <SelectItem value="60">1 hora</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="min-advance">Antecedência mínima</Label>
-                  <Select
-                    value={minAdvanceBooking}
-                    onValueChange={setMinAdvanceBooking}
-                  >
-                    <SelectTrigger id="min-advance" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Nenhuma</SelectItem>
-                      <SelectItem value="1">1 hora</SelectItem>
-                      <SelectItem value="2">2 horas</SelectItem>
-                      <SelectItem value="4">4 horas</SelectItem>
-                      <SelectItem value="24">24 horas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="max-advance">Antecedência máxima</Label>
-                  <Select
-                    value={maxAdvanceBooking}
-                    onValueChange={setMaxAdvanceBooking}
-                  >
-                    <SelectTrigger id="max-advance" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Nenhuma</SelectItem>
-                      <SelectItem value="7">7 dias</SelectItem>
-                      <SelectItem value="15">15 dias</SelectItem>
-                      <SelectItem value="30">30 dias</SelectItem>
-                      <SelectItem value="60">60 dias</SelectItem>
-                      <SelectItem value="90">90 dias</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cancellation-deadline">
-                    Prazo para cancelamento
-                  </Label>
-                  <Select
-                    value={cancellationDeadline}
-                    onValueChange={setCancellationDeadline}
-                  >
-                    <SelectTrigger id="cancellation-deadline" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Nenhum</SelectItem>
-                      <SelectItem value="2">2 horas antes</SelectItem>
-                      <SelectItem value="6">6 horas antes</SelectItem>
-                      <SelectItem value="12">12 horas antes</SelectItem>
-                      <SelectItem value="24">24 horas antes</SelectItem>
-                      <SelectItem value="48">48 horas antes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                <div>
-                  <p className="font-medium">Confirmação automática</p>
-                  <p className="text-sm text-muted-foreground">
-                    Agendamentos são confirmados automaticamente
-                  </p>
-                </div>
-                <Switch
-                  checked={autoConfirm}
-                  onCheckedChange={setAutoConfirm}
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleSaveSection("Agendamento")}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Notification Settings */}
-          <Card className="gap-0">
-            <div className="px-6 py-4 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Notificações</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Configure lembretes e alertas automáticos
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium">Notificações por e-mail</p>
-                      <div className="flex items-center">
-                        <p className="text-sm text-muted-foreground">
-                          Enviar lembretes por e-mail 
-                        </p>
-                        <Tooltip disableHoverableContent>
-                          <TooltipTrigger asChild>
-                            <div>
-                              <Button 
-                                size="xs"
-                                className="h-8 w-8 p-0 rounded rounded-md bg-transparent hover:bg-transparent"
-                              >
-                                <HelpCircle className="w-4 h-4 stroke-yellow-500" />
-                              </Button>
-                            </div>
-                          </TooltipTrigger>
-
-                          <TooltipContent side="top" sideOffset={4} className="bg-yellow-500 fill-yellow-500">
-                            Caso o cliente não possua email cadastrado, a notificação não será enviada.
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                      
-                    </div>
-                  </div>
-                  <Switch
-                    checked={emailNotifications}
-                    onCheckedChange={setEmailNotifications}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <MessageCircle className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium">Notificações por Whatsapp</p>
-                      <p className="text-sm text-muted-foreground">
-                        Enviar lembretes por mensagem de texto via Whatsapp
-                      </p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={smsNotifications}
-                    onCheckedChange={setSmsNotifications}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <Label htmlFor="reminder-before">Enviar lembrete</Label>
-                <Select
-                  value={reminderBefore}
-                  onValueChange={setReminderBefore}
-                >
-                  <SelectTrigger id="reminder-before">
-                    <Clock className="w-4 h-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Não enviar</SelectItem>
-                    <SelectItem value="1">1 hora antes</SelectItem>
-                    <SelectItem value="2">2 horas antes</SelectItem>
-                    <SelectItem value="6">6 horas antes</SelectItem>
-                    <SelectItem value="24">24 horas antes</SelectItem>
-                    <SelectItem value="48">48 horas antes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="border-t border-border pt-4 space-y-3">
-                <p className="font-medium text-sm">Notificar sobre:</p>
-
-                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Novo agendamento</span>
-                  </div>
-                  <Switch
-                    checked={notifyNewAppointment}
-                    onCheckedChange={setNotifyNewAppointment}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Cancelamentos</span>
-                  </div>
-                  <Switch
-                    checked={notifyCancellation}
-                    onCheckedChange={setNotifyCancellation}
-                  />
-                </div>
-
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <Button
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleSaveSection("Notificações")}
+                  onClick={() => handleSaveData("Perfil da Empresa")}
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Salvar Alterações
@@ -450,7 +181,7 @@ export function SettingsPage() {
           </Card>
 
           {/* Financial Settings */}
-          <Card className="gap-0">
+          {/* <Card className="gap-0">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -525,205 +256,7 @@ export function SettingsPage() {
                 </Button>
               </div>
             </div>
-          </Card>
-
-          {/* Appearance Settings */}
-          <Card className="gap-0">
-            <div className="px-6 py-4 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Palette className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Aparência</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Personalize a página de agendamento pública
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="primary-color">Cor primária</Label>
-                <div className="flex gap-3 items-center">
-                  <Input
-                    id="primary-color"
-                    type="color"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="w-20 h-10 cursor-pointer"
-                  />
-                  <Input
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="flex-1"
-                    placeholder="#00A676"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="booking-url">
-                  URL da página de agendamento
-                </Label>
-                <div className="relative">
-                  <InputGroup>
-                    <InputGroupInput 
-                      id="booking-url"
-                      value={bookingPageUrl}
-                      onChange={(e) => setBookingPageUrl(e.target.value)}
-                    />
-                    <InputGroupAddon>
-                      <InputGroupText>sked.com.br/</InputGroupText>
-                    </InputGroupAddon>
-                    <InputGroupAddon align="inline-end">
-                      <Tooltip disableHoverableContent>
-                        <TooltipTrigger asChild>
-                          <div>
-                            <Button 
-                              size="sm"
-                              className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TooltipTrigger>
-
-                        <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                          Copiar
-                        </TooltipContent>
-                      </Tooltip>
-                      
-                    </InputGroupAddon>
-                  </InputGroup>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Link público para seus clientes agendarem serviços
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                  <div>
-                    <p className="font-medium">Exibir preços</p>
-                    <p className="text-sm text-muted-foreground">
-                      Mostrar valores dos serviços na página pública
-                    </p>
-                  </div>
-                  <Switch
-                    checked={showPrices}
-                    onCheckedChange={setShowPrices}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                  <div>
-                    <p className="font-medium">Exigir login</p>
-                    <p className="text-sm text-muted-foreground">
-                      Clientes precisam criar conta para agendar
-                    </p>
-                  </div>
-                  <Switch
-                    checked={requireLogin}
-                    onCheckedChange={setRequireLogin}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleSaveSection("Aparência")}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Security Settings */}
-          <Card className="gap-0">
-            <div className="px-6 py-4 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Segurança</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Proteja sua conta e dados
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                <div>
-                  <p className="font-medium">Autenticação de dois fatores</p>
-                  <p className="text-sm text-muted-foreground">
-                    Adicione uma camada extra de segurança
-                  </p>
-                </div>
-                <Switch
-                  checked={twoFactorAuth}
-                  onCheckedChange={setTwoFactorAuth}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="session-timeout">
-                  Tempo de sessão (minutos)
-                </Label>
-                <Select
-                  value={sessionTimeout}
-                  onValueChange={setSessionTimeout}
-                >
-                  <SelectTrigger id="session-timeout">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">15 minutos</SelectItem>
-                    <SelectItem value="30">30 minutos</SelectItem>
-                    <SelectItem value="60">1 hora</SelectItem>
-                    <SelectItem value="120">2 horas</SelectItem>
-                    <SelectItem value="240">4 horas</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Tempo de inatividade antes de desconectar automaticamente
-                </p>
-              </div>
-
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <div className="flex gap-3">
-                  <Shield className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-amber-900">Alterar senha</p>
-                    <p className="text-sm text-amber-700 mb-3">
-                      Recomendamos trocar sua senha a cada 90 dias
-                    </p>
-                    <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
-                      <Lock className="w-4 h-4 mr-2" />
-                      Alterar senha
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleSaveSection("Segurança")}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </Button>
-              </div>
-            </div>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>

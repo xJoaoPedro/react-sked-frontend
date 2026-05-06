@@ -4,6 +4,7 @@ import { Clock, User, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle, } from "@/components/ui/empty"
 import { useNavigate } from 'react-router-dom';
+import { formatDate, formatTime } from '@/lib/parsers';
 
 interface Appointment {
   id: string;
@@ -56,13 +57,7 @@ export function AppointmentList({appointments}: AppointmentProps) {
             <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
               <Clock className="w-4 h-4" />
               <span className="text-sm">
-                {new Date(appointment.time).toLocaleString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatDate(appointment.dateTime)}, {formatTime(appointment.dateTime)}
               </span>
             </div>
             
