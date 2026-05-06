@@ -58,6 +58,7 @@ export function AppointmentsPage() {
       PENDING: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20' },
       CANCELED: { label: 'Cancelado', className: 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20' },
       COMPLETED: { label: 'Concluído', className: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20' },
+      NO_SHOW: { label: 'Não compareceu', className: 'bg-gray-500/10 text-gray-600 border border-gray-500/20 hover:bg-gray-500/' }
     };
     
     const config = statusConfig[status];

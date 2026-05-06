@@ -125,6 +125,11 @@ export function DailySchedulePage() {
 
   if (data === null) return <LoadingPage />
 
+  const shouldUseFixedColumns = data.professionals.length > 3;
+  const gridTemplateColumns = shouldUseFixedColumns
+    ? `96px repeat(${data.professionals.length}, 350px)`
+    : `96px repeat(${data.professionals.length}, minmax(0, 1fr))`;
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <PageHeader title="Agenda do Dia" subtitle={formatDate(selectedDate)} />
@@ -168,9 +173,12 @@ export function DailySchedulePage() {
 
         {data.professionals.length > 0 ? (
           <Card className="flex-1 overflow-auto scrollbar-custom">
-            <div className="flex min-w-max">
+            <div
+              className={shouldUseFixedColumns ? "inline-grid min-w-max" : "grid min-w-full"}
+              style={{ gridTemplateColumns }}
+            >
               {/* Time column */}
-              <div className="w-24 flex-shrink-0 border-r border-border sticky left-0 bg-background z-20">
+              <div className="border-r border-border sticky left-0 bg-background z-20">
                 <div className="h-12 border-b border-border sticky top-0 bg-white z-20" />{" "}
                 {/* Header spacer */}
                 {timeSlots.map((time) => (
@@ -194,7 +202,7 @@ export function DailySchedulePage() {
                 return (
                   <div
                     key={professional.id}
-                    className="w-[350px] flex-shrink-0 border-r border-border last:border-r-0"
+                    className="border-r border-border last:border-r-0 min-w-0"
                   >
                     {/* Professional header */}
                     <div className="h-12 border-b border-border bg-background flex items-center justify-center px-4 sticky top-0 z-10">

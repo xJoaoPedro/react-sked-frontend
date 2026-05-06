@@ -151,7 +151,15 @@ export function Sidebar({ dados }) {
                   }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    <span className="text-popover text-sm font-medium">AD</span>
+                    {dados.photo ? (
+                      <img
+                        src={dados.photo}
+                        alt={dados.fantasy_name ?? "Foto do perfil"}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className={`w-4 h-4 ${location.pathname === '/settings' ? 'text-primary' : 'text-white' }`} />
+                    )}
                   </div>
                   <button
                     onClick={(e) => {
