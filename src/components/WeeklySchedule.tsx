@@ -1,4 +1,5 @@
 import { Card } from './ui/card';
+import { getDateKeyInTimeZone } from '@/lib/parsers';
 
 interface DashboardProps {
   weekStats: {
@@ -21,12 +22,10 @@ const dayMap = {
 
 const weekStatsMapper = (item) => {
   const dow = Number(item.dow)
-  const dateOnly = item.date.split("T")[0]
+  const dateOnly = getDateKeyInTimeZone(item.date)
   const day = Number(dateOnly.split("-")[2])
 
-  const today = new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Sao_Paulo",
-  })
+  const today = getDateKeyInTimeZone(new Date())
 
   return {
     day: dayMap[dow],
@@ -40,7 +39,7 @@ const weekStatsMapper = (item) => {
 export function WeeklySchedule({ weekStats }: DashboardProps) {
   const weekDays = weekStats.map(weekStatsMapper)
   
-  const maxAppointments = Math.max(...weekDays.map(d => d.appointments));
+  const maxAppointments = Math.max(...weekDays.map(d => d.appointments), 0);
 
   return (
     <Card className="p-6 gap-0">
@@ -67,7 +66,7 @@ export function WeeklySchedule({ weekStats }: DashboardProps) {
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <div 
                   className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: day.appointments === 0 ? '0' : `${(day.appointments / maxAppointments) * 100}%` }}
+                  style={{ width: day.appointments === 0 || maxAppointments === 0 ? '0' : `${(day.appointments / maxAppointments) * 100}%` }}
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">

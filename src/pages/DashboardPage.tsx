@@ -7,8 +7,9 @@ import { Calendar, Users, DollarSign, Clock } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { formatPrice } from "@/lib/parsers";
+import { dateKeyToIsoString, formatPrice, getDateKeyInTimeZone } from "@/lib/parsers";
 import { LoadingPage } from "./LoadingPage";
+import { api } from "@/lib/api";
 
 export function DashboardPage() {
   const { dados } = useOutletContext();
@@ -17,8 +18,99 @@ export function DashboardPage() {
   useEffect(() => {
     if (dados === null) return;
 
-    setDataState(dados.dashboard);
-  }, [dados, data]);
+    const dashboard = dados.dashboard;
+    const dailyAppointments = Array.isArray(dados?.dailySchedules?.appointments)
+      ? dados.dailySchedules.appointments
+      : null;
+
+    if (!dashboard) {
+      setDataState(null);
+      return;
+    }
+
+    if (!dailyAppointments) {
+      setDataState(dashboard);
+      return;
+    }
+
+    const todayKey = getDateKeyInTimeZone(new Date());
+    const totalToday = dailyAppointments.filter((appointment) =>
+      getDateKeyInTimeZone(appointment.start_time) === todayKey,
+    ).length;
+
+    const weekStats = Array.isArray(dashboard.weekStats)
+      ? dashboard.weekStats.map((item) =>
+          getDateKeyInTimeZone(item.date) === todayKey
+            ? { ...item, appointments: totalToday }
+            : item,
+        )
+      : [];
+
+    setDataState({
+      ...dashboard,
+      totalToday,
+      weekStats,
+    });
+  }, [dados]);
+
+  useEffect(() => {
+    if (!dados?.dashboard || !dados?.dailySchedules?.id) return;
+    if (!Array.isArray(dados.dashboard.weekStats) || dados.dashboard.weekStats.length === 0) return;
+
+    let isActive = true;
+
+    async function syncWeekStats() {
+      try {
+        const scheduleId = dados.dailySchedules.id;
+        const weekStatsWithCounts = await Promise.all(
+          dados.dashboard.weekStats.map(async (item) => {
+            const requestDate = dateKeyToIsoString(getDateKeyInTimeZone(item.date));
+            const response = (
+              await api.get(`/appointments/${scheduleId}/${requestDate}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+              })
+            ).data.data;
+
+            const appointmentCount = Array.isArray(response)
+              ? response.filter((appointment) =>
+                  getDateKeyInTimeZone(appointment.start_time) === getDateKeyInTimeZone(item.date),
+                ).length
+              : 0;
+
+            return {
+              ...item,
+              appointments: appointmentCount,
+            };
+          }),
+        );
+
+        if (!isActive) return;
+
+        const todayKey = getDateKeyInTimeZone(new Date());
+        const todayCount =
+          weekStatsWithCounts.find((item) => getDateKeyInTimeZone(item.date) === todayKey)
+            ?.appointments ?? 0;
+
+        setDataState((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            totalToday: todayCount,
+            weekStats: weekStatsWithCounts,
+          };
+        });
+      } catch (error) {
+        console.error("Erro ao sincronizar weekStats:", error);
+      }
+    }
+
+    syncWeekStats();
+
+    return () => {
+      isActive = false;
+    };
+  }, [dados]);
 
   if (data === null) return <LoadingPage />
 

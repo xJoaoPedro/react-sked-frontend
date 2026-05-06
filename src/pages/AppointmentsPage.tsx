@@ -475,7 +475,7 @@ export function AppointmentsPage() {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Data</label>
                   <CalendarDatePicker
-                    value={filterDate ? new Date(filterDate) : undefined}
+                    value={formData.appointment_date ? new Date(`${formData.appointment_date}T12:00:00`) : undefined}
                     onChange={(date) => {
                       if (!date) return setFilterDate("")
 

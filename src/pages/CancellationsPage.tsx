@@ -593,151 +593,149 @@ export function CancellationsPage() {
               </div>
             </div>
 
-            <div>
-              <Table className="w-full">
-                <TableHeader className="table table-fixed z-10">
-                  <TableRow className="table w-full table-fixed bg-muted/50">
-                    <TableHead className="font-semibold text-foreground w-[100px]">ID</TableHead>
-                    <TableHead className="font-semibold text-foreground">Data/Hora</TableHead>
-                    <TableHead className="font-semibold text-foreground">Cliente</TableHead>
-                    <TableHead className="font-semibold text-foreground">Serviço</TableHead>
-                    <TableHead className="font-semibold text-foreground">Profissional</TableHead>
-                    <TableHead className="font-semibold text-foreground">Motivo</TableHead>
-                    <TableHead className="font-semibold text-foreground">Cancelado por</TableHead>
-                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
+            <div className="h-[600px] overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
+                  <tr className="border-b transition-colors">
+                    <th className="h-10 w-[100px] px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">ID</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Data/Hora</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Cliente</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Serviço</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Profissional</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Motivo</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Cancelado por</th>
+                    <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
+                  </tr>
+                </thead>
 
-                <div className="h-[500px] flex overflow-y-auto">
-                  <TableBody className="block overflow-y-auto">
-                    {data.recentCancellations.length === 0 ? (
-                      <TableRow className='table table-fixed w-full h-full'>
-                        <TableCell colSpan={9} className="w-32 text-center py-16">
-                          <Empty>
-                            <EmptyHeader>
-                              <EmptyMedia variant="icon">
-                                <CalendarX />
-                              </EmptyMedia>
-                              <EmptyTitle className='text-muted-foreground'>Não há cancelamentos para listar!</EmptyTitle>
-                            </EmptyHeader>
-                          </Empty>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      data.recentCancellations.map((cancellation) => (
-                        <TableRow key={cancellation.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                          <TableCell className="w-[100px] font-mono text-sm font-semibold text-destructive">{cancellation.id}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm">{formatDate(cancellation.date)}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">{formatTime(cancellation.date)}</span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
+                <tbody className="[&_tr:last-child]:border-0">
+                  {data.recentCancellations.length === 0 ? (
+                    <tr className="border-b transition-colors">
+                      <td colSpan={9} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
+                        <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
+                          <CalendarX className="w-12 h-12 opacity-20" />
+                          <p className="font-medium">
+                            Não há cancelamentos para listar!
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    data.recentCancellations.map((cancellation) => (
+                      <tr key={cancellation.id} className="border-b transition-colors hover:bg-muted/30">
+                        <td className="w-[100px] p-2 align-middle whitespace-nowrap font-mono text-sm font-semibold text-destructive">
+                          {cancellation.id}
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                                <User className="w-4 h-4 text-destructive" />
-                              </div>
-                              <span className="font-medium">{cancellation.clientName}</span>
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm">{formatDate(cancellation.date)}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">{cancellation.serviceName}</span>
-                          </TableCell>
-                          <TableCell>
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                                <User className="w-4 h-4 text-destructive" />
-                              </div>
-                              <span className="font-medium">{cancellation.professionalName}</span>
+                              <Clock className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">{formatTime(cancellation.date)}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                              <span className="text-sm">{formatLimitText(reasons[cancellation.reason], 24)}</span>
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 text-destructive" />
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={
-                                cancellation.cancelledBy === "client"
-                                  ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                                  : "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                              }
-                            >
-                              {cancellation.cancelledBy === "client"
-                                ? "Cliente"
-                                : "Estabelecimento"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button 
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
-                                  Visualizar
-                                </TooltipContent>
-                              </Tooltip>
-                              
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button  
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                                  Editar
-                                </TooltipContent>
-                              </Tooltip>
-                              
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button  
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                                  Excluir
-                                </TooltipContent>
-                              </Tooltip>
+                            <span className="font-medium">{cancellation.clientName}</span>
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <span className="text-muted-foreground">{cancellation.serviceName}</span>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 text-destructive" />
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </div>                
-              </Table>
+                            <span className="font-medium">{cancellation.professionalName}</span>
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{formatLimitText(reasons[cancellation.reason], 24)}</span>
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <Badge
+                            variant="outline"
+                            className={
+                              cancellation.cancelledBy === "client"
+                                ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                            }
+                          >
+                            {cancellation.cancelledBy === "client"
+                              ? "Cliente"
+                              : "Estabelecimento"}
+                          </Badge>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <div className="flex items-center gap-1">
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button 
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+
+                              <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
+                                Visualizar
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button  
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+
+                              <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                                Editar
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip disableHoverableContent>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button  
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+
+                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                                Excluir
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
 
             {/* Pagination or Summary */}

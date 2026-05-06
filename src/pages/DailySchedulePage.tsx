@@ -7,6 +7,7 @@ import { useOutletContext } from "react-router-dom";
 import { api } from "@/lib/api";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { LoadingPage } from './LoadingPage';
+import { getTimePartsInTimeZone, isSameDayInTimeZone } from "@/lib/parsers";
 
 const timeSlots = [
   "06:00", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -28,13 +29,7 @@ export function DailySchedulePage() {
   if (data === null) return <div>Carregando...</div>;
 
   const filteredAppointments = data.appointments.filter((apt) => {
-    const date = new Date(apt.start_time);
-
-    return (
-      date.getDate() === selectedDate.getDate() &&
-      date.getMonth() === selectedDate.getMonth() &&
-      date.getFullYear() === selectedDate.getFullYear()
-    );
+    return isSameDayInTimeZone(apt.start_time, selectedDate);
   });
 
   const formatDate = (date, schedule = false) => {
@@ -110,11 +105,11 @@ export function DailySchedulePage() {
   };
 
   const getAppointmentPosition = (start, end) => {
-    const s = new Date(start);
-    const e = new Date(end);
+    const s = getTimePartsInTimeZone(start);
+    const e = getTimePartsInTimeZone(end);
 
-    const startMinutes = s.getHours() * 60 + s.getMinutes();
-    const endMinutes = e.getHours() * 60 + e.getMinutes();
+    const startMinutes = s.hours * 60 + s.minutes;
+    const endMinutes = e.hours * 60 + e.minutes;
     const base = timeToMinutes(timeSlots[0]);
 
     return {
@@ -195,7 +190,7 @@ export function DailySchedulePage() {
 
               {/* Professional columns */}
               {data.professionals.map((professional) => {
-                const professionalAppointments = data.appointments.filter(
+                const professionalAppointments = filteredAppointments.filter(
                   (apt) => apt.employee_id === professional.id,
                 );
 
