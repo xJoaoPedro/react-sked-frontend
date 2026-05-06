@@ -73,14 +73,16 @@ export function Layout() {
 
   if (!localStorage.getItem("token")) return <Navigate to="/login" replace />;
 
-  if (!dados) return <LoadingPage />
-
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar dados={dados.settings} />
-      <main className="flex-1 flex flex-col overflow-auto">
-        <Outlet context={{ dados, updateDados, refreshDados }} />
-      </main>
+      {!dados ? (
+        <LoadingPage />
+      ) : (
+        <><Sidebar dados={dados.settings} /><main className="flex-1 flex flex-col overflow-auto">
+            <Outlet context={{ dados, updateDados, refreshDados }} />
+          </main></>
+      )}
+      
     </div>
   );
 }

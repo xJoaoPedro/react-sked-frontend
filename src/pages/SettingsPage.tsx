@@ -5,10 +5,8 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { PageHeader } from "../components/PageHeader";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
-import { Building2, Calendar, Bell, CreditCard, Palette, Shield, Upload, Save, Mail, Phone, Globe, Clock, DollarSign, Check, MessageCircle, HelpCircle, Copy, Lock, } from "lucide-react";
+import { Building2, CreditCard, Upload, Save, Mail, Phone, Globe, DollarSign, Check, Baby, Wifi, Car, Puzzle, Accessibility, PawPrint, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText, } from "@/components/ui/input-group";
 import { LoadingPage } from "./LoadingPage";
 import { useOutletContext } from "react-router-dom";
 import { formatPhone } from "@/lib/parsers";
@@ -19,6 +17,7 @@ import { toast } from "sonner";
 export function SettingsPage() {
   const { dados, updateDados } = useOutletContext();
   const [data, setDataState] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!dados) return;
@@ -32,19 +31,60 @@ export function SettingsPage() {
     setDataState((prev) => ({ ...prev, phone: cleanedPhone }));
   };
 
+  const hasAcceptedPaymentMethod = (method: string) =>
+    (data.acceptedPaymentMethods || []).includes(method);
+
+  const handlePaymentMethodChange = (method: string, checked: boolean) => {
+    setDataState((prev) => {
+      const currentMethods = prev.acceptedPaymentMethods || [];
+
+      return {
+        ...prev,
+        acceptedPaymentMethods: checked
+          ? [...new Set([...currentMethods, method])]
+          : currentMethods.filter((item) => item !== method),
+      };
+    });
+  };
+
+  const hasAmenity = (amenity: string) =>
+    (data.amenities || []).includes(amenity);
+
+  const handleAmenityChange = (amenity: string, checked: boolean) => {
+    setDataState((prev) => {
+      const currentAmenities = prev.amenities || [];
+
+      return {
+        ...prev,
+        amenities: checked
+          ? [...new Set([...currentAmenities, amenity])]
+          : currentAmenities.filter((item) => item !== amenity),
+      };
+    });
+  };
+
   const handleSaveData = async () => {
-    await api.patch(`/companies/${localStorage.getItem('companyId')}`, data)
-    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/settings`)).data.data
-    
-    toast.success('Dados da empresa alterados com sucesso!')
-    setDataState(response)
-    updateDados((prev) => ({
-      ...prev,
-      settings: response,
-    }));
+    try {
+      setIsSaving(true);
+
+      await api.patch(`/companies/${localStorage.getItem('companyId')}`, data)
+      const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/settings`)).data.data
+      
+      toast.success('Dados da empresa alterados com sucesso!')
+      setDataState(response)
+      updateDados((prev) => ({
+        ...prev,
+        settings: response,
+      }));
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   if (data === null) return <LoadingPage />
+
+  const hasPendingChanges =
+    JSON.stringify(data) !== JSON.stringify(dados?.settings);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -59,7 +99,7 @@ export function SettingsPage() {
         <div className="p-6 space-y-6">
           {/* Company Profile */}
           <Card className="gap-0">
-            <div className="px-6 py-4 border-b border-border">
+            <div className="px-6 py-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Building2 className="w-5 h-5 text-primary" />
@@ -168,21 +208,9 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
-                <Button
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleSaveData("Perfil da Empresa")}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </Button>
-              </div>
             </div>
-          </Card>
 
-          {/* Financial Settings */}
-          {/* <Card className="gap-0">
-            <div className="px-6 py-4 border-b border-border">
+            <div className="px-6 py-4  border-t border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <CreditCard className="w-5 h-5 text-primary" />
@@ -195,7 +223,6 @@ export function SettingsPage() {
                 </div>
               </div>
             </div>
-
             <div className="p-6 space-y-6">
               <div>
                 <p className="font-medium mb-3">Formas de pagamento aceitas</p>
@@ -206,8 +233,10 @@ export function SettingsPage() {
                       <span className="font-medium">Dinheiro</span>
                     </div>
                     <Switch
-                      checked={acceptCash}
-                      onCheckedChange={setAcceptCash}
+                      checked={hasAcceptedPaymentMethod("CASH")}
+                      onCheckedChange={(checked) =>
+                        handlePaymentMethodChange("CASH", checked)
+                      }
                     />
                   </div>
 
@@ -217,8 +246,10 @@ export function SettingsPage() {
                       <span className="font-medium">Cartão de Débito</span>
                     </div>
                     <Switch
-                      checked={acceptDebit}
-                      onCheckedChange={setAcceptDebit}
+                      checked={hasAcceptedPaymentMethod("DEBIT")}
+                      onCheckedChange={(checked) =>
+                        handlePaymentMethodChange("DEBIT", checked)
+                      }
                     />
                   </div>
 
@@ -228,8 +259,10 @@ export function SettingsPage() {
                       <span className="font-medium">Cartão de Crédito</span>
                     </div>
                     <Switch
-                      checked={acceptCredit}
-                      onCheckedChange={setAcceptCredit}
+                      checked={hasAcceptedPaymentMethod("CREDIT")}
+                      onCheckedChange={(checked) =>
+                        handlePaymentMethodChange("CREDIT", checked)
+                      }
                     />
                   </div>
 
@@ -239,25 +272,141 @@ export function SettingsPage() {
                       <span className="font-medium">PIX</span>
                     </div>
                     <Switch
-                      checked={acceptPix}
-                      onCheckedChange={setAcceptPix}
+                      checked={hasAcceptedPaymentMethod("PIX")}
+                      onCheckedChange={(checked) =>
+                        handlePaymentMethodChange("PIX", checked)
+                      }
                     />
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="flex justify-end">
-                <Button
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleSaveSection("Financeiro")}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </Button>
+            <div className="px-6 py-4 border-t border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Check className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Comodidades</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Recursos e facilidades oferecidos pela empresa
+                  </p>
+                </div>
               </div>
             </div>
-          </Card> */}
+
+            <div className="p-6 space-y-6">
+              <div>
+                <p className="font-medium mb-3">Comodidades disponíveis</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Baby className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Aceita crianças</span>
+                    </div>
+                    <Switch
+                      checked={hasAmenity("ACCEPTS_CHILDREN")}
+                      onCheckedChange={(checked) =>
+                        handleAmenityChange("ACCEPTS_CHILDREN", checked)
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Wifi className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Wi-Fi</span>
+                    </div>
+                    <Switch
+                      checked={hasAmenity("WIFI")}
+                      onCheckedChange={(checked) =>
+                        handleAmenityChange("WIFI", checked)
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Car className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Estacionamento</span>
+                    </div>
+                    <Switch
+                      checked={hasAmenity("PARKING")}
+                      onCheckedChange={(checked) =>
+                        handleAmenityChange("PARKING", checked)
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Puzzle className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Aceita autistas</span>
+                    </div>
+                    <Switch
+                      checked={hasAmenity("ACCEPTS_AUTISTIC")}
+                      onCheckedChange={(checked) =>
+                        handleAmenityChange("ACCEPTS_AUTISTIC", checked)
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Accessibility className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Acessibilidade</span>
+                    </div>
+                    <Switch
+                      checked={hasAmenity("ACCESSIBILITY")}
+                      onCheckedChange={(checked) =>
+                        handleAmenityChange("ACCESSIBILITY", checked)
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <PawPrint className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Pet friendly</span>
+                    </div>
+                    <Switch
+                      checked={hasAmenity("PET_FRIENDLY")}
+                      onCheckedChange={(checked) =>
+                        handleAmenityChange("PET_FRIENDLY", checked)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
+      </div>
+
+      <div className="fixed bottom-6 right-6 z-30">
+        <Tooltip disableHoverableContent>
+          <TooltipTrigger asChild>
+            <Button
+              className={`h-14 w-14 rounded-full p-0 shadow-lg transition-all ${
+                hasPendingChanges
+                  ? "bg-primary hover:bg-primary/90 animate-pulse ring-4 ring-primary/20 scale-105"
+                  : "bg-primary/80 hover:bg-primary/90"
+              }`}
+              onClick={handleSaveData}
+              disabled={isSaving}
+            >
+              <Save className="size-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left" sideOffset={4} className="bg-primary fill-primary">
+            {isSaving
+              ? "Salvando alterações"
+              : hasPendingChanges
+                ? "Você tem alterações pendentes"
+                : "Tudo salvo!"}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
