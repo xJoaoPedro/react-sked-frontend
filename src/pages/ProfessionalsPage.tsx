@@ -18,6 +18,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from "date-fns/locale";
 import { LoadingPage } from './LoadingPage';
+import { getTimePartsInTimeZone } from '@/lib/parsers';
 
 interface WorkSchedule {
   [key: string]: {
@@ -165,8 +166,10 @@ export function ProfessionalsPage() {
       return `${pad(value.getHours())}:${pad(value.getMinutes())}`;
     }
 
-    const isoMatch = value.match(/T(\d{2}):(\d{2})/);
-    if (isoMatch) return `${isoMatch[1]}:${isoMatch[2]}`;
+    if (value.includes('T')) {
+      const { hours, minutes } = getTimePartsInTimeZone(value);
+      return `${pad(hours)}:${pad(minutes)}`;
+    }
 
     if (value.length >= 5) return value.slice(0, 5);
 

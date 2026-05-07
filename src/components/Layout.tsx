@@ -6,6 +6,26 @@ import { jwtDecode } from "jwt-decode";
 import { api } from "@/lib/api";
 import { LoadingPage } from "@/pages/LoadingPage";
 
+const pageTitles: Record<string, string> = {
+  "/login": "Login",
+  "/dashboard": "Dashboard",
+  "/daily-schedule": "Agenda do Dia",
+  "/appointments": "Agendamentos",
+  "/cancellations": "Cancelamentos",
+  "/revenue": "Receita",
+  "/inventory": "Estoque",
+  "/services": "Serviços",
+  "/professionals": "Profissionais",
+  "/customers": "Clientes",
+  "/settings": "Configurações",
+};
+
+const getDocumentTitle = (pathname: string) => {
+  const pageTitle = pageTitles[pathname] ?? "Sked";
+
+  return pageTitle === "Sked" ? pageTitle : `Sked - ${pageTitle}`;
+};
+
 export function Layout() {
   const [dados, setDados] = useState(null);
   const location = useLocation();
@@ -13,6 +33,10 @@ export function Layout() {
   useEffect(() => {
     verifyPermission()
   }, [location.pathname])
+
+  useEffect(() => {
+    document.title = getDocumentTitle(location.pathname);
+  }, [location.pathname]);
 
   function verifyPermission() {
     const token = localStorage.getItem("token");

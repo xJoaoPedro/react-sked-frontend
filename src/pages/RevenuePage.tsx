@@ -5,9 +5,8 @@ import { Badge } from '../components/ui/badge';
 import { PageHeader } from '../components/PageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline } from 'lucide-react';
+import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline, Package } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { formatDate, formatLimitText, formatPrice, formatTime } from '@/lib/parsers';
@@ -157,7 +156,7 @@ export function RevenuePage() {
           </div>
 
           {/* Metrics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Card className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -166,7 +165,7 @@ export function RevenuePage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Receita Total</p>
-                <h3 className="text-2xl font-bold text-foreground">{formatPrice(totalRevenue)}</h3>
+                <h3 className="text-2xl font-bold text-foreground">{formatPrice(totalRevenue - data.totalStockCost)}</h3>
               </div>
             </Card>
 
@@ -199,6 +198,22 @@ export function RevenuePage() {
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Pendente</p>
                 <h3 className="text-2xl font-bold text-foreground">{formatPrice(data.revenuePending)}</h3> 
+              </div>
+            </Card>
+
+            <Card className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <Package className="w-6 h-6 text-destructive" />
+                </div>
+                {/* <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                  {((data.revenuePending / (data.revenuePending + data.revenueReceived)) * 100) > 50 ? (<TrendingUp className="w-3 h-3 mr-1" />) : (<TrendingDown className="w-3 h-3 mr-1" />)}
+                  {data.revenuePending + data.revenueReceived > 0 ? ((data.revenuePending / (data.revenuePending + data.revenueReceived)) * 100).toFixed(1) : 0}%
+                </Badge> */}
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Custo de estoque</p>
+                <h3 className="text-2xl font-bold text-foreground">-{formatPrice(data.totalStockCost)}</h3> 
               </div>
             </Card>
 

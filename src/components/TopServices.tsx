@@ -35,7 +35,7 @@ export function TopServices({services}: TopServicesProps) {
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <div 
                   className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: `${(service.total / maxTotal) * 50}%` }}
+                  style={{ width: `${service.total > 0 ? (service.total / maxTotal) * 50 : 0 }%`}}
                 />
               </div>
             </div>

@@ -46,8 +46,6 @@ export function CustomersPage() {
 
   if (data === null) return <LoadingPage />
 
-  console.log(data)
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}

@@ -1,5 +1,5 @@
 import { register } from "@/lib/register";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
 export function LoginPage() {
@@ -10,6 +10,10 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    document.title = "Sked - Login";
+  }, []);
 
   if (localStorage.getItem("token"))
     return <Navigate to="/dashboard" replace />;

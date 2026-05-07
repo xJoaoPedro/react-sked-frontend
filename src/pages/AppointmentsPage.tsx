@@ -121,8 +121,61 @@ export function AppointmentsPage() {
     return `${hours}:${minutes}`;
   };
 
+  const getTodayDateKey = () => toLocalDateInput(new Date());
+
+  const isPastAppointmentDate =
+    !!formData.appointment_date && formData.appointment_date < getTodayDateKey();
+  const isTodayAppointmentDate = formData.appointment_date === getTodayDateKey();
+
+  const getCurrentSelectableTime = () => {
+    const now = new Date();
+    const totalMinutes = now.getHours() * 60 + now.getMinutes();
+    const nextSlotMinutes = Math.ceil(totalMinutes / 30) * 30;
+    const hours = Math.floor(nextSlotMinutes / 60);
+    const minutes = nextSlotMinutes % 60;
+
+    return new Date(2000, 0, 1, hours, minutes, 0, 0);
+  };
+
+  const getAppointmentMinTime = () => {
+    if (editingAppointment || !isTodayAppointmentDate) {
+      return new Date(2000, 0, 1, 6, 0, 0);
+    }
+
+    const currentSelectableTime = getCurrentSelectableTime();
+    const openingTime = new Date(2000, 0, 1, 6, 0, 0);
+
+    return currentSelectableTime > openingTime ? currentSelectableTime : openingTime;
+  };
+
+  const isTimeBeforeMinimum = (time: string) => {
+    if (!time || editingAppointment || !isTodayAppointmentDate) return false;
+
+    const selectedTime = timeToDate(time);
+    if (!selectedTime) return false;
+
+    return selectedTime < getAppointmentMinTime();
+  };
+
+  const isAppointmentDateTimeInvalid = () => {
+    if (editingAppointment) return false;
+    if (isPastAppointmentDate) return true;
+
+    return isTimeBeforeMinimum(formData.appointment_time);
+  };
+
   const getSelectedService = () =>
     services.find((service) => String(service.id) === String(formData.service_id));
+
+  const buildStartAt = () => {
+    const startAt = new Date(`${formData.appointment_date}T${formData.appointment_time}:00`);
+
+    if (Number.isNaN(startAt.getTime())) {
+      throw new Error('Selecione uma data e horário válidos.');
+    }
+
+    return startAt;
+  };
 
   const buildAppointmentPayload = () => {
     const selectedService = getSelectedService();
@@ -131,14 +184,7 @@ export function AppointmentsPage() {
       throw new Error('Selecione um serviço válido.');
     }
 
-    const startAt = new Date(`${formData.appointment_date}T${formData.appointment_time}:00`);
-
-    if (Number.isNaN(startAt.getTime())) {
-      throw new Error('Selecione uma data e horário válidos.');
-    }
-
-    const duration = Number(selectedService.duration_minutes || 0);
-    const endAt = new Date(startAt.getTime() + duration * 60 * 1000);
+    const startAt = buildStartAt();
 
     return {
       company_id: formData.company_id,
@@ -146,7 +192,6 @@ export function AppointmentsPage() {
       employee_id: Number(formData.employee_id),
       service_id: Number(formData.service_id),
       start_time: startAt.toISOString(),
-      end_time: endAt.toISOString(),
       status: formData.status,
     };
   };
@@ -182,12 +227,12 @@ export function AppointmentsPage() {
   const handleSubmitAppointment = async () => {
     try {
       let clientId = Number(formData.client_id);
-
+      const startAt = buildStartAt();
       const clientPayload = {
         company_id: formData.company_id,
         name: formData.client_name,
         email: formData.client_email,
-        contact: formData.client_contact,
+        phone: formData.client_contact,
       };
 
       if (editingAppointment && clientId) {
@@ -201,6 +246,7 @@ export function AppointmentsPage() {
 
       const payload = buildAppointmentPayload();
       payload.client_id = clientId;
+      payload.start_time = startAt.toISOString();
 
       if (editingAppointment) {
         await api.patch(`/appointments/${editingAppointment.id}`, payload);
@@ -475,12 +521,11 @@ export function AppointmentsPage() {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Data</label>
                   <CalendarDatePicker
-                    value={formData.appointment_date ? new Date(`${formData.appointment_date}T12:00:00`) : undefined}
+                    value={filterDate ? new Date(`${filterDate}T12:00:00`) : undefined}
                     onChange={(date) => {
                       if (!date) return setFilterDate("")
 
-                      const iso = date.toISOString().split("T")[0]
-                      setFilterDate(iso)
+                      setFilterDate(toLocalDateInput(date))
                     }}
                   />
                 </div>
@@ -831,14 +876,26 @@ export function AppointmentsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="appointment-date">Data</Label>
+                <Label htmlFor="appointment-date">Data</Label>
               <CalendarDatePicker
                 value={formData.appointment_date ? new Date(`${formData.appointment_date}T12:00:00`) : undefined}
                 onChange={(date) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    appointment_date: date ? toLocalDateInput(date) : '',
-                  }))
+                  setFormData((prev) => {
+                    const nextDate = date ? toLocalDateInput(date) : '';
+                    const isPast = !!nextDate && nextDate < getTodayDateKey();
+                    const isToday = nextDate === getTodayDateKey();
+                    const selectedTime = prev.appointment_time ? timeToDate(prev.appointment_time) : null;
+                    const shouldResetTime =
+                      !editingAppointment &&
+                      selectedTime !== null &&
+                      (isPast || (isToday && selectedTime < getAppointmentMinTime()));
+
+                    return {
+                      ...prev,
+                      appointment_date: nextDate,
+                      appointment_time: shouldResetTime ? '' : prev.appointment_time,
+                    };
+                  })
                 }
               />
             </div>
@@ -860,7 +917,8 @@ export function AppointmentsPage() {
                 locale={ptBR}
                 placeholderText="HH:mm"
                 isClearable
-                minTime={new Date(2000, 0, 1, 6, 0, 0)}
+                disabled={!editingAppointment && isPastAppointmentDate}
+                minTime={getAppointmentMinTime()}
                 maxTime={new Date(2000, 0, 1, 23, 59, 0)}
                 className="w-full rounded-md border border-primary px-3 py-2 text-sm"
               />
@@ -905,12 +963,12 @@ export function AppointmentsPage() {
               onClick={handleSubmitAppointment}
               disabled={
                 !formData.client_name ||
-                !formData.client_email ||
                 !formData.client_contact ||
                 !formData.employee_id ||
                 !formData.service_id ||
                 !formData.appointment_date ||
-                !formData.appointment_time
+                !formData.appointment_time ||
+                isAppointmentDateTimeInvalid()
               }
             >
               {editingAppointment ? 'Salvar alterações' : 'Criar agendamento'}

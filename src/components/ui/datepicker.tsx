@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export function DatePicker({ value, onChange }) {
+export function DatePicker({ value, onChange, ...calendarProps }) {
   const [date, setDate] = React.useState<Date | undefined>();
 
   React.useEffect(() => {
@@ -44,6 +44,7 @@ export function DatePicker({ value, onChange }) {
           mode="single"
           selected={date}
           onSelect={handleSelect}
+          {...calendarProps}
         />
 
         <div className="flex justify-between p-1">
