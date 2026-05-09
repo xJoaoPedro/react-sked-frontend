@@ -2,18 +2,18 @@ import { useEffect, useState } from 'react';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { PageHeader } from '../components/PageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline, Package } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { useOutletContext } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { formatDate, formatLimitText, formatPrice, formatTime } from '@/lib/parsers';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { LoadingPage } from './LoadingPage';
+import { usePageHeader } from '@/hooks/usePageHeader';
+import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
 
 const period = {
   'week': "Esta semana",
@@ -37,7 +37,7 @@ const paymentIcons = {
 };
 
 export function RevenuePage() {
-  const { dados } = useOutletContext();
+  const { dados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -49,6 +49,8 @@ export function RevenuePage() {
   const [limit] = useState(50);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  usePageHeader("Receitas", "Acompanhe e gerencie as receitas do seu negócio" );
 
   const fetchTableData = async () => {
     const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/revenue`, {params: { page, limit, filterPeriod }})).data.data;
@@ -98,11 +100,6 @@ export function RevenuePage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <PageHeader 
-        title="Receitas" 
-        subtitle="Acompanhe e gerencie as receitas do seu negócio"
-      />
-
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6 scrollbar-custom">
         <div className="space-y-6">

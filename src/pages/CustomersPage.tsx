@@ -3,23 +3,25 @@ import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { PageHeader } from "../components/PageHeader";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { User, Users, UserPlus, Cake, Gift, Repeat, UserRoundX, UserX, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingPage } from "./LoadingPage";
-import { useOutletContext } from "react-router-dom";
 import { formatDate, formatPhone } from "@/lib/parsers";
 import { api } from "@/lib/api";
+import { usePageHeader } from "@/hooks/usePageHeader";
+import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 
 export function CustomersPage() {
-  const { dados } = useOutletContext();
+  const { dados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [limit] = useState(50);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [initialized, setInitialized] = useState(false);
+
+  usePageHeader("Clientes", "Gerencie sua base de clientes");
 
   const fetchTableData = async () => {
     const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/customers`, {params: { page, limit }})).data.data;
@@ -48,10 +50,6 @@ export function CustomersPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <PageHeader title="Clientes" subtitle="Gerencie sua base de clientes" />
-
-      {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         <div className="p-6 space-y-6">
           {/* Stats Cards */}

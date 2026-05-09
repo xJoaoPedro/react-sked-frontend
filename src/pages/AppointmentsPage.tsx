@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { PageHeader } from '../components/PageHeader';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -9,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '
 import { Filter, X, Calendar, Download, Eye, Edit, Trash2, Clock, User, DollarSign, FileText, Table2, ChevronDown, ChevronUp, FileJson, Plus, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DatePicker as CalendarDatePicker } from '@/components/ui/datepicker';
-import { useOutletContext } from 'react-router-dom';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import * as XLSX from "xlsx";
@@ -20,6 +18,8 @@ import { LoadingPage } from './LoadingPage';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from "date-fns/locale";
+import { usePageHeader } from '@/hooks/usePageHeader';
+import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
@@ -36,7 +36,7 @@ const appointmentStatusOptions = [
 ];
 
 export function AppointmentsPage() {
-  const { dados, refreshDados } = useOutletContext();
+  const { dados, refreshDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -68,6 +68,8 @@ export function AppointmentsPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTimeStart, setFilterTimeStart] = useState('');
   const [filterTimeEnd, setFilterTimeEnd] = useState('');
+
+  usePageHeader("Agendamentos", data ? `${data.length} de ${total} agendamentos` : "Gerencie os agendamentos em tempo real", );
 
   const fetchData = async () => {
     const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/appointments`, {params: buildQuery()})).data.data;
@@ -434,12 +436,6 @@ export function AppointmentsPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <PageHeader 
-        title="Agendamentos" 
-        subtitle={`${data.length} de ${total} agendamentos`}
-      />
-
-      {/* Scrollable Content Area */}
       <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom">
         <div className="flex items-center justify-end gap-3 flex-shrink-0">
           <Button

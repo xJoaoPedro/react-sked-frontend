@@ -4,19 +4,19 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { PageHeader } from "../components/PageHeader";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { Info, Plus, Edit, Trash2, Search, Clock, Scissors, Sparkles, Hand, Flower2, DollarSign, User, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useOutletContext } from "react-router-dom";
 import { formatLimitText, formatPrice } from "@/lib/parsers";
 import { api } from "@/lib/api";
 import { handleServiceError } from "@/lib/errorHandlers";
 import { toast } from "sonner";
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LoadingPage } from "./LoadingPage";
+import { usePageHeader } from "@/hooks/usePageHeader";
+import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 
 const serviceCategories = {
   HAIR: { label: "Cabelo", icon: Scissors },
@@ -39,7 +39,7 @@ const serviceCategories = {
 }
 
 export function ServicesPage() {
-  const { dados, refreshDados } = useOutletContext();
+  const { dados, refreshDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -55,6 +55,8 @@ export function ServicesPage() {
     status: "ACTIVE" as "ACTIVE" | "DISABLED",
     company_id: localStorage.getItem('companyId')
   });
+
+  usePageHeader("Serviços", "Gerencie os serviços oferecidos pelo seu negócio" );
 
   useEffect(() => {
     if (!dados) return;
@@ -146,13 +148,6 @@ export function ServicesPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <PageHeader
-        title="Serviços"
-        subtitle="Gerencie os serviços oferecidos pelo seu negócio"
-      />
-
-      {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         {/* Info Banner */}
         <Card className="p-4 bg-primary/10 border-primary/20 m-6 mb-0">

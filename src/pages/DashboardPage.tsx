@@ -4,16 +4,18 @@ import { RevenueChart } from "../components/RevenueChart";
 import { WeeklySchedule } from "../components/WeeklySchedule";
 import { TopServices } from "../components/TopServices";
 import { Calendar, Users, DollarSign, Clock } from "lucide-react";
-import { PageHeader } from "../components/PageHeader";
-import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { dateKeyToIsoString, formatPrice, getDateKeyInTimeZone } from "@/lib/parsers";
 import { LoadingPage } from "./LoadingPage";
 import { api } from "@/lib/api";
+import { usePageHeader } from "@/hooks/usePageHeader";
+import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 
 export function DashboardPage() {
-  const { dados } = useOutletContext();
+  const { dados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
+
+  usePageHeader(`Painel ${dados?.settings?.fantasy_name ?? ""}`.trim(), "Bem-vindo de volta! Aqui está o resumo de hoje." );
 
   useEffect(() => {
     if (dados === null) return;
@@ -116,12 +118,6 @@ export function DashboardPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <PageHeader
-        title={`Painel ${dados?.settings?.fantasy_name ?? ""}`}
-        subtitle="Bem-vindo de volta! Aqui está o resumo de hoje."
-      />
-
-      {/* Content */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-custom">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -3,12 +3,10 @@ import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { PageHeader } from '../components/PageHeader';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Plus, Edit, Trash2, User, Upload, Search, UserX, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useOutletContext } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { api } from '@/lib/api';
@@ -19,6 +17,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from "date-fns/locale";
 import { LoadingPage } from './LoadingPage';
 import { getTimePartsInTimeZone } from '@/lib/parsers';
+import { usePageHeader } from '@/hooks/usePageHeader';
+import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
 
 interface WorkSchedule {
   [key: string]: {
@@ -50,7 +50,7 @@ const weekDays = [
 ];
 
 export function ProfessionalsPage() {
-  const { dados, refreshDados } = useOutletContext();
+  const { dados, refreshDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,6 +66,8 @@ export function ProfessionalsPage() {
     scheduleOpenings: [],
     status: 'ACTIVE' as 'ACTIVE' | 'DISABLED',
   });
+
+  usePageHeader("Profissionais", "Gerencie os profissionais do seu negócio" );
 
 
   useEffect(() => {
@@ -247,13 +249,6 @@ export function ProfessionalsPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <PageHeader
-        title="Profissionais"
-        subtitle="Gerencie os profissionais do seu negócio"
-      />
-
-      {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         {/* Professionals Table */}
         <Card className="overflow-hidden m-6 gap-0">

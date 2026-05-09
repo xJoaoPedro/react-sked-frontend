@@ -1,4 +1,3 @@
-import { PageHeader } from "../components/PageHeader";
 import { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -13,10 +12,11 @@ import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { api } from "@/lib/api";
 import { formatDate, formatLimitText, formatPrice, formatTime } from "@/lib/parsers";
-import { useOutletContext } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { LoadingPage } from "./LoadingPage";
+import { usePageHeader } from "@/hooks/usePageHeader";
+import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 
 const period = {
   'week': "Esta semana",
@@ -35,7 +35,7 @@ const reasons = {
 }
 
 export function CancellationsPage() {
-  const { dados } = useOutletContext();
+  const { dados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -45,6 +45,8 @@ export function CancellationsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [byMonthExists, setByMonthExists] = useState(false);
+
+  usePageHeader("Análise de Cancelamentos", "Insights e estatísticas sobre cancelamentos" );
 
   // TODO IMPLEMENTAR FUTURAMENTE
   // const exportCSV = () => {
@@ -194,8 +196,6 @@ export function CancellationsPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <PageHeader title="Análise de Cancelamentos" subtitle="Insights e estatísticas sobre cancelamentos" />
-      
       {/* Content */}
       <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-6 scrollbar-custom-destructive">
         {/* Action Buttons */}

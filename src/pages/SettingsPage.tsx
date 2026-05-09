@@ -4,20 +4,22 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
-import { PageHeader } from "../components/PageHeader";
 import { Building2, CreditCard, Upload, Save, Mail, Phone, Globe, DollarSign, Check, Baby, Wifi, Car, Puzzle, Accessibility, PawPrint, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingPage } from "./LoadingPage";
-import { useOutletContext } from "react-router-dom";
 import { formatPhone } from "@/lib/parsers";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { usePageHeader } from "@/hooks/usePageHeader";
+import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 
 
 export function SettingsPage() {
-  const { dados, updateDados } = useOutletContext();
+  const { dados, updateDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  usePageHeader("Configurações Gerais", "Personalize e configure seu sistema de agendamento" );
 
   useEffect(() => {
     if (!dados) return;
@@ -88,13 +90,6 @@ export function SettingsPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <PageHeader
-        title="Configurações Gerais"
-        subtitle="Personalize e configure seu sistema de agendamento"
-      />
-
-      {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         <div className="p-6 space-y-6">
           {/* Company Profile */}

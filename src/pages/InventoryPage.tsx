@@ -4,19 +4,19 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { PageHeader } from '../components/PageHeader';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { DollarSign, Package, ShoppingCart, Plus, Edit, Trash2, Search, AlertTriangle, Package2, X, Scissors, User, Sparkles, Hand, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, Minus, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useOutletContext } from 'react-router-dom';
 import { formatLimitText, formatPrice } from '@/lib/parsers';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { handleProductError } from '@/lib/errorHandlers';
 import { LoadingPage } from './LoadingPage';
+import { usePageHeader } from '@/hooks/usePageHeader';
+import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
 
 const productCategories = {
   HAIR: { label: "Cabelo", icon: Scissors },
@@ -39,7 +39,7 @@ const productCategories = {
 }
 
 export function InventoryPage() {
-  const { dados, refreshDados } = useOutletContext();
+  const { dados, refreshDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -51,6 +51,8 @@ export function InventoryPage() {
     category: '',
     company_id: localStorage.getItem('companyId')
   });
+
+  usePageHeader("Gerenciamento de Estoque", "Controle seus produtos, quantidades e valores" );
 
   useEffect(() => {
     if (!dados) return;
@@ -173,13 +175,6 @@ export function InventoryPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <PageHeader
-        title="Gerenciamento de Estoque"
-        subtitle="Controle seus produtos, quantidades e valores"
-      />
-
-      {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         <div className="p-6">
           {/* Metrics Cards */}

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { PageHeader } from "../components/PageHeader";
 import { ChevronLeft, ChevronRight, Calendar, Plus, CalendarX, } from "lucide-react";
-import { useOutletContext } from "react-router-dom";
 import { api } from "@/lib/api";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { LoadingPage } from './LoadingPage';
 import { getTimePartsInTimeZone, isSameDayInTimeZone } from "@/lib/parsers";
+import { usePageHeader } from "@/hooks/usePageHeader";
+import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 
 const timeSlots = [
   "06:00", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -16,7 +16,7 @@ const timeSlots = [
 ];
 
 export function DailySchedulePage() {
-  const { dados } = useOutletContext();
+  const { dados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
@@ -49,6 +49,8 @@ export function DailySchedulePage() {
           day: "numeric",
         }).format(parsedDate);
   };
+
+  usePageHeader("Agenda do Dia", formatDate(selectedDate));
 
   const updateAppointments = async (date) => {
     try {
@@ -127,9 +129,6 @@ export function DailySchedulePage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <PageHeader title="Agenda do Dia" subtitle={formatDate(selectedDate)} />
-
-      {/* Content */}
       <div className="flex-1 flex flex-col overflow-hidden p-6 gap-6">
         {/* Controls */}
         <div className="flex items-center justify-between flex-shrink-0">
