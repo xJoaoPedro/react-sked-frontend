@@ -58,6 +58,8 @@ const defaultPageHeaders: Record<string, { title: string; subtitle?: string }> =
   },
 };
 
+const NOTIFICATION_SOUND_SRC = "/notification.mp3";
+
 const realtimeEvents = [
   "appointment:created",
   "appointment:updated",
@@ -222,6 +224,7 @@ export function Layout() {
   );
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const refreshTimeoutRef = useRef<number | null>(null);
+  const notificationSoundRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     verifyPermission();
@@ -234,6 +237,17 @@ export function Layout() {
   useEffect(() => {
     setPageHeaderState(getDefaultPageHeader(location.pathname));
   }, [location.pathname]);
+
+  useEffect(() => {
+    const audio = new Audio(NOTIFICATION_SOUND_SRC);
+
+    audio.preload = "auto";
+    notificationSoundRef.current = audio;
+
+    return () => {
+      notificationSoundRef.current = null;
+    };
+  }, []);
 
   function verifyPermission() {
     const token = localStorage.getItem("token");
@@ -294,6 +308,17 @@ export function Layout() {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
   }, []);
 
+  const playNotificationSound = useCallback(() => {
+    const audio = notificationSoundRef.current;
+
+    if (!audio) return;
+
+    audio.currentTime = 0;
+    audio.play().catch((error) => {
+      console.warn("Nao foi possivel tocar o som da notificacao.", error);
+    });
+  }, []);
+
   useEffect(() => {
     async function fetchData() {
       await refreshDados();
@@ -320,7 +345,7 @@ export function Layout() {
       }, 200);
     };
 
-    const prependNotification = (notification: NotificationItem | null) => {
+    const prependNotification = (notification: NotificationItem | null, playSound = true) => {
       if (!notification) return;
 
       setNotifications((prev) => {
@@ -328,6 +353,10 @@ export function Layout() {
 
         return [notification, ...nextNotifications].slice(0, 30);
       });
+
+      if (playSound) {
+        playNotificationSound();
+      }
     };
 
     const handleConnect = () => {
@@ -342,8 +371,7 @@ export function Layout() {
     };
 
     const realtimeListeners = realtimeEvents.map((eventName) => {
-      const listener = (payload: unknown) => {
-        prependNotification(normalizeNotification(eventName, payload));
+      const listener = () => {
         scheduleRefresh();
       };
 
@@ -367,7 +395,7 @@ export function Layout() {
       });
       socket.disconnect();
     };
-  }, [refreshDados]);
+  }, [playNotificationSound, refreshDados]);
 
   if (!localStorage.getItem("token")) return <Navigate to="/login" replace />;
 

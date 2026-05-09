@@ -1,5 +1,6 @@
 import axios from "axios"
 import { toast } from "sonner"
+import { socket } from "@/services/socket"
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL + '/api',
@@ -14,6 +15,10 @@ api.interceptors.request.use((config) => {
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+  }
+
+  if (socket.connected && socket.id) {
+    config.headers["x-socket-id"] = socket.id
   }
 
   return config
