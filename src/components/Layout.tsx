@@ -59,6 +59,7 @@ const defaultPageHeaders: Record<string, { title: string; subtitle?: string }> =
 };
 
 const NOTIFICATION_SOUND_SRC = "/notification.mp3";
+const NOTIFICATIONS_STORAGE_PREFIX = "sked:notifications";
 
 const realtimeEvents = [
   "appointment:created",
@@ -102,23 +103,20 @@ const getDocumentTitle = (pathname: string) => {
 const getDefaultPageHeader = (pathname: string) =>
   defaultPageHeaders[pathname] ?? { title: pageTitles[pathname] ?? "Sked" };
 
-const formatRelativeNotificationTime = (value?: string | Date) => {
-  if (!value) return "Agora";
+const getNotificationsStorageKey = (companyId?: string | null) =>
+  `${NOTIFICATIONS_STORAGE_PREFIX}:${companyId || "anonymous"}`;
+
+const formatNotificationDateTime = (value?: string | Date) => {
+  if (!value) return "";
 
   const date = value instanceof Date ? value : new Date(value);
 
-  if (Number.isNaN(date.getTime())) return "Agora";
+  if (Number.isNaN(date.getTime())) return "";
 
-  const diffInMinutes = Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
-
-  if (diffInMinutes < 1) return "Agora";
-  if (diffInMinutes < 60) return `Há ${diffInMinutes} minuto${diffInMinutes > 1 ? "s" : ""}`;
-
-  const diffInHours = Math.round(diffInMinutes / 60);
-  if (diffInHours < 24) return `Há ${diffInHours} hora${diffInHours > 1 ? "s" : ""}`;
-
-  const diffInDays = Math.round(diffInHours / 24);
-  return `Há ${diffInDays} dia${diffInDays > 1 ? "s" : ""}`;
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(date);
 };
 
 const inferNotificationType = (
@@ -198,6 +196,13 @@ const normalizeNotification = (eventName: string, rawPayload?: unknown): Notific
   const title =
     typeof payload.title === "string" ? payload.title : buildNotificationTitle(eventName, type);
 
+  const createdAt =
+    typeof payload.created_at === "string"
+      ? payload.created_at
+      : typeof payload.createdAt === "string"
+        ? payload.createdAt
+        : new Date().toISOString();
+
   return {
     id:
       typeof payload.id === "string" || typeof payload.id === "number"
@@ -206,13 +211,7 @@ const normalizeNotification = (eventName: string, rawPayload?: unknown): Notific
     type,
     title,
     message: buildNotificationMessage(eventName, payload),
-    time: formatRelativeNotificationTime(
-      typeof payload.created_at === "string"
-        ? payload.created_at
-        : typeof payload.createdAt === "string"
-          ? payload.createdAt
-          : new Date(),
-    ),
+    time: formatNotificationDateTime(createdAt),
     isRead: Boolean(payload.isRead),
   };
 };
@@ -226,6 +225,36 @@ export function Layout() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const refreshTimeoutRef = useRef<number | null>(null);
   const notificationSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const companyId = localStorage.getItem("companyId");
+    const storageKey = getNotificationsStorageKey(companyId);
+    const storedNotifications = localStorage.getItem(storageKey);
+
+    if (!storedNotifications) {
+      setNotifications([]);
+      return;
+    }
+
+    try {
+      const parsedNotifications = JSON.parse(storedNotifications);
+
+      if (Array.isArray(parsedNotifications)) {
+        setNotifications(parsedNotifications);
+      } else {
+        setNotifications([]);
+      }
+    } catch {
+      setNotifications([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    const companyId = localStorage.getItem("companyId");
+    const storageKey = getNotificationsStorageKey(companyId);
+
+    localStorage.setItem(storageKey, JSON.stringify(notifications));
+  }, [notifications]);
 
   useEffect(() => {
     verifyPermission();
@@ -303,6 +332,10 @@ export function Layout() {
     setNotifications((prev) =>
       prev.map((notification) => ({ ...notification, isRead: true })),
     );
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    setNotifications([]);
   }, []);
 
   const deleteNotification = useCallback((id: string) => {
@@ -414,6 +447,7 @@ export function Layout() {
               notifications={notifications}
               onMarkAsRead={markNotificationAsRead}
               onMarkAllAsRead={markAllNotificationsAsRead}
+              onClearNotifications={clearNotifications}
               onDeleteNotification={deleteNotification}
             />
             <Outlet

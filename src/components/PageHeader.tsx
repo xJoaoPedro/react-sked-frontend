@@ -10,6 +10,7 @@ interface PageHeaderProps {
   notifications: NotificationItem[];
   onMarkAsRead: (id: string) => void;
   onMarkAllAsRead: () => void;
+  onClearNotifications: () => void;
   onDeleteNotification: (id: string) => void;
 }
 
@@ -45,6 +46,7 @@ export function PageHeader({
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
+  onClearNotifications,
   onDeleteNotification,
 }: PageHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -95,14 +97,14 @@ export function PageHeader({
                   </p>
                 )}
               </div>
-              {unreadCount > 0 && (
+              {(unreadCount > 0 || notifications.length > 0) && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={onMarkAllAsRead}
+                  onClick={unreadCount > 0 ? onMarkAllAsRead : onClearNotifications}
                   className="text-xs h-7"
                 >
-                  Marcar todas como lidas
+                  {unreadCount > 0 ? "Marcar todas como lidas" : "Limpar notificações"}
                 </Button>
               )}
             </div>

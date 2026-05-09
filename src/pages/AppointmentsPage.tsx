@@ -46,6 +46,7 @@ export function AppointmentsPage() {
   const [services, setServices] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
+  const [clientMode, setClientMode] = useState<'new' | 'existing'>('new');
   const [total, setTotal] = useState(1);
   const [limit] = useState(50);
   const [page, setPage] = useState(1);
@@ -69,6 +70,7 @@ export function AppointmentsPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTimeStart, setFilterTimeStart] = useState('');
   const [filterTimeEnd, setFilterTimeEnd] = useState('');
+  const customers = dados?.customers?.customers || [];
 
   usePageHeader("Agendamentos", data ? `${data.length} de ${total} agendamentos` : "Gerencie os agendamentos em tempo real", );
 
@@ -94,6 +96,7 @@ export function AppointmentsPage() {
       appointment_time: '',
       status: 'PENDING',
     });
+    setClientMode('new');
     setEditingAppointment(null);
   };
 
@@ -170,6 +173,102 @@ export function AppointmentsPage() {
   const getSelectedService = () =>
     services.find((service) => String(service.id) === String(formData.service_id));
 
+  const getSelectedProfessional = () =>
+    professionals.find(
+      (professional) => String(professional.id) === String(formData.employee_id),
+    );
+
+  const getAppointmentWeekDay = (dateKey) => {
+    if (!dateKey) return null;
+
+    return new Date(`${dateKey}T12:00:00`).getDay();
+  };
+
+  const toMinutes = (timeValue) => {
+    if (!timeValue) return null;
+
+    if (typeof timeValue === 'string' && /^\d{2}:\d{2}$/.test(timeValue)) {
+      const [hours, minutes] = timeValue.split(':').map(Number);
+
+      return hours * 60 + minutes;
+    }
+
+    const normalizedTime =
+      typeof timeValue === 'string' && timeValue.includes('T')
+        ? formatTime(timeValue)
+        : formatTime(timeValue);
+
+    if (!normalizedTime) return null;
+
+    const [hours, minutes] = normalizedTime.split(':').map(Number);
+
+    return hours * 60 + minutes;
+  };
+
+  const toTimeOption = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return new Date(2000, 0, 1, hours, minutes, 0, 0);
+  };
+
+  const getAvailableTimeOptions = () => {
+    const professional = getSelectedProfessional();
+    const weekDay = getAppointmentWeekDay(formData.appointment_date);
+    const service = getSelectedService();
+
+    if (!professional || weekDay === null || !service) {
+      return [];
+    }
+
+    const durationMinutes = Number(service.duration_minutes || 0);
+    const minimumSelectableMinutes = editingAppointment || !isTodayAppointmentDate
+      ? 0
+      : (() => {
+          const minTime = getAppointmentMinTime();
+          return minTime.getHours() * 60 + minTime.getMinutes();
+        })();
+
+    return (professional.scheduleOpenings || [])
+      .filter((opening) => Number(opening.week_day) === weekDay)
+      .flatMap((opening) => {
+        const openingStartMinutes = toMinutes(opening.start_time);
+        const openingEndMinutes = toMinutes(opening.end_time);
+
+        if (
+          openingStartMinutes === null ||
+          openingEndMinutes === null ||
+          durationMinutes <= 0
+        ) {
+          return [];
+        }
+
+        const firstAvailableMinute = Math.max(openingStartMinutes, minimumSelectableMinutes);
+        const alignedStartMinute = Math.ceil(firstAvailableMinute / 30) * 30;
+        const slots = [];
+
+        for (
+          let minutes = alignedStartMinute;
+          minutes + durationMinutes <= openingEndMinutes;
+          minutes += 30
+        ) {
+          slots.push(toTimeOption(minutes));
+        }
+
+        return slots;
+      });
+  };
+
+  const hasProfessionalAvailability = () => getAvailableTimeOptions().length > 0;
+
+  const isSelectedTimeAvailable = () => {
+    if (!formData.appointment_time) return true;
+
+    const selectedTime = dateToTime(timeToDate(formData.appointment_time));
+
+    return getAvailableTimeOptions().some((timeOption) => dateToTime(timeOption) === selectedTime);
+  };
+
   const buildStartAt = () => {
     const startAt = new Date(`${formData.appointment_date}T${formData.appointment_time}:00`);
 
@@ -205,6 +304,7 @@ export function AppointmentsPage() {
   };
 
   const openEditDialog = (appointment) => {
+    setClientMode('existing');
     setEditingAppointment(appointment);
     setFormData({
       company_id: localStorage.getItem('companyId'),
@@ -227,19 +327,43 @@ export function AppointmentsPage() {
     setFormData((prev) => ({ ...prev, client_contact: cleanedPhone }));
   };
 
+  const handleExistingClientChange = (clientId) => {
+    const selectedCustomer = customers.find(
+      (customer) => String(customer.id) === String(clientId),
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      client_id: String(clientId),
+      client_name: selectedCustomer?.name ?? '',
+      client_contact: selectedCustomer?.phone ?? selectedCustomer?.contact ?? '',
+      client_email: '',
+    }));
+  };
+
   const handleSubmitAppointment = async () => {
     try {
       let clientId = Number(formData.client_id);
       const startAt = buildStartAt();
-      const clientPayload = {
-        company_id: formData.company_id,
-        name: formData.client_name,
-        phone: formData.client_contact,
-      };
+      const shouldUseExistingClient = !editingAppointment && clientMode === 'existing';
 
-      if (editingAppointment && clientId) {
-        await api.patch(`/customers/${clientId}`, clientPayload);
-      } else {
+      if (editingAppointment) {
+        const clientPayload = {
+          company_id: formData.company_id,
+          name: formData.client_name,
+          phone: formData.client_contact,
+        };
+
+        if (clientId) {
+          await api.patch(`/customers/${clientId}`, clientPayload);
+        }
+      } else if (!shouldUseExistingClient) {
+        const clientPayload = {
+          company_id: formData.company_id,
+          name: formData.client_name,
+          phone: formData.client_contact,
+        };
+
         const createdCustomer = (await api.post('/customers', clientPayload)).data.data;
         clientId = createdCustomer.id;
       }
@@ -431,6 +555,16 @@ export function AppointmentsPage() {
 
     fetchData()
   }, [initialized, page, filterId, filterDate, filterService, filterClient, filterStatus, filterTimeStart, filterTimeEnd])
+
+  useEffect(() => {
+    if (!formData.appointment_time) return;
+    if (isSelectedTimeAvailable()) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      appointment_time: '',
+    }));
+  }, [formData.employee_id, formData.appointment_date, formData.service_id]);
 
   if (data === null) return <LoadingPage />
 
@@ -792,42 +926,105 @@ export function AppointmentsPage() {
           </DialogHeader>
 
           <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="appointment-client-name">Nome do cliente</Label>
-              <Input
-                id="appointment-client-name"
-                placeholder="Nome do cliente"
-                value={formData.client_name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, client_name: e.target.value }))
-                }
-              />
-            </div>
+            {!editingAppointment && (
+              <div className="col-span-2 flex items-end gap-3">
+                <div className="flex-1 space-y-2">
+                  <Label>Cliente</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      variant={clientMode === 'new' ? 'default' : 'secondary'}
+                      className="justify-center"
+                      onClick={() => {
+                        setClientMode('new');
+                        setFormData((prev) => ({
+                          ...prev,
+                          client_id: '',
+                          client_name: '',
+                          client_email: '',
+                          client_contact: '',
+                        }));
+                      }}
+                    >
+                      Novo
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={clientMode === 'existing' ? 'default' : 'secondary'}
+                      className="justify-center"
+                      onClick={() => {
+                        setClientMode('existing');
+                        setFormData((prev) => ({
+                          ...prev,
+                          client_id: '',
+                          client_name: '',
+                          client_email: '',
+                          client_contact: '',
+                        }));
+                      }}
+                    >
+                      Existente
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="appointment-client-email">E-mail do cliente</Label>
-              <Input
-                id="appointment-client-email"
-                type="email"
-                placeholder="cliente@email.com"
-                value={formData.client_email}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, client_email: e.target.value }))
-                }
-              />
-            </div>
+            {!editingAppointment && clientMode === 'existing' ? (
+              <div className="col-span-2 space-y-2">
+                <Select value={formData.client_id} onValueChange={handleExistingClientChange}>
+                  <SelectTrigger id="appointment-existing-client">
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={String(customer.id)}>
+                        {customer.name} - {formatPhone(customer.phone ?? customer.contact ?? '')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <>
+                <div className="col-span-2 space-y-2">
+                  <Label htmlFor="appointment-client-name">Nome do cliente</Label>
+                  <Input
+                    id="appointment-client-name"
+                    placeholder="Nome do cliente"
+                    value={formData.client_name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, client_name: e.target.value }))
+                    }
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="appointment-client-phone">Telefone do cliente</Label>
-              <Input
-                id="appointment-client-phone"
-                type="tel"
-                inputMode="numeric"
-                placeholder="(11) 99999-9999"
-                value={formatPhone(formData.client_contact)}
-                onChange={(e) => handleClientPhoneChange(e.target.value)}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="appointment-client-email">E-mail do cliente</Label>
+                  <Input
+                    id="appointment-client-email"
+                    type="email"
+                    placeholder="cliente@email.com"
+                    value={formData.client_email}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, client_email: e.target.value }))
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="appointment-client-phone">Telefone do cliente</Label>
+                  <Input
+                    id="appointment-client-phone"
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="(11) 99999-9999"
+                    value={formatPhone(formData.client_contact)}
+                    onChange={(e) => handleClientPhoneChange(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="appointment-service">Serviço</Label>
@@ -909,15 +1106,27 @@ export function AppointmentsPage() {
                 showTimeSelect
                 showTimeSelectOnly
                 timeIntervals={30}
+                includeTimes={getAvailableTimeOptions()}
                 dateFormat="HH:mm"
                 locale={ptBR}
                 placeholderText="HH:mm"
                 isClearable
-                disabled={!editingAppointment && isPastAppointmentDate}
+                disabled={
+                  (!editingAppointment && isPastAppointmentDate) ||
+                  !formData.employee_id ||
+                  !formData.appointment_date ||
+                  !formData.service_id ||
+                  !hasProfessionalAvailability()
+                }
                 minTime={getAppointmentMinTime()}
                 maxTime={new Date(2000, 0, 1, 23, 59, 0)}
                 className="w-full rounded-md border border-primary px-3 py-2 text-sm"
               />
+              {formData.employee_id && formData.appointment_date && formData.service_id && !hasProfessionalAvailability() && (
+                <p className="text-xs text-destructive">
+                  Esse profissional nao possui horario disponivel nessa data para a duracao do servico.
+                </p>
+              )}
             </div>
 
             <div className="col-span-2 space-y-2">
@@ -958,8 +1167,9 @@ export function AppointmentsPage() {
               type="button"
               onClick={handleSubmitAppointment}
               disabled={
-                !formData.client_name ||
-                !formData.client_contact ||
+                (editingAppointment || clientMode === 'new'
+                  ? (!formData.client_name || !formData.client_contact)
+                  : !formData.client_id) ||
                 !formData.employee_id ||
                 !formData.service_id ||
                 !formData.appointment_date ||
