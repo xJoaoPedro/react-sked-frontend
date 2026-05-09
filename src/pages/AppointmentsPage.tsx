@@ -211,7 +211,7 @@ export function AppointmentsPage() {
       client_id: String(appointment.client?.id ?? ''),
       client_name: appointment.client?.name ?? '',
       client_email: appointment.client?.email ?? '',
-      client_contact: appointment.client?.contact ?? '',
+      client_contact: appointment.client?.phone ?? appointment.client?.contact ?? '',
       employee_id: String(appointment.employee?.id ?? ''),
       service_id: String(appointment.service?.id ?? ''),
       appointment_date: toLocalDateInput(appointment.start_time),
@@ -234,7 +234,6 @@ export function AppointmentsPage() {
       const clientPayload = {
         company_id: formData.company_id,
         name: formData.client_name,
-        email: formData.client_email,
         phone: formData.client_contact,
       };
 

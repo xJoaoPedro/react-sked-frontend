@@ -80,6 +80,7 @@ const realtimeEvents = [
   "product:created",
   "product:updated",
   "product:deleted",
+  "product:low-stock",
   "company:updated",
   "dashboard:updated",
 ];
