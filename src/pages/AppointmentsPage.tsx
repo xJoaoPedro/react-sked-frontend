@@ -20,6 +20,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from "date-fns/locale";
 import { usePageHeader } from '@/hooks/usePageHeader';
 import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
+import { showRequestErrorToast } from '@/lib/errorHandlers';
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
@@ -262,7 +263,7 @@ export function AppointmentsPage() {
       resetForm();
       await Promise.all([fetchData(), refreshDados()]);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message || 'Não foi possível salvar o agendamento.');
+      showRequestErrorToast(error, 'Não foi possível salvar o agendamento.');
     }
   };
 
@@ -272,7 +273,7 @@ export function AppointmentsPage() {
       toast.success('Agendamento deletado com sucesso!');
       await Promise.all([fetchData(), refreshDados()]);
     } catch (error) {
-      toast.error(error?.response?.data?.message || 'Não foi possível deletar o agendamento.');
+      showRequestErrorToast(error, 'Não foi possível deletar o agendamento.');
     }
   };
 

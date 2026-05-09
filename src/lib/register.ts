@@ -1,5 +1,5 @@
 import axios from "axios"
-import { toast } from "sonner"
+import { showRequestErrorToast } from "@/lib/errorHandlers"
 
 export const register = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
@@ -13,19 +13,16 @@ register.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status
-    const message =
-      error?.response?.data?.message ||
-      "Erro inesperado na requisição"
       
     if (status === 401) {
-      toast.error("Sessão expirada")
+      showRequestErrorToast(error, "Sessao expirada")
 
       localStorage.removeItem("token")
       window.location.href = "/login"
     } else if (status >= 500) {
-      toast.error("Erro interno do servidor")
+      showRequestErrorToast(error, "Erro interno do servidor")
     } else {
-      toast.error(message)
+      showRequestErrorToast(error)
     }
 
     return Promise.reject(error)
