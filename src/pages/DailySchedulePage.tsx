@@ -20,18 +20,6 @@ export function DailySchedulePage() {
   const [data, setDataState] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
-  useEffect(() => {
-    if (!dados) return;
-
-    setDataState(dados.dailySchedules || []);
-  }, [dados]);
-
-  if (data === null) return <div>Carregando...</div>;
-
-  const filteredAppointments = data.appointments.filter((apt) => {
-    return isSameDayInTimeZone(apt.start_time, selectedDate);
-  });
-
   const formatDate = (date, schedule = false) => {
     const parsedDate = new Date(date);
 
@@ -51,6 +39,18 @@ export function DailySchedulePage() {
   };
 
   usePageHeader("Agenda do Dia", formatDate(selectedDate));
+
+  useEffect(() => {
+    if (!dados) return;
+
+    setDataState(dados.dailySchedules || []);
+  }, [dados]);
+
+  if (data === null) return <LoadingPage />;
+
+  const filteredAppointments = data.appointments.filter((apt) => {
+    return isSameDayInTimeZone(apt.start_time, selectedDate);
+  });
 
   const updateAppointments = async (date) => {
     try {
@@ -119,8 +119,6 @@ export function DailySchedulePage() {
       height: ((endMinutes - startMinutes) / 30) * 64,
     };
   };
-
-  if (data === null) return <LoadingPage />
 
   const shouldUseFixedColumns = data.professionals.length > 3;
   const gridTemplateColumns = shouldUseFixedColumns
