@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { LoadingPage } from "@/pages/LoadingPage";
 import { socket } from "@/services/socket";
@@ -183,18 +184,47 @@ const buildNotificationMessage = (eventName: string, payload?: Record<string, un
   return "Uma nova atualização em tempo real foi recebida.";
 };
 
+const extractNotificationPayload = (rawPayload?: unknown) => {
+  if (!rawPayload || typeof rawPayload !== "object") return null;
+
+  const payload = rawPayload as Record<string, unknown>;
+  const notification =
+    payload.notification && typeof payload.notification === "object"
+      ? (payload.notification as Record<string, unknown>)
+      : payload;
+
+  return {
+    payload: notification,
+    eventName:
+      typeof payload.event === "string"
+        ? payload.event
+        : typeof notification.event === "string"
+          ? notification.event
+          : "notification",
+  };
+};
+
+const getToastVariant = (eventName: string, notificationType: NotificationItem["type"]) => {
+  if (eventName.includes("cancel")) return "error";
+  if (eventName.includes("updated") || eventName.includes("rescheduled")) return "warning";
+  if (eventName.includes("created") || eventName.includes("payment")) return "success";
+
+  if (notificationType === "cancellation") return "error";
+  if (notificationType === "appointment") return "warning";
+
+  return "success";
+};
+
 const normalizeNotification = (eventName: string, rawPayload?: unknown): NotificationItem | null => {
-  const payload =
-    rawPayload && typeof rawPayload === "object"
-      ? ((rawPayload as Record<string, unknown>).notification as Record<string, unknown>) ||
-        (rawPayload as Record<string, unknown>)
-      : undefined;
+  const extractedPayload = extractNotificationPayload(rawPayload);
+  const payload = extractedPayload?.payload;
+  const normalizedEventName = extractedPayload?.eventName ?? eventName;
 
   if (!payload) return null;
 
-  const type = inferNotificationType(eventName, payload);
+  const type = inferNotificationType(normalizedEventName, payload);
   const title =
-    typeof payload.title === "string" ? payload.title : buildNotificationTitle(eventName, type);
+    typeof payload.title === "string" ? payload.title : buildNotificationTitle(normalizedEventName, type);
 
   const createdAt =
     typeof payload.created_at === "string"
@@ -207,10 +237,10 @@ const normalizeNotification = (eventName: string, rawPayload?: unknown): Notific
     id:
       typeof payload.id === "string" || typeof payload.id === "number"
         ? String(payload.id)
-        : `${eventName}-${Date.now()}`,
+        : `${normalizedEventName}-${Date.now()}`,
     type,
     title,
-    message: buildNotificationMessage(eventName, payload),
+    message: buildNotificationMessage(normalizedEventName, payload),
     time: formatNotificationDateTime(createdAt),
     isRead: Boolean(payload.isRead),
   };
@@ -393,6 +423,33 @@ export function Layout() {
       }
     };
 
+    const showRealtimeNotificationToast = (rawPayload: unknown) => {
+      const extractedPayload = extractNotificationPayload(rawPayload);
+      const eventName = extractedPayload?.eventName ?? "notification";
+      const notification = normalizeNotification(eventName, rawPayload);
+
+      if (!notification) return;
+
+      const variant = getToastVariant(eventName, notification.type);
+      const description = notification.message;
+      const toastOptions = {
+        id: `realtime-toast-${notification.id}`,
+        description,
+      };
+
+      if (variant === "error") {
+        toast.error(notification.title, toastOptions);
+        return;
+      }
+
+      if (variant === "warning") {
+        toast.warning(notification.title, toastOptions);
+        return;
+      }
+
+      toast.success(notification.title, toastOptions);
+    };
+
     const handleConnect = () => {
       if (companyId) {
         socket.emit("company:join", { companyId });
@@ -401,6 +458,7 @@ export function Layout() {
 
     const handleSocketNotification = (payload: unknown) => {
       prependNotification(normalizeNotification("notification", payload));
+      showRealtimeNotificationToast(payload);
       scheduleRefresh();
     };
 

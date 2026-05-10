@@ -12,6 +12,7 @@ export default function App() {
         richColors
         closeButton
         expand
+        duration={5000}
       />
     </TooltipProvider>
   );
