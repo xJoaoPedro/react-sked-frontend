@@ -13,9 +13,9 @@ const pageTitles: Record<string, string> = {
   "/dashboard": "Painel",
   "/daily-schedule": "Agenda do Dia",
   "/appointments": "Agendamentos",
-  "/cancellations": "Análise de Cancelamentos",
+  "/cancellations": "Cancelamentos",
   "/revenue": "Receitas",
-  "/inventory": "Gerenciamento de Estoque",
+  "/inventory": "Estoque",
   "/services": "Serviços",
   "/professionals": "Profissionais",
   "/customers": "Clientes",
@@ -79,10 +79,9 @@ const realtimeEvents = [
   "customer:created",
   "customer:updated",
   "customer:deleted",
-  "product:created",
-  "product:updated",
-  "product:deleted",
   "product:low-stock",
+  "product:out-of-stock",
+  "product:restocked",
   "company:updated",
   "dashboard:updated",
 ];
@@ -205,6 +204,9 @@ const extractNotificationPayload = (rawPayload?: unknown) => {
 };
 
 const getToastVariant = (eventName: string, notificationType: NotificationItem["type"]) => {
+  if (eventName === "product:out-of-stock") return "error";
+  if (eventName === "product:low-stock") return "warning";
+  if (eventName === "product:restocked") return "success";
   if (eventName.includes("cancel")) return "error";
   if (eventName.includes("updated") || eventName.includes("rescheduled")) return "warning";
   if (eventName.includes("created") || eventName.includes("payment")) return "success";
@@ -238,6 +240,7 @@ const normalizeNotification = (eventName: string, rawPayload?: unknown): Notific
       typeof payload.id === "string" || typeof payload.id === "number"
         ? String(payload.id)
         : `${normalizedEventName}-${Date.now()}`,
+    eventName: normalizedEventName,
     type,
     title,
     message: buildNotificationMessage(normalizedEventName, payload),

@@ -3,6 +3,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { DailySchedulePage } from "./pages/DailySchedulePage";
 import { AppointmentsPage } from "./pages/AppointmentsPage";
 import { CancellationsPage } from "./pages/CancellationsPage";
+import type { ReactElement } from "react";
 // import { CommissionsPage } from "./pages/CommissionsPage";
 // import { ReportsPage } from "./pages/ReportsPage";
 import { RevenuePage } from "./pages/RevenuePage";
@@ -13,6 +14,11 @@ import { CustomersPage } from "./pages/CustomersPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/LoginPage";
+import { hasManagerAccess } from "./lib/auth";
+
+function ManagerRoute({ element }: { element: ReactElement }) {
+  return hasManagerAccess() ? element : <Navigate to="/dashboard" replace />;
+}
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -29,10 +35,10 @@ export const router = createBrowserRouter([
       // TODO IMPLEMENTAR FUTURAMENTE
       // { path: "commissions", element: <CommissionsPage /> },
       // { path: "reports", element: <ReportsPage /> },
-      { path: "revenue", element: <RevenuePage /> },
+      { path: "revenue", element: <ManagerRoute element={<RevenuePage />} /> },
       { path: "inventory", element: <InventoryPage /> },
       { path: "services", element: <ServicesPage /> },
-      { path: "professionals", element: <ProfessionalsPage /> },
+      { path: "professionals", element: <ManagerRoute element={<ProfessionalsPage />} /> },
       { path: "customers", element: <CustomersPage /> },
       { path: "settings", element: <SettingsPage /> },
     ],

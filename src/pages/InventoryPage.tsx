@@ -60,6 +60,8 @@ export function InventoryPage() {
     setDataState(dados.products);
   }, [dados])
 
+  const lowStockThreshold = Number(dados?.settings?.lowStockThreshold ?? data?.lowStockThreshold ?? 2);
+
   const fetchPageData = async () => {
     const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/products`, formData)).data.data
 
@@ -70,7 +72,7 @@ export function InventoryPage() {
 
     if (quantity === 0) {
       status = 'esgotado'
-    } else if (quantity <= 2) {
+    } else if (quantity <= lowStockThreshold) {
       status = 'baixo';
     }
     
@@ -208,7 +210,9 @@ export function InventoryPage() {
                 <div className="flex-1">
                   <p className="text-muted-foreground text-sm mb-1">Estoque baixo</p>
                   <h3 className="text-3xl font-semibold text-yellow-600 mb-2">{data.lowStock}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">produtos que precisam de atenção</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    produtos com até {lowStockThreshold} unidade{lowStockThreshold === 1 ? "" : "s"}
+                  </p>
                 </div>
                 <div className="bg-yellow-600/10 p-4 rounded-lg">
                   <AlertTriangle className="w-6 h-6 text-yellow-600" />

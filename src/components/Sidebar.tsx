@@ -3,6 +3,7 @@ import { socket } from "@/services/socket";
 import { Link, useLocation, useNavigate, } from 'react-router-dom';
 import skedLogo from '../assets/skedLogo.svg';
 import { Users, Menu, LayoutDashboard, CalendarCheck, CalendarX, DollarSign, Package, Wrench, UserCog, CalendarDays, Percent, LogOut, LucideIcon, User, } from 'lucide-react';
+import { getCurrentAuthSession, hasManagerAccess, isEmployeeSession } from '@/lib/auth';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider, } from './ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from './ui/alert-dialog';
 
@@ -57,6 +58,20 @@ export function Sidebar({ dados }) {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const authSession = getCurrentAuthSession();
+  const canAccessManagerAreas = hasManagerAccess(authSession);
+  const isEmployee = isEmployeeSession(authSession);
+
+  const visibleMenuCategories = menuCategories
+    .map((category) => ({
+      ...category,
+      items: category.items.filter((item) => {
+        if (canAccessManagerAreas) return true;
+
+        return !["/revenue", "/professionals"].includes(item.path);
+      }),
+    }))
+    .filter((category) => category.items.length > 0);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -83,7 +98,7 @@ export function Sidebar({ dados }) {
         </div>
         
         <nav className="flex-1 p-4 overflow-y-auto">
-          {menuCategories.map((category, categoryIndex) => (
+          {visibleMenuCategories.map((category, categoryIndex) => (
             <div key={categoryIndex} className="mb-7">
               {!isCollapsed && (
                 <h3 className="text-primary text-xs font-semibold mb-2 px-3 mt-1">
@@ -202,8 +217,8 @@ export function Sidebar({ dados }) {
                 )}
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium truncate">{dados.fantasy_name}</p>
-                <p className="text-xs text-[#6B6B6B] truncate">{dados.email }</p>
+                <p className="text-sm font-medium truncate">{isEmployee ? "Meu perfil" : dados.fantasy_name}</p>
+                <p className="text-xs text-[#6B6B6B] truncate">{isEmployee ? "Funcionário" : dados.email}</p>
               </div>
               <button
                 onClick={(e) => {

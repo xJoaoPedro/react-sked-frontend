@@ -1,4 +1,4 @@
-import { register } from "@/lib/register";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
@@ -15,8 +15,22 @@ export function LoginPage() {
     document.title = "Sked - Login";
   }, []);
 
-  if (localStorage.getItem("token"))
+  if (localStorage.getItem("token") && localStorage.getItem("companyId"))
     return <Navigate to="/dashboard" replace />;
+
+  async function loginAsCompanyOrEmployee(credentials) {
+    try {
+      const response = await axios.post(`${url}/auth/companies/login`, credentials);
+      return response.data;
+    } catch (companyError) {
+      if (companyError?.response?.status && companyError.response.status !== 401) {
+        throw companyError;
+      }
+
+      const response = await axios.post(`${url}/auth/users/login`, credentials);
+      return response.data;
+    }
+  }
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -24,17 +38,22 @@ export function LoginPage() {
     setError("");
 
     try {
-      const { data } = await register.post("/auth/companies/login", {
+      const data = await loginAsCompanyOrEmployee({
         email,
         password,
       });
 
       localStorage.setItem("token", data.token);
-      if (data.id) localStorage.setItem("companyId", data.id);
+      localStorage.setItem("companyId", String(data.companyId ?? data.id));
 
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message || "Erro ao fazer login");
+      setError(
+        err?.response?.data?.error ||
+          err?.response?.data?.message ||
+          err.message ||
+          "Erro ao fazer login",
+      );
     } finally {
       setLoading(false);
     }

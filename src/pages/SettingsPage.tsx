@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
-import { Building2, CreditCard, Upload, Save, Mail, Phone, Globe, DollarSign, Check, Baby, Wifi, Car, Puzzle, Accessibility, PawPrint, } from "lucide-react";
+import { Building2, CreditCard, Upload, Save, Mail, Phone, Globe, DollarSign, Check, Baby, Wifi, Car, Puzzle, Accessibility, PawPrint, User, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingPage } from "./LoadingPage";
 import { formatPhone } from "@/lib/parsers";
@@ -12,20 +12,40 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { usePageHeader } from "@/hooks/usePageHeader";
 import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
+import { getCurrentAuthSession, isEmployeeSession } from "@/lib/auth";
 
 
 export function SettingsPage() {
   const { dados, updateDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
+  const [initialEmployeeData, setInitialEmployeeData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const authSession = getCurrentAuthSession();
+  const isEmployee = isEmployeeSession(authSession);
 
-  usePageHeader("Configurações Gerais", "Personalize e configure seu sistema de agendamento" );
+  usePageHeader(
+    isEmployee ? "Meu Perfil" : "Configurações Gerais",
+    isEmployee ? "Atualize seus dados pessoais" : "Personalize e configure seu sistema de agendamento",
+  );
 
   useEffect(() => {
+    if (isEmployee) {
+      const loadUserProfile = async () => {
+        if (!authSession?.user_id) return;
+
+        const response = (await api.get(`/users/${authSession.user_id}`)).data.data;
+        setDataState(response);
+        setInitialEmployeeData(response);
+      };
+
+      loadUserProfile();
+      return;
+    }
+
     if (!dados) return;
 
     setDataState(dados.settings);
-  }, [dados])
+  }, [authSession?.user_id, dados, isEmployee])
 
   const   handlePhoneChange = (value: string) => {
     const cleanedPhone = value.replace(/\D/g, "").slice(0, 11);
@@ -69,9 +89,23 @@ export function SettingsPage() {
     try {
       setIsSaving(true);
 
+      if (isEmployee) {
+        await api.patch(`/users/${authSession?.user_id}`, {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+        });
+
+        const response = (await api.get(`/users/${authSession?.user_id}`)).data.data;
+        toast.success('Seus dados foram alterados com sucesso!');
+        setDataState(response);
+        setInitialEmployeeData(response);
+        return;
+      }
+
       await api.patch(`/companies/${localStorage.getItem('companyId')}`, data)
       const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/settings`)).data.data
-      
+
       toast.success('Dados da empresa alterados com sucesso!')
       setDataState(response)
       updateDados((prev) => ({
@@ -86,7 +120,111 @@ export function SettingsPage() {
   if (data === null) return <LoadingPage />
 
   const hasPendingChanges =
-    JSON.stringify(data) !== JSON.stringify(dados?.settings);
+    isEmployee
+      ? JSON.stringify({
+          name: data?.name,
+          email: data?.email,
+          phone: data?.phone,
+        }) !==
+        JSON.stringify(
+          initialEmployeeData
+            ? {
+                name: initialEmployeeData.name,
+                email: initialEmployeeData.email,
+                phone: initialEmployeeData.phone,
+              }
+            : null,
+        )
+      : JSON.stringify(data) !== JSON.stringify(dados?.settings);
+
+  if (isEmployee) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex-1 overflow-y-auto scrollbar-custom">
+          <div className="p-6 space-y-6">
+            <Card className="gap-0">
+              <div className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Meu Perfil</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Informações pessoais da sua conta
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="user-name">Nome</Label>
+                    <Input
+                      id="user-name"
+                      value={data.name ?? ""}
+                      onChange={(e) =>
+                        setDataState((prev) => ({ ...prev, name: e.target.value }))
+                      }
+                      placeholder="Seu nome"
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="user-email">E-mail</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="user-email"
+                        type="email"
+                        value={data.email ?? ""}
+                        onChange={(e) =>
+                          setDataState((prev) => ({ ...prev, email: e.target.value }))
+                        }
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="user-phone">Telefone</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="user-phone"
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={15}
+                        placeholder="(11) 99999-9999"
+                        value={formatPhone(data.phone ?? "")}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <div className="border-t bg-white p-4 flex justify-between items-center">
+          <div className="text-sm text-muted-foreground">
+            Atualize apenas suas informações pessoais.
+          </div>
+          <Button
+            onClick={handleSaveData}
+            disabled={isSaving || !hasPendingChanges}
+            className="min-w-[160px]"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? "Salvando..." : "Salvar Alterações"}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -199,6 +337,23 @@ export function SettingsPage() {
                         className="pl-10"
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="low-stock-threshold">Limite de estoque baixo</Label>
+                    <Input
+                      id="low-stock-threshold"
+                      type="number"
+                      min={0}
+                      value={data.lowStockThreshold ?? 0}
+                      onChange={(e) =>
+                        setDataState((prev) => ({
+                          ...prev,
+                          lowStockThreshold: Number(e.target.value),
+                        }))
+                      }
+                      placeholder="Ex.: 2"
+                    />
                   </div>
                 </div>
               </div>
