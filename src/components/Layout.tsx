@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -61,6 +62,7 @@ const defaultPageHeaders: Record<string, { title: string; subtitle?: string }> =
 
 const NOTIFICATION_SOUND_SRC = "/notification.mp3";
 const NOTIFICATIONS_STORAGE_PREFIX = "sked:notifications";
+const SESSION_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 const realtimeEvents = [
   "appointment:created",
@@ -258,6 +260,7 @@ export function Layout() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const refreshTimeoutRef = useRef<number | null>(null);
   const notificationSoundRef = useRef<HTMLAudioElement | null>(null);
+  const lastSessionRefreshAtRef = useRef(0);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
@@ -386,6 +389,64 @@ export function Layout() {
     });
   }, []);
 
+  const prependManualNotification = useCallback((notification: NotificationItem | null, playSound = true) => {
+    if (!notification) return;
+
+    setNotifications((prev) => {
+      const nextNotifications = prev.filter((item) => item.id !== notification.id);
+
+      return [notification, ...nextNotifications].slice(0, 30);
+    });
+
+    if (playSound) {
+      playNotificationSound();
+    }
+  }, [playNotificationSound]);
+
+  const refreshSession = useCallback(async (force = false) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return null;
+
+    const now = Date.now();
+
+    if (!force && now - lastSessionRefreshAtRef.current < SESSION_REFRESH_INTERVAL_MS) {
+      return token;
+    }
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/auth/refresh`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const refreshedToken = response.data?.token;
+
+      if (refreshedToken) {
+        localStorage.setItem("token", refreshedToken);
+        lastSessionRefreshAtRef.current = now;
+
+        if (socket.auth && typeof socket.auth === "object") {
+          socket.auth = {
+            ...socket.auth,
+            token: refreshedToken,
+          };
+        }
+
+        return refreshedToken;
+      }
+    } catch (error) {
+      console.error("Erro ao renovar sessao:", error);
+    }
+
+    return null;
+  }, []);
+
   useEffect(() => {
     async function fetchData() {
       await refreshDados();
@@ -492,6 +553,34 @@ export function Layout() {
     };
   }, [playNotificationSound, refreshDados]);
 
+  useEffect(() => {
+    const activityEvents: Array<keyof WindowEventMap> = [ "pointerdown", "keydown", "focus", ];
+
+    const handleActivity = () => {
+      refreshSession().catch(() => null);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshSession().catch(() => null);
+      }
+    };
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, handleActivity, { passive: true });
+    });
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, handleActivity);
+      });
+
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refreshSession]);
+
   if (!localStorage.getItem("token")) return <Navigate to="/login" replace />;
 
   return (
@@ -510,6 +599,9 @@ export function Layout() {
               onMarkAllAsRead={markAllNotificationsAsRead}
               onClearNotifications={clearNotifications}
               onDeleteNotification={deleteNotification}
+              evolutionConnection={dados?.settings?.evolution ?? null}
+              onEvolutionConnectionUpdated={refreshDados}
+              onEvolutionConnectionNotification={prependManualNotification}
             />
             <Outlet
               context={{
