@@ -53,6 +53,12 @@ const menuCategories: MenuCategory[] = [
   },
 ];
 
+const getCompanyProfilePhoto = (dados) => {
+  return dados?.evolution?.connected && !dados?.evolution?.phoneMismatch
+    ? dados?.evolution?.profilePictureUrl || null
+    : null;
+};
+
 export function Sidebar({ dados }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -61,6 +67,7 @@ export function Sidebar({ dados }) {
   const authSession = getCurrentAuthSession();
   const canAccessManagerAreas = hasManagerAccess(authSession);
   const isEmployee = isEmployeeSession(authSession);
+  const profilePhoto = getCompanyProfilePhoto(dados);
 
   const visibleMenuCategories = menuCategories
     .map((category) => ({
@@ -166,9 +173,9 @@ export function Sidebar({ dados }) {
                   }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    {dados.photo ? (
+                    {profilePhoto ? (
                       <img
-                        src={dados.photo}
+                        src={profilePhoto}
                         alt={dados.fantasy_name ?? "Foto do perfil"}
                         className="w-full h-full rounded-full object-cover"
                       />
@@ -206,9 +213,9 @@ export function Sidebar({ dados }) {
               }`}
             >
               <div className={`w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 ${location.pathname === '/settings' ? 'bg-white' : 'bg-primary'}`}>
-                {dados.photo ? (
+                {profilePhoto ? (
                   <img
-                    src={dados.photo}
+                    src={profilePhoto}
                     alt={dados.fantasy_name ?? "Foto do perfil"}
                     className="w-full h-full rounded-full object-cover"
                   />

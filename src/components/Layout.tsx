@@ -23,12 +23,24 @@ const pageTitles: Record<string, string> = {
   "/settings": "Configurações Gerais",
 };
 
+const formatDailyScheduleSubtitle = (date = new Date()) =>
+  new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+
 const defaultPageHeaders: Record<string, { title: string; subtitle?: string }> = {
   "/dashboard": {
     title: "Painel",
     subtitle: "Bem-vindo de volta! Aqui está o resumo de hoje.",
   },
-  "/daily-schedule": { title: "Agenda do Dia" },
+  "/daily-schedule": {
+    title: "Agenda do Dia",
+    subtitle: formatDailyScheduleSubtitle(),
+  },
   "/appointments": { title: "Agendamentos" },
   "/cancellations": {
     title: "Análise de Cancelamentos",

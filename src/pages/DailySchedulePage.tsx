@@ -1,50 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  Plus,
-  CalendarX,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Plus, CalendarX, ChevronDown,Check, Search, } from "lucide-react";
 import { api } from "@/lib/api";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, } from "@/components/ui/empty";
 import { LoadingPage } from "./LoadingPage";
-import {
-  formatPhone,
-  formatTime,
-  getDateKeyInTimeZone,
-  getTimePartsInTimeZone,
-  isSameDayInTimeZone,
-} from "@/lib/parsers";
+import { formatPhone, formatTime, getDateKeyInTimeZone, getTimePartsInTimeZone, isSameDayInTimeZone, } from "@/lib/parsers";
 import { usePageHeader } from "@/hooks/usePageHeader";
 import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { ptBR } from "date-fns/locale";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "../components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
 import { toast } from "sonner";
 import { showRequestErrorToast } from "@/lib/errorHandlers";
 
@@ -93,10 +60,14 @@ const appointmentStatusOptions = [
 
 export function DailySchedulePage() {
   const { dados, refreshDados } = useLayoutOutletContext();
+  const existingClientDropdownRef = useRef<HTMLDivElement | null>(null);
   const [data, setDataState] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [clientMode, setClientMode] = useState<"new" | "existing">("new");
+  const [existingClientSearch, setExistingClientSearch] = useState("");
+  const [existingClientDropdownOpen, setExistingClientDropdownOpen] = useState(false);
+  const [occupiedAppointments, setOccupiedAppointments] = useState([]);
   const [formData, setFormData] = useState({
     company_id: localStorage.getItem("companyId"),
     client_id: "",
@@ -132,12 +103,41 @@ export function DailySchedulePage() {
   useEffect(() => {
     if (!dados) return;
 
-    setDataState(dados.dailySchedules || []);
+    setDataState((prev) => {
+      const nextDailySchedule = dados.dailySchedules || null;
+
+      if (!nextDailySchedule) {
+        return prev;
+      }
+
+      if (!prev) {
+        return nextDailySchedule;
+      }
+
+      return {
+        ...nextDailySchedule,
+        appointments: prev.appointments ?? nextDailySchedule.appointments,
+      };
+    });
   }, [dados]);
 
   const professionals = dados?.professionals || [];
   const services = dados?.services || [];
   const customers = dados?.customers?.customers || [];
+  const selectedExistingCustomer = customers.find(
+    (customer) => String(customer.id) === String(formData.client_id),
+  );
+  const filteredCustomers = customers.filter((customer) => {
+    const normalizedSearch = existingClientSearch.trim().toLowerCase();
+    if (!normalizedSearch) return true;
+
+    const phone = formatPhone(customer.phone ?? customer.contact ?? "").toLowerCase();
+
+    return (
+      customer.name?.toLowerCase().includes(normalizedSearch) ||
+      phone.includes(normalizedSearch)
+    );
+  });
 
   const resetForm = () => {
     setFormData({
@@ -152,6 +152,8 @@ export function DailySchedulePage() {
       status: "PENDING",
     });
     setClientMode("new");
+    setExistingClientSearch("");
+    setExistingClientDropdownOpen(false);
   };
 
   const timeToDate = (time) => {
@@ -203,6 +205,21 @@ export function DailySchedulePage() {
       (professional) => String(professional.id) === String(formData.employee_id),
     );
 
+  const getProfessionalServiceIds = (professional) =>
+    (professional?.services || []).map((serviceId) => String(serviceId));
+
+  const availableProfessionals = formData.service_id
+    ? professionals.filter((professional) =>
+        getProfessionalServiceIds(professional).includes(String(formData.service_id)),
+      )
+    : professionals;
+
+  const availableServices = formData.employee_id
+    ? services.filter((service) =>
+        getProfessionalServiceIds(getSelectedProfessional()).includes(String(service.id)),
+      )
+    : services;
+
   const toMinutes = (timeValue) => {
     if (!timeValue) return null;
 
@@ -226,6 +243,21 @@ export function DailySchedulePage() {
     const minutes = totalMinutes % 60;
 
     return new Date(2000, 0, 1, hours, minutes, 0, 0);
+  };
+
+  const hasTimeConflict = (slotStartMinutes, durationMinutes) => {
+    const slotEndMinutes = slotStartMinutes + durationMinutes;
+
+    return occupiedAppointments.some((appointment) => {
+      const occupiedStartMinutes = toMinutes(appointment.start_time);
+      const occupiedEndMinutes = toMinutes(appointment.end_time);
+
+      if (occupiedStartMinutes === null || occupiedEndMinutes === null) {
+        return false;
+      }
+
+      return slotStartMinutes < occupiedEndMinutes && slotEndMinutes > occupiedStartMinutes;
+    });
   };
 
   const getAvailableTimeOptions = () => {
@@ -268,6 +300,10 @@ export function DailySchedulePage() {
           minutes + durationMinutes <= openingEndMinutes;
           minutes += 30
         ) {
+          if (hasTimeConflict(minutes, durationMinutes)) {
+            continue;
+          }
+
           slots.push(toTimeOption(minutes));
         }
 
@@ -276,6 +312,15 @@ export function DailySchedulePage() {
   };
 
   const hasProfessionalAvailability = () => getAvailableTimeOptions().length > 0;
+  const getTimeSelectOptions = () =>
+    getAvailableTimeOptions().map((timeOption) => {
+      const value = dateToTime(timeOption);
+
+      return {
+        value,
+        label: value,
+      };
+    });
 
   const isSelectedTimeAvailable = () => {
     if (!formData.appointment_time) return true;
@@ -294,6 +339,77 @@ export function DailySchedulePage() {
       appointment_time: "",
     }));
   }, [formData.employee_id, formData.service_id, selectedDateKey]);
+
+  useEffect(() => {
+    if (!formData.service_id || !formData.employee_id) return;
+
+    const selectedProfessionalStillAvailable = availableProfessionals.some(
+      (professional) => String(professional.id) === String(formData.employee_id),
+    );
+
+    if (!selectedProfessionalStillAvailable) {
+      setFormData((prev) => ({
+        ...prev,
+        employee_id: "",
+        appointment_time: "",
+      }));
+    }
+  }, [formData.service_id, formData.employee_id]);
+
+  useEffect(() => {
+    if (!formData.employee_id || !formData.service_id) return;
+
+    const selectedServiceStillAvailable = availableServices.some(
+      (service) => String(service.id) === String(formData.service_id),
+    );
+
+    if (!selectedServiceStillAvailable) {
+      setFormData((prev) => ({
+        ...prev,
+        service_id: "",
+        appointment_time: "",
+      }));
+    }
+  }, [formData.employee_id, formData.service_id]);
+
+  useEffect(() => {
+    const companyId = localStorage.getItem("companyId");
+
+    if (!companyId || !formData.employee_id) {
+      setOccupiedAppointments([]);
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchOccupiedAppointments = async () => {
+      try {
+        const response = (
+          await api.get(`/companies/${companyId}/appointments`, {
+            params: {
+              page: 1,
+              limit: 500,
+              date: selectedDateKey,
+              employeeId: formData.employee_id,
+            },
+          })
+        ).data.data;
+
+        if (!isActive) return;
+
+        setOccupiedAppointments(response.data || []);
+      } catch {
+        if (!isActive) return;
+        setOccupiedAppointments([]);
+      }
+    };
+
+    fetchOccupiedAppointments();
+
+    return () => {
+      isActive = false;
+    };
+  }, [formData.employee_id, selectedDateKey]);
 
   const buildStartAt = () => {
     const startAt = new Date(`${selectedDateKey}T${formData.appointment_time}:00`);
@@ -323,7 +439,11 @@ export function DailySchedulePage() {
       client_contact: selectedCustomer?.phone ?? selectedCustomer?.contact ?? "",
       client_email: "",
     }));
+    setExistingClientSearch("");
+    setExistingClientDropdownOpen(false);
   };
+
+  const isPastSelectedDate = selectedDateKey < getTodayDateKey();
 
   const handleCreateAppointment = async () => {
     try {
@@ -354,11 +474,29 @@ export function DailySchedulePage() {
       toast.success("Agendamento criado com sucesso!");
       setIsDialogOpen(false);
       resetForm();
-      await Promise.all([updateAppointments(selectedDate), refreshDados()]);
+      await refreshDados();
+      await updateAppointments(selectedDate);
     } catch (error) {
       showRequestErrorToast(error, "Nao foi possivel criar o agendamento.");
     }
   };
+
+  useEffect(() => {
+    if (!existingClientDropdownOpen) return;
+
+    const handlePointerDownOutside = (event: MouseEvent) => {
+      if (!existingClientDropdownRef.current) return;
+      if (existingClientDropdownRef.current.contains(event.target as Node)) return;
+
+      setExistingClientDropdownOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDownOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDownOutside);
+    };
+  }, [existingClientDropdownOpen]);
 
   if (data === null) return <LoadingPage />;
 
@@ -587,222 +725,321 @@ export function DailySchedulePage() {
           if (!open) resetForm();
         }}
       >
-        <DialogContent className="sm:max-w-[640px]">
-          <DialogHeader>
-            <DialogTitle>Novo Agendamento</DialogTitle>
-            <DialogDescription>
-              Preencha as informações para criar um novo agendamento em{" "}
-              {formatDate(selectedDate)}.
+        <DialogContent className="gap-0 overflow-x-hidden border-border/60 bg-background p-0 shadow-2xl sm:max-w-[820px]">
+          <DialogHeader className="border-b border-border bg-muted/30 px-6 py-5">
+            <DialogTitle className="text-xl font-semibold tracking-tight">Novo Agendamento</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Preencha as informações para criar um novo agendamento em {formatDate(selectedDate)}.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="col-span-2 flex items-end gap-3">
-              <div className="flex-1 space-y-2">
-                <Label>Cliente</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant={clientMode === "new" ? "default" : "secondary"}
-                    className="justify-center"
-                    onClick={() => {
-                      setClientMode("new");
-                      setFormData((prev) => ({
-                        ...prev,
-                        client_id: "",
-                        client_name: "",
-                        client_email: "",
-                        client_contact: "",
-                      }));
-                    }}
-                  >
-                    Novo
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={clientMode === "existing" ? "default" : "secondary"}
-                    className="justify-center"
-                    onClick={() => {
-                      setClientMode("existing");
-                      setFormData((prev) => ({
-                        ...prev,
-                        client_id: "",
-                        client_name: "",
-                        client_email: "",
-                        client_contact: "",
-                      }));
-                    }}
-                  >
-                    Existente
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {clientMode === "existing" ? (
-              <div className="col-span-2 space-y-2">
-                <Select value={formData.client_id} onValueChange={handleExistingClientChange}>
-                  <SelectTrigger id="daily-appointment-existing-client">
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {customers.map((customer) => (
-                      <SelectItem key={customer.id} value={String(customer.id)}>
-                        {customer.name} - {formatPhone(customer.phone ?? customer.contact ?? "")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <>
-                <div className="col-span-2 space-y-2">
-                  <Label htmlFor="daily-appointment-client-name">Nome do cliente</Label>
-                  <Input
-                    id="daily-appointment-client-name"
-                    placeholder="Nome do cliente"
-                    value={formData.client_name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, client_name: e.target.value }))
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="daily-appointment-client-email">E-mail do cliente</Label>
-                  <Input
-                    id="daily-appointment-client-email"
-                    type="email"
-                    placeholder="cliente@email.com"
-                    value={formData.client_email}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, client_email: e.target.value }))
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="daily-appointment-client-phone">Telefone do cliente</Label>
-                  <Input
-                    id="daily-appointment-client-phone"
-                    type="tel"
-                    inputMode="numeric"
-                    placeholder="(11) 99999-9999"
-                    value={formatPhone(formData.client_contact)}
-                    onChange={(e) => handleClientPhoneChange(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="daily-appointment-service">Serviço</Label>
-              <Select
-                value={formData.service_id}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, service_id: value }))
-                }
-              >
-                <SelectTrigger id="daily-appointment-service">
-                  <SelectValue placeholder="Selecione o serviço" />
-                </SelectTrigger>
-                <SelectContent>
-                  {services.map((service) => (
-                    <SelectItem key={service.id} value={String(service.id)}>
-                      {service.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="daily-appointment-professional">Profissional</Label>
-              <Select
-                value={formData.employee_id}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, employee_id: value }))
-                }
-              >
-                <SelectTrigger id="daily-appointment-professional">
-                  <SelectValue placeholder="Selecione o profissional" />
-                </SelectTrigger>
-                <SelectContent>
-                  {professionals.map((professional) => (
-                    <SelectItem key={professional.id} value={String(professional.id)}>
-                      {professional.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="daily-appointment-date">Data</Label>
-              <Input
-                id="daily-appointment-date"
-                value={formatDate(selectedDate)}
-                disabled
-              />
-            </div>
-
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="daily-appointment-time">Horário</Label>
-              <DatePicker
-                selected={timeToDate(formData.appointment_time)}
-                onChange={(date) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    appointment_time: dateToTime(date),
-                  }))
-                }
-                showTimeSelect
-                showTimeSelectOnly
-                timeIntervals={30}
-                includeTimes={getAvailableTimeOptions()}
-                dateFormat="HH:mm"
-                locale={ptBR}
-                placeholderText="HH:mm"
-                isClearable
-                disabled={
-                  !formData.employee_id ||
-                  !formData.service_id ||
-                  !hasProfessionalAvailability()
-                }
-                minTime={getAppointmentMinTime()}
-                maxTime={new Date(2000, 0, 1, 23, 59, 0)}
-                className="w-full rounded-md border border-primary px-3 py-2 text-sm"
-              />
-              {formData.employee_id && formData.service_id && !hasProfessionalAvailability() && (
-                <p className="text-xs text-destructive">
-                  Esse profissional nao possui horario disponivel nessa data para a duracao do servico.
+          <div className="space-y-6 px-6 py-6">
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="mb-3">
+                <Label className="text-sm font-semibold text-foreground">Tipo de cliente</Label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Escolha se deseja cadastrar um novo cliente ou usar um já existente.
                 </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant={clientMode === "new" ? "default" : "secondary"}
+                  className="justify-center"
+                  onClick={() => {
+                    setClientMode("new");
+                    setFormData((prev) => ({
+                      ...prev,
+                      client_id: "",
+                      client_name: "",
+                      client_email: "",
+                      client_contact: "",
+                    }));
+                  }}
+                >
+                  Novo cliente
+                </Button>
+                <Button
+                  type="button"
+                  variant={clientMode === "existing" ? "default" : "secondary"}
+                  className="justify-center"
+                  onClick={() => {
+                    setClientMode("existing");
+                    setFormData((prev) => ({
+                      ...prev,
+                      client_id: "",
+                      client_name: "",
+                      client_email: "",
+                      client_contact: "",
+                    }));
+                  }}
+                >
+                  Cliente existente
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-foreground">Dados do cliente</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Preencha as informações de contato para identificar o agendamento.
+                </p>
+              </div>
+
+              {clientMode === "existing" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="daily-appointment-existing-client">Cliente</Label>
+                  <div className="relative" ref={existingClientDropdownRef}>
+                    <Button
+                      type="button"
+                      id="daily-appointment-existing-client"
+                      aria-expanded={existingClientDropdownOpen}
+                      aria-haspopup="listbox"
+                      onClick={() => setExistingClientDropdownOpen((current) => !current)}
+                      className="h-10 w-full justify-between border border-input bg-muted px-3 font-normal text-foreground hover:bg-muted"
+                    >
+                      <span className="truncate text-left">
+                        {selectedExistingCustomer
+                          ? `${selectedExistingCustomer.name} - ${formatPhone(selectedExistingCustomer.phone ?? selectedExistingCustomer.contact ?? "")}`
+                          : "Selecione um cliente"}
+                      </span>
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-60" />
+                    </Button>
+
+                    {existingClientDropdownOpen && (
+                      <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-md ring-1 ring-foreground/10">
+                        <div className="flex flex-col gap-2">
+                          <div className="relative">
+                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                              value={existingClientSearch}
+                              onChange={(e) => setExistingClientSearch(e.target.value)}
+                              placeholder="Buscar cliente..."
+                              className="pl-9"
+                            />
+                          </div>
+
+                          <div className="max-h-64 overflow-y-auto rounded-md border border-border overscroll-contain scrollbar-custom">
+                            {filteredCustomers.length > 0 ? (
+                              filteredCustomers.map((customer) => {
+                                const customerId = String(customer.id);
+                                const isSelected = customerId === String(formData.client_id);
+
+                                return (
+                                  <button
+                                    key={customer.id}
+                                    type="button"
+                                    onClick={() => handleExistingClientChange(customerId)}
+                                    className="flex w-full items-center justify-between gap-3 border-b border-border px-3 py-2 text-left text-sm last:border-b-0 hover:bg-muted/50"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="truncate font-medium text-foreground">{customer.name}</p>
+                                      <p className="truncate text-xs text-muted-foreground">
+                                        {formatPhone(customer.phone ?? customer.contact ?? "")}
+                                      </p>
+                                    </div>
+                                    {isSelected && <Check className="h-4 w-4 shrink-0 text-primary" />}
+                                  </button>
+                                );
+                              })
+                            ) : (
+                              <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                                Nenhum cliente encontrado.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="md:col-span-2 space-y-2">
+                    <Label htmlFor="daily-appointment-client-name">Nome do cliente</Label>
+                    <Input
+                      id="daily-appointment-client-name"
+                      placeholder="Nome do cliente"
+                      value={formData.client_name}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, client_name: e.target.value }))
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="daily-appointment-client-email">E-mail do cliente</Label>
+                    <Input
+                      id="daily-appointment-client-email"
+                      type="email"
+                      placeholder="cliente@email.com"
+                      value={formData.client_email}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, client_email: e.target.value }))
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="daily-appointment-client-phone">Telefone do cliente</Label>
+                    <Input
+                      id="daily-appointment-client-phone"
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder="(11) 99999-9999"
+                      value={formatPhone(formData.client_contact)}
+                      onChange={(e) => handleClientPhoneChange(e.target.value)}
+                    />
+                  </div>
+                </div>
               )}
             </div>
 
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="daily-appointment-status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, status: value }))
-                }
-              >
-                <SelectTrigger id="daily-appointment-status">
-                  <SelectValue placeholder="Selecione o status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {appointmentStatusOptions.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-foreground">Detalhes do agendamento</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Selecione serviço, profissional, horário e status para a data escolhida.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="daily-appointment-service">Serviço</Label>
+                  <Select
+                    value={formData.service_id}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, service_id: value }))
+                    }
+                  >
+                    <SelectTrigger id="daily-appointment-service">
+                      <SelectValue placeholder="Selecione o serviço" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      {availableServices.map((service) => (
+                        <SelectItem key={service.id} value={String(service.id)}>
+                          {service.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="daily-appointment-professional">Profissional</Label>
+                  <Select
+                    value={formData.employee_id}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, employee_id: value }))
+                    }
+                  >
+                    <SelectTrigger id="daily-appointment-professional">
+                      <SelectValue placeholder="Selecione o profissional" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      {availableProfessionals.map((professional) => (
+                        <SelectItem key={professional.id} value={String(professional.id)}>
+                          {professional.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="daily-appointment-date">Data</Label>
+                  <Input
+                    id="daily-appointment-date"
+                    value={formatDate(selectedDate)}
+                    disabled
+                  />
+                  {isPastSelectedDate && (
+                    <p className="text-xs text-destructive">
+                      Esse profissional não possui horário disponível nessa data para a duração do serviço.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="daily-appointment-time">Horário</Label>
+                    {formData.employee_id && formData.service_id && !isPastSelectedDate && hasProfessionalAvailability() && (
+                      <span className="text-xs text-muted-foreground">
+                        {getTimeSelectOptions().length} horários disponíveis
+                      </span>
+                    )}
+                  </div>
+                  <Select
+                    value={formData.appointment_time || undefined}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        appointment_time: value,
+                      }))
+                    }
+                    disabled={
+                      isPastSelectedDate ||
+                      !formData.employee_id ||
+                      !formData.service_id ||
+                      !hasProfessionalAvailability()
+                    }
+                  >
+                    <SelectTrigger id="daily-appointment-time">
+                      <SelectValue
+                        placeholder={
+                          !formData.service_id
+                            ? "Selecione um serviço"
+                            : !formData.employee_id
+                              ? "Selecione um profissional"
+                              : isPastSelectedDate
+                                ? "Data indisponível"
+                                : hasProfessionalAvailability()
+                                  ? "Selecione um horário"
+                                  : "Sem horários disponíveis"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      {getTimeSelectOptions().map((timeOption) => (
+                        <SelectItem key={timeOption.value} value={timeOption.value}>
+                          {timeOption.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formData.employee_id && formData.service_id && !isPastSelectedDate && !hasProfessionalAvailability() && (
+                    <p className="text-xs text-destructive">
+                      Esse profissional não possui horário disponível nessa data para a duração do serviço.
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="daily-appointment-status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, status: value }))
+                    }
+                  >
+                    <SelectTrigger id="daily-appointment-status">
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      {appointmentStatusOptions.map((status) => (
+                        <SelectItem key={status.value} value={status.value}>
+                          {status.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4">
             <Button
               size="sm"
               className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive"
@@ -823,7 +1060,8 @@ export function DailySchedulePage() {
                   : !formData.client_id) ||
                 !formData.employee_id ||
                 !formData.service_id ||
-                !formData.appointment_time
+                !formData.appointment_time ||
+                isPastSelectedDate
               }
             >
               Criar agendamento

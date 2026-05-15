@@ -16,7 +16,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from "date-fns/locale";
 import { LoadingPage } from './LoadingPage';
-import { getTimePartsInTimeZone } from '@/lib/parsers';
+import { formatPhone, getTimePartsInTimeZone } from '@/lib/parsers';
 import { usePageHeader } from '@/hooks/usePageHeader';
 import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
 
@@ -515,7 +515,7 @@ export function ProfessionalsPage() {
                         </div>
                       </TableCell>
                       <TableCell>{professional.email}</TableCell>
-                      <TableCell>{professional.phone}</TableCell>
+                      <TableCell>{formatPhone(professional.phone)}</TableCell>
                       <TableCell>
                         {getStatusBadge(professional.status)}
                       </TableCell>

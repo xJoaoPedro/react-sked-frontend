@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
-import { Building2, CreditCard, Upload, Save, Mail, Phone, Globe, DollarSign, Check, Baby, Wifi, Car, Puzzle, Accessibility, PawPrint, User, } from "lucide-react";
+import { Building2, CreditCard, Save, Mail, Phone, Globe, DollarSign, Check, Baby, Wifi, Car, Puzzle, Accessibility, PawPrint, User, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingPage } from "./LoadingPage";
 import { formatPhone } from "@/lib/parsers";
@@ -14,6 +14,11 @@ import { usePageHeader } from "@/hooks/usePageHeader";
 import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 import { getCurrentAuthSession, isEmployeeSession } from "@/lib/auth";
 
+const getCompanyProfilePhoto = (settings) => {
+  return settings?.evolution?.connected && !settings?.evolution?.phoneMismatch
+    ? settings?.evolution?.profilePictureUrl || null
+    : null;
+};
 
 export function SettingsPage() {
   const { dados, updateDados } = useLayoutOutletContext();
@@ -22,6 +27,7 @@ export function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const authSession = getCurrentAuthSession();
   const isEmployee = isEmployeeSession(authSession);
+  const profilePhoto = getCompanyProfilePhoto(data);
 
   usePageHeader(
     isEmployee ? "Meu Perfil" : "Configurações Gerais",
@@ -103,10 +109,19 @@ export function SettingsPage() {
         return;
       }
 
-      await api.patch(`/companies/${localStorage.getItem('companyId')}`, data)
+      const previousPhone = dados?.settings?.phone ?? "";
+      const updateResponse = await api.patch(`/companies/${localStorage.getItem('companyId')}`, data)
       const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/settings`)).data.data
+      const phoneChanged = Boolean(updateResponse?.data?.data?.phoneChanged) || previousPhone !== (response?.phone ?? "");
 
-      toast.success('Dados da empresa alterados com sucesso!')
+      if (phoneChanged) {
+        toast.success('Telefone atualizado com sucesso!', {
+          description: 'O WhatsApp foi desconectado e precisará ser reconectado com o novo número.',
+        })
+      } else {
+        toast.success('Dados da empresa alterados com sucesso!')
+      }
+
       setDataState(response)
       updateDados((prev) => ({
         ...prev,
@@ -247,34 +262,28 @@ export function SettingsPage() {
             </div>
 
             <div className="p-6">
-              <div className="flex gap-6 mb-6">
-                {/* Logo Upload */}
+                <div className="flex gap-6 mb-6">
+                {/* Company Photo */}
                 <div className="flex-shrink-0">
-                  <Label htmlFor="logo-upload" className="cursor-pointer block">
-                    <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-lg">
-                      {data.photo ? (
+                  <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-border rounded-lg">
+                      {profilePhoto ? (
                         <img
-                          src={data.photo}
-                          alt="Logo"
+                          src={profilePhoto}
+                          alt={data.fantasy_name || "Foto da empresa"}
                           className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="flex flex-col items-center gap-2">
-                          <Upload className="w-8 h-8 text-muted-foreground" />
+                          <User className="w-8 h-8 text-muted-foreground" />
                           <span className="text-xs text-muted-foreground text-center px-2">
-                            Logo da empresa
+                            Foto do WhatsApp
                           </span>
                         </div>
                       )}
-                    </div>
-                  </Label>
-                  <Input
-                    id="logo-upload"
-                    type="file"
-                    accept="image/*"
-                    // onChange={handleLogoUpload}
-                    className="hidden"
-                  />
+                  </div>
+                  <p className="mt-2 max-w-32 text-center text-xs text-muted-foreground">
+                    Foto do WhatsApp conectado
+                  </p>
                 </div>
 
                 {/* Company Info */}
@@ -322,6 +331,9 @@ export function SettingsPage() {
                         className="pl-10"
                       />
                     </div>
+                    <p className="text-xs text-amber-700">
+                      Se este telefone for alterado, será necessário reconectar o WhatsApp com o novo número.
+                    </p>
                   </div>
 
                   <div className="col-span-2 space-y-2">
