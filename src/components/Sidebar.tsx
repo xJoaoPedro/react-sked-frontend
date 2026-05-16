@@ -84,7 +84,7 @@ export function Sidebar({ dados }) {
     localStorage.removeItem("token");
     localStorage.removeItem("companyId");
     socket.disconnect();
-    navigate("/login");
+    navigate("/auth");
   };
 
   return (

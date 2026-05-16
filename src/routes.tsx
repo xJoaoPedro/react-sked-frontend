@@ -13,7 +13,7 @@ import { ProfessionalsPage } from "./pages/ProfessionalsPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { Layout } from "./components/Layout";
-import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
 import { hasManagerAccess } from "./lib/auth";
 
 function ManagerRoute({ element }: { element: ReactElement }) {
@@ -21,7 +21,7 @@ function ManagerRoute({ element }: { element: ReactElement }) {
 }
 
 export const router = createBrowserRouter([
-  { path: "/login", element: <LoginPage /> },
+  { path: "/auth", element: <RegisterPage /> },
 
   {
     path: "/",

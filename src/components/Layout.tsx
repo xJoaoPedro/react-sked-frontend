@@ -10,7 +10,7 @@ import { PageHeader, type NotificationItem } from "./PageHeader";
 import { Sidebar } from "./Sidebar";
 
 const pageTitles: Record<string, string> = {
-  "/login": "Login",
+  "/auth": "Acesso",
   "/dashboard": "Painel",
   "/daily-schedule": "Agenda do Dia",
   "/appointments": "Agendamentos",
@@ -593,7 +593,7 @@ export function Layout() {
     };
   }, [refreshSession]);
 
-  if (!localStorage.getItem("token")) return <Navigate to="/login" replace />;
+  if (!localStorage.getItem("token")) return <Navigate to="/auth" replace />;
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

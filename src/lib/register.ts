@@ -18,7 +18,7 @@ register.interceptors.response.use(
       showRequestErrorToast(error, "Sessao expirada")
 
       localStorage.removeItem("token")
-      window.location.href = "/login"
+      window.location.href = "/auth"
     } else if (status >= 500) {
       showRequestErrorToast(error, "Erro interno do servidor")
     } else {
