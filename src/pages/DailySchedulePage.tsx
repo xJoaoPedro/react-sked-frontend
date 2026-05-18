@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
 import { toast } from "sonner";
 import { showRequestErrorToast } from "@/lib/errorHandlers";
+import { RevenueTransactionDialog } from "@/components/RevenueTransactionDialog";
 
 const timeSlots = [
   "06:00",
@@ -64,6 +65,8 @@ export function DailySchedulePage() {
   const [data, setDataState] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isRevenueDialogOpen, setIsRevenueDialogOpen] = useState(false);
+  const [pendingRevenueAppointment, setPendingRevenueAppointment] = useState(null);
   const [clientMode, setClientMode] = useState<"new" | "existing">("new");
   const [existingClientSearch, setExistingClientSearch] = useState("");
   const [existingClientDropdownOpen, setExistingClientDropdownOpen] = useState(false);
@@ -462,20 +465,35 @@ export function DailySchedulePage() {
         clientId = createdCustomer.id;
       }
 
-      await api.post("/appointments", {
+      const createdAppointment = (await api.post("/appointments", {
         company_id: formData.company_id,
         client_id: clientId,
         employee_id: Number(formData.employee_id),
         service_id: Number(formData.service_id),
         start_time: startAt.toISOString(),
         status: formData.status,
-      });
+      })).data.data;
 
       toast.success("Agendamento criado com sucesso!");
       setIsDialogOpen(false);
       resetForm();
       await refreshDados();
       await updateAppointments(selectedDate);
+
+      if (formData.status === "COMPLETED") {
+        setPendingRevenueAppointment({
+          appointmentId: createdAppointment.id,
+          clientId: createdAppointment.client?.id ?? clientId,
+          clientName: createdAppointment.client?.name ?? formData.client_name,
+          employeeId: createdAppointment.employee?.id ?? Number(formData.employee_id),
+          professionalName: createdAppointment.employee?.name ?? null,
+          serviceId: createdAppointment.service?.id ?? Number(formData.service_id),
+          serviceName: createdAppointment.service?.name ?? null,
+          amount: Number(createdAppointment.service?.price ?? 0),
+          occurredAt: createdAppointment.start_time,
+        });
+        setIsRevenueDialogOpen(true);
+      }
     } catch (error) {
       showRequestErrorToast(error, "Nao foi possivel criar o agendamento.");
     }
@@ -1069,6 +1087,21 @@ export function DailySchedulePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <RevenueTransactionDialog
+        companyId={localStorage.getItem("companyId") ?? ""}
+        open={isRevenueDialogOpen}
+        onOpenChange={(open) => {
+          setIsRevenueDialogOpen(open);
+          if (!open) {
+            setPendingRevenueAppointment(null);
+          }
+        }}
+        appointmentContext={pendingRevenueAppointment}
+        onCreated={async () => {
+          await Promise.all([refreshDados(), updateAppointments(selectedDate)]);
+        }}
+      />
     </div>
   );
 }

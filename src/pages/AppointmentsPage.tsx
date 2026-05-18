@@ -18,6 +18,7 @@ import { LoadingPage } from './LoadingPage';
 import { usePageHeader } from '@/hooks/usePageHeader';
 import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
 import { showRequestErrorToast } from '@/lib/errorHandlers';
+import { RevenueTransactionDialog } from '@/components/RevenueTransactionDialog';
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
@@ -45,7 +46,9 @@ export function AppointmentsPage() {
   const [professionals, setProfessionals] = useState([]);
   const [services, setServices] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isRevenueDialogOpen, setIsRevenueDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
+  const [pendingRevenueAppointment, setPendingRevenueAppointment] = useState(null);
   const [clientMode, setClientMode] = useState<'new' | 'existing'>('new');
   const [existingClientSearch, setExistingClientSearch] = useState('');
   const [existingClientPopoverOpen, setExistingClientPopoverOpen] = useState(false);
@@ -400,6 +403,23 @@ export function AppointmentsPage() {
     setIsDialogOpen(true);
   };
 
+  const openRevenueDialogForAppointment = (appointment) => {
+    if (!appointment) return;
+
+    setPendingRevenueAppointment({
+      appointmentId: appointment.id,
+      clientId: appointment.client?.id ?? appointment.client_id ?? null,
+      clientName: appointment.client?.name ?? null,
+      employeeId: appointment.employee?.id ?? appointment.employee_id ?? null,
+      professionalName: appointment.employee?.name ?? null,
+      serviceId: appointment.service?.id ?? appointment.service_id ?? null,
+      serviceName: appointment.service?.name ?? null,
+      amount: Number(appointment.service?.price ?? 0),
+      occurredAt: appointment.start_time,
+    });
+    setIsRevenueDialogOpen(true);
+  };
+
   const handleClientPhoneChange = (value) => {
     const cleanedPhone = value.replace(/\D/g, "").slice(0, 11);
 
@@ -456,11 +476,22 @@ export function AppointmentsPage() {
       payload.start_time = startAt.toISOString();
 
       if (editingAppointment) {
-        await api.patch(`/appointments/${editingAppointment.id}`, payload);
+        const updatedAppointment = (
+          await api.patch(`/appointments/${editingAppointment.id}`, payload)
+        ).data.data;
         toast.success('Agendamento alterado com sucesso!');
+        const shouldOpenRevenueDialog =
+          payload.status === 'COMPLETED' && editingAppointment.status !== 'COMPLETED';
+
+        if (shouldOpenRevenueDialog) {
+          openRevenueDialogForAppointment(updatedAppointment);
+        }
       } else {
-        await api.post('/appointments', payload);
+        const createdAppointment = (await api.post('/appointments', payload)).data.data;
         toast.success('Agendamento criado com sucesso!');
+        if (payload.status === 'COMPLETED') {
+          openRevenueDialogForAppointment(createdAppointment);
+        }
       }
 
       setIsDialogOpen(false);
@@ -1482,6 +1513,21 @@ export function AppointmentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <RevenueTransactionDialog
+        companyId={localStorage.getItem('companyId') ?? ''}
+        open={isRevenueDialogOpen}
+        onOpenChange={(open) => {
+          setIsRevenueDialogOpen(open);
+          if (!open) {
+            setPendingRevenueAppointment(null);
+          }
+        }}
+        appointmentContext={pendingRevenueAppointment}
+        onCreated={async () => {
+          await Promise.all([fetchData(), refreshDados()]);
+        }}
+      />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline, Package } from 'lucide-react';
+import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline, Package, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { api } from '@/lib/api';
 import { formatDate, formatLimitText, formatPrice, formatTime } from '@/lib/parsers';
@@ -14,6 +14,7 @@ import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empt
 import { LoadingPage } from './LoadingPage';
 import { usePageHeader } from '@/hooks/usePageHeader';
 import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
+import { RevenueTransactionDialog } from '@/components/RevenueTransactionDialog';
 
 const period = {
   'week': "Esta semana",
@@ -37,10 +38,11 @@ const paymentIcons = {
 };
 
 export function RevenuePage() {
-  const { dados } = useLayoutOutletContext();
+  const { dados, refreshDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [isRevenueDialogOpen, setIsRevenueDialogOpen] = useState(false);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [receivedPercentage, setReceivedPercentage] = useState(0);
   const [pendingPercentage, setPendingPercentage] = useState(0);
@@ -65,22 +67,27 @@ export function RevenuePage() {
 
   const fetchPageData = async () => {
     const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/revenue/summary`, {params: { page, limit, filterPeriod }})).data.data;
+    const nextTotalRevenue = response.revenuePending + response.revenueReceived;
 
     setDataState(response);
     setTotal(response.totalTransactions);
     setPage(1);
     setTotalPages(Math.ceil(response.totalTransactions / limit));
-    setTotalRevenue(response.revenuePending + response.revenueReceived);
-    setReceivedPercentage(totalRevenue > 0 ? (response.revenueReceived / totalRevenue) * 100 : 0);
-    setPendingPercentage(totalRevenue > 0 ? (response.revenuePending / totalRevenue) * 100 : 0);
+    setTotalRevenue(nextTotalRevenue);
+    setReceivedPercentage(nextTotalRevenue > 0 ? (response.revenueReceived / nextTotalRevenue) * 100 : 0);
+    setPendingPercentage(nextTotalRevenue > 0 ? (response.revenuePending / nextTotalRevenue) * 100 : 0);
   }
 
   useEffect(() => {
     if (!dados) return;
+    const nextTotalRevenue = dados.revenue.revenuePending + dados.revenue.revenueReceived;
 
     setDataState(dados.revenue);
-    setTotal(dados.revenue.totalRevenue);
+    setTotal(dados.revenue.totalTransactions);
     setTotalPages(Math.ceil(dados.revenue.totalTransactions / limit));
+    setTotalRevenue(nextTotalRevenue);
+    setReceivedPercentage(nextTotalRevenue > 0 ? (dados.revenue.revenueReceived / nextTotalRevenue) * 100 : 0);
+    setPendingPercentage(nextTotalRevenue > 0 ? (dados.revenue.revenuePending / nextTotalRevenue) * 100 : 0);
     setInitialized(true)
   }, [dados])
   
@@ -105,6 +112,14 @@ export function RevenuePage() {
         <div className="space-y-6">
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3">
+            <Button
+              className="border border-border bg-primary text-popover hover:bg-primary/90"
+              onClick={() => setIsRevenueDialogOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Novo lançamento
+            </Button>
+
             <Select value={filterPeriod} onValueChange={setFilterPeriod}>
               <SelectTrigger className="w-[180px] bg-transparent p-4 border border-border text-foreground hover:bg-primary hover:text-popover">
                 <SelectValue className="hover:bg-white" />
@@ -574,6 +589,15 @@ export function RevenuePage() {
           </Card>
         </div>
       </div>
+
+      <RevenueTransactionDialog
+        companyId={localStorage.getItem('companyId') ?? ''}
+        open={isRevenueDialogOpen}
+        onOpenChange={setIsRevenueDialogOpen}
+        onCreated={async () => {
+          await Promise.all([fetchPageData(), fetchTableData(), refreshDados?.()]);
+        }}
+      />
     </div>
   );
 }
