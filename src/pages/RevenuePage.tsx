@@ -281,7 +281,7 @@ export function RevenuePage() {
                     <EmptyMedia variant="icon">
                       <ChartSpline  />
                     </EmptyMedia>
-                    <EmptyTitle className='text-muted-foreground'>Não há profissionais com cancelamentos para listar!</EmptyTitle>
+                    <EmptyTitle className='text-muted-foreground'>Não há dados de receita suficiente para listar!</EmptyTitle>
                   </EmptyHeader>
                 </Empty>
               )}

@@ -208,7 +208,6 @@ export function RegisterPage() {
         src={backgroundImage}
         alt=""
         aria-hidden="true"
-        fetchPriority="high"
         loading="eager"
         decoding="async"
         className="pointer-events-none absolute inset-0 h-full w-full scale-105 object-cover object-center blur-[6px]"

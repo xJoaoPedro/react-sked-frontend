@@ -14,6 +14,7 @@ import { CustomersPage } from "./pages/CustomersPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { Layout } from "./components/Layout";
 import { RegisterPage } from "./pages/RegisterPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { hasManagerAccess } from "./lib/auth";
 
 function ManagerRoute({ element }: { element: ReactElement }) {
@@ -22,6 +23,7 @@ function ManagerRoute({ element }: { element: ReactElement }) {
 
 export const router = createBrowserRouter([
   { path: "/auth", element: <RegisterPage /> },
+  { path: "*", element: <NotFoundPage /> },
 
   {
     path: "/",
