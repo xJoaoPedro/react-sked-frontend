@@ -63,7 +63,7 @@ export function InventoryPage() {
   const lowStockThreshold = Number(dados?.settings?.lowStockThreshold ?? data?.lowStockThreshold ?? 2);
 
   const fetchPageData = async () => {
-    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/products`, formData)).data.data
+    const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/products`)).data.data
 
     setDataState(response)
   }

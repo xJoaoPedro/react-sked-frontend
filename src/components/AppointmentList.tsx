@@ -11,7 +11,8 @@ interface Appointment {
   clientName: string;
   service: string;
   time: string;
-  status: 'confirmed' | 'pending' | 'canceled';
+  dateTime: string | Date;
+  status: 'confirmed' | 'pending' | 'canceled' | 'completed';
   avatar?: string;
 }
 

@@ -57,8 +57,8 @@ export function dateKeyToIsoString(dateKey: string) {
   return localMidday.toISOString();
 }
 
-export function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
+export function formatDate(dateValue: string | number | Date) {
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
   
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: SAO_PAULO_TIME_ZONE,
@@ -68,8 +68,8 @@ export function formatDate(dateStr: string) {
   }).format(date);
 };
 
-export function formatTime(timeStr: string) {
-  const date = new Date(timeStr);
+export function formatTime(timeValue: string | number | Date) {
+  const date = timeValue instanceof Date ? timeValue : new Date(timeValue);
   
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: SAO_PAULO_TIME_ZONE,

@@ -11,7 +11,7 @@ const getToastId = (error, message) => {
   return `request-error:${status}:${method}:${url}:${message}`;
 };
 
-export function showRequestErrorToast(error, fallbackMessage) {
+export function showRequestErrorToast(error, fallbackMessage = "Erro inesperado na requisicao") {
   const message = getErrorMessage(error, fallbackMessage);
 
   toast.error(message, {

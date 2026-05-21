@@ -388,7 +388,7 @@ export function ServicesPage() {
                         <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
                           <Wrench className="w-12 h-12 opacity-20" />
                           <p className="font-medium">Nenhum serviço cadastrado.</p>
-                          <Button onClick={setIsAddDialogOpen}>Criar serviço</Button>
+                          <Button onClick={() => setIsAddDialogOpen(true)}>Criar serviço</Button>
                         </div>
                       </TableCell>
                     </TableRow>
