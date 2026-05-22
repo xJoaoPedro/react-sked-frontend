@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -7,7 +7,7 @@ import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
-import { DollarSign, Package, ShoppingCart, Plus, Edit, Trash2, Search, AlertTriangle, Package2, X, Scissors, User, Sparkles, Hand, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, Minus, } from 'lucide-react';
+import { DollarSign, Package, ShoppingCart, Plus, Edit, Trash2, Search, AlertTriangle, Package2, X, Scissors, User, Sparkles, Hand, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, Minus, PackageOpen, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatLimitText, formatPrice } from '@/lib/parsers';
 import { api } from '@/lib/api';
@@ -40,8 +40,11 @@ const productCategories = {
 
 export function InventoryPage() {
   const { dados, refreshDados } = useLayoutOutletContext();
+  const quantityUpdateTimersRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const pendingQuantityUpdatesRef = useRef<Record<number, number>>({});
   const [data, setDataState] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [quickFilter, setQuickFilter] = useState<'low' | 'out' | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
@@ -60,7 +63,16 @@ export function InventoryPage() {
     setDataState(dados.products);
   }, [dados])
 
+  useEffect(() => {
+    return () => {
+      Object.values(quantityUpdateTimersRef.current).forEach((timer) => clearTimeout(timer));
+    };
+  }, []);
+
   const lowStockThreshold = Number(dados?.settings?.lowStockThreshold ?? data?.lowStockThreshold ?? 2);
+  const selectedCategoryMeta = formData.category
+    ? productCategories[formData.category]
+    : null;
 
   const fetchPageData = async () => {
     const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/products`)).data.data
@@ -150,30 +162,195 @@ export function InventoryPage() {
     
   };
 
-  const changeQuantity = async (id, quantity) => {
+  const flushQuantityUpdate = async (id: number) => {
+    const quantity = pendingQuantityUpdatesRef.current[id];
+
+    if (quantity === undefined) return;
+
     try {
-      if (quantity < 0 || quantity > 999) {
-        toast.error('Quantidade fora do alcance.');
-        return;
-      }
-
-      await api.patch(`/products/${id}`, {id, quantity});
-
+      await api.patch(`/products/${id}`, { id, quantity });
       toast.success('Quantidade alterada com sucesso!');
-      setIsAddDialogOpen(false);
-      resetForm();
-    } catch (err) {
-      handleProductError(err)
-    } finally {
       await Promise.all([fetchPageData(), refreshDados()]);
-      setEditingProduct(null);
-      resetForm();
+    } catch (err) {
+      handleProductError(err);
+      await Promise.all([fetchPageData(), refreshDados()]);
+    } finally {
+      delete pendingQuantityUpdatesRef.current[id];
+      delete quantityUpdateTimersRef.current[id];
     }
-  }
+  };
+
+  const changeQuantity = (id: number, delta: number) => {
+    const currentProduct = data?.products?.find((product) => product.id === id);
+    const currentQuantity =
+      pendingQuantityUpdatesRef.current[id] ?? currentProduct?.quantity ?? 0;
+    const nextQuantity = currentQuantity + delta;
+
+    if (nextQuantity < 0 || nextQuantity > 999) {
+      toast.error('Quantidade fora do alcance.');
+      return;
+    }
+
+    pendingQuantityUpdatesRef.current[id] = nextQuantity;
+
+    setDataState((prev) => {
+      if (!prev) return prev;
+
+      const updatedProducts = prev.products.map((product) =>
+        product.id === id ? { ...product, quantity: nextQuantity } : product,
+      );
+
+      const totalProducts = updatedProducts.length;
+      const totalCost = updatedProducts.reduce(
+        (sum, product) => sum + Number(product.cost_price) * Number(product.quantity),
+        0,
+      );
+      const lowStock = updatedProducts.filter(
+        (product) => product.quantity > 0 && product.quantity <= lowStockThreshold,
+      ).length;
+      const outOfStock = updatedProducts.filter((product) => product.quantity === 0).length;
+
+      return {
+        ...prev,
+        products: updatedProducts,
+        totalProducts,
+        totalCost,
+        lowStock,
+        outOfStock,
+      };
+    });
+
+    if (quantityUpdateTimersRef.current[id]) {
+      clearTimeout(quantityUpdateTimersRef.current[id]);
+    }
+
+    quantityUpdateTimersRef.current[id] = setTimeout(() => {
+      flushQuantityUpdate(id);
+    }, 450);
+  };
+
+  const renderProductFormFields = () => (
+    <div className="space-y-4 py-2">
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Informações do produto</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Defina nome e categoria para facilitar a organização do estoque.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="product-name">Nome do Produto</Label>
+          <Input
+            id="product-name"
+            placeholder="Ex: Pomada Matte 80g"
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <Label>Categoria</Label>
+            {selectedCategoryMeta && (
+              <Badge variant="outline" className="gap-1.5 text-xs">
+                <selectedCategoryMeta.icon className="w-3.5 h-3.5 text-primary" />
+                {selectedCategoryMeta.label}
+              </Badge>
+            )}
+          </div>
+          <Select
+            value={formData.category}
+            onValueChange={(value) =>
+              setFormData({ ...formData, category: value })
+            }
+          >
+            <SelectTrigger id="product-category">
+              <SelectValue placeholder="Selecione a categoria" />
+            </SelectTrigger>
+            <SelectContent className="max-h-96">
+              {Object.entries(productCategories).map(([value, meta]) => {
+                const Icon = meta.icon;
+
+                return (
+                  <SelectItem key={value} value={value}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="text-primary" size={16} />
+                      {meta.label}
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Controle de estoque</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Informe quantidade disponível e custo unitário do produto.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="product-quantity">Quantidade</Label>
+            <Input
+              id="product-quantity"
+              type="number"
+              min={0}
+              max={999}
+              placeholder="0"
+              value={formData.quantity}
+              onChange={(e) =>
+                setFormData({ ...formData, quantity: e.target.value })
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Informe a quantidade atual em estoque.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="product-cost-price">Preço de Custo</Label>
+            <Input
+              id="product-cost-price"
+              type="number"
+              step="0.01"
+              min={0}
+              placeholder="0,00"
+              value={formData.cost_price}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  cost_price: e.target.value,
+                })
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Valor unitário pago pelo produto.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (data === null) return <LoadingPage />
 
-  const filteredProducts = data.products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredProducts = data.products.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!matchesSearch) return false;
+    if (quickFilter === 'out') return product.quantity === 0;
+    if (quickFilter === 'low') return product.quantity > 0 && product.quantity <= lowStockThreshold;
+
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -228,7 +405,7 @@ export function InventoryPage() {
                   <p className="text-xs text-muted-foreground mt-1">produtos sem estoque</p>
                 </div>
                 <div className="bg-destructive/10 p-4 rounded-lg">
-                  <AlertTriangle className="w-6 h-6 text-destructive" />
+                  <PackageOpen className="w-6 h-6 text-destructive" />
                 </div>
               </div>
             </Card>
@@ -251,10 +428,57 @@ export function InventoryPage() {
                       className="pl-10"
                     />
                   </div>
+
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        type="button"
+                        onClick={() => setQuickFilter((prev) => (prev === 'low' ? null : 'low'))}
+                        className={
+                          quickFilter === 'low'
+                            ? 'border border-yellow-500/30 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20'
+                            : 'border border-border bg-default text-foreground hover:bg-yellow-500/10 hover:text-yellow-600'
+                        }
+                      >
+                        <AlertTriangle className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={4} className="bg-yellow-500 fill-yellow-500">
+                      Filtrar produtos com estoque baixo
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        type="button"
+                        onClick={() => setQuickFilter((prev) => (prev === 'out' ? null : 'out'))}
+                        className={
+                          quickFilter === 'out'
+                            ? 'border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20'
+                            : 'border border-border bg-default text-foreground hover:bg-destructive/10 hover:text-destructive'
+                        }
+                      >
+                        <PackageOpen className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
+                      Filtrar produtos esgotados
+                    </TooltipContent>
+                  </Tooltip>
+                  
+
+                  
                   
                   <Dialog 
                     open={isAddDialogOpen}
-                    onOpenChange={setIsAddDialogOpen}
+                    onOpenChange={(open) => {
+                      setIsAddDialogOpen(open);
+
+                      if (!open) {
+                        resetForm();
+                      }
+                    }}
                   >
                     <DialogTrigger asChild>
                       <Button className="bg-primary hover:bg-primary/90">
@@ -262,87 +486,19 @@ export function InventoryPage() {
                         Adicionar Produto
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px]">
+                    <DialogContent className="overflow-hidden p-0 sm:max-w-[560px]">
                       <DialogHeader>
-                        <DialogTitle>Adicionar Novo Produto</DialogTitle>
-                        <DialogDescription>
-                          Preencha as informações do produto para adicionar ao estoque
+                        <DialogTitle className="px-6 pt-6">Novo Produto</DialogTitle>
+                        <DialogDescription className="px-6">
+                          Preencha os dados abaixo para cadastrar o produto no estoque.
                         </DialogDescription>
                       </DialogHeader>
 
-                      <div className="grid grid-cols-2 gap-4 py-4">
-                        <div className="col-span-2 space-y-2">
-                          <Label htmlFor="name">Nome do Produto</Label>
-                          <Input
-                            id="name"
-                            placeholder="Ex: Pomada Matte 80g"
-                            value={formData.name}
-                            onChange={e =>
-                              setFormData({ ...formData, name: e.target.value })
-                            }
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Categoria</Label>
-                          <Select
-                            value={formData.category}
-                            onValueChange={(value) =>
-                              setFormData({ ...formData, category: value })
-                            }
-                          >
-                            <SelectTrigger id="duration">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-96">
-                              {Object.entries(productCategories).map(([value, meta]) => {
-                                const Icon = meta.icon;
-
-                                return (
-                                <SelectItem key={value} value={value} className="flex items-center gap-2 group">
-                                  <div className="flex items-center gap-2">
-                                    <Icon className="text-primary group-hover:text-white" size={16} />
-                                    {meta.label}
-                                  </div>
-                                </SelectItem>
-                              )
-                              })}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="quantity">Quantidade (unidades)</Label>
-                          <Input
-                            id="quantity"
-                            type="number"
-                            min={0}
-                            max={999}
-                            value={formData.quantity}
-                            onChange={e =>
-                              setFormData({ ...formData, quantity: e.target.value })
-                            }
-                          />
-                        </div>
-
-                        <div className="col-span-2 space-y-2">
-                          <Label htmlFor="costPrice">Preço de Custo (R$)</Label>
-                          <Input
-                            id="costPrice"
-                            type="number"
-                            step="0.01"
-                            value={formData.cost_price}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                cost_price: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
+                      <div className="px-6 pb-6">
+                        {renderProductFormFields()}
                       </div>
 
-                      <DialogFooter>
+                      <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
                         <Button
                           className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
                           onClick={() => {
@@ -417,9 +573,9 @@ export function InventoryPage() {
                           </TableCell>
                           <TableCell className="font-medium">
                             <div className='w-32 flex justify-between items-center'>
-                              <Button variant='secondary' size='xs' className='w-8 mr-1' onClick={() => changeQuantity(product.id, product.quantity - 1)}><Minus /></Button>
+                              <Button variant='secondary' size='xs' className='w-8 mr-1' onClick={() => changeQuantity(product.id, -1)}><Minus /></Button>
                               {product.quantity} un
-                              <Button variant='secondary' size='xs' className='w-8 ml-1' onClick={() => changeQuantity(product.id, product.quantity + 1)}><Plus /></Button>
+                              <Button variant='secondary' size='xs' className='w-8 ml-1' onClick={() => changeQuantity(product.id, 1)}><Plus /></Button>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -467,99 +623,21 @@ export function InventoryPage() {
                                   </TooltipContent>
                                 </Tooltip>
 
-                                <DialogContent className="sm:max-w-[600px]">
+                              <DialogContent className="overflow-hidden p-0 sm:max-w-[560px]">
                                   <DialogHeader>
-                                    <DialogTitle>Editar Serviço</DialogTitle>
-                                    <DialogDescription>
-                                      Atualize as informações do serviço
+                                    <DialogTitle className="px-6 pt-6">Editar Produto</DialogTitle>
+                                    <DialogDescription className="px-6">
+                                      Atualize as informações do produto no estoque.
                                     </DialogDescription>
                                   </DialogHeader>
 
-                                  <div className="grid grid-cols-2 gap-4 py-4">
-                                    <div className="col-span-2 space-y-2">
-                                      <Label htmlFor="edit-name">
-                                        Nome do Serviço
-                                      </Label>
-                                      <Input
-                                        id="edit-name"
-                                        value={formData.name}
-                                        onChange={(e) =>
-                                          setFormData({
-                                            ...formData,
-                                            name: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label>Categoria</Label>
-                                      <Select
-                                        value={formData.category}
-                                        onValueChange={(value) =>
-                                          setFormData({ ...formData, category: value })
-                                        }
-                                      >
-                                        <SelectTrigger id="duration">
-                                          <SelectValue placeholder="Selecione" />
-                                        </SelectTrigger>
-                                        <SelectContent className="max-h-96">
-                                          {Object.entries(productCategories).map(([value, meta]) => {
-                                            const Icon = meta.icon;
-    
-                                            return (
-                                            <SelectItem key={value} value={value} className="flex items-center gap-2 group">
-                                              <div className="flex items-center gap-2">
-                                                <Icon className="text-primary group-hover:text-white" size={16} />
-                                                {meta.label}
-                                              </div>
-                                            </SelectItem>
-                                          )
-                                          })}
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-quantity">
-                                        Quantidade (unidades)
-                                      </Label>
-                                      <Input
-                                        id="edit-quantity"
-                                        type="number"
-                                        step="1"
-                                        min={0}
-                                        max={999}
-                                        value={formData.quantity}
-                                        onChange={(e) =>
-                                          setFormData({
-                                            ...formData,
-                                            quantity: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
-
-                                    <div className="col-span-2 space-y-2">
-                                      <Label htmlFor="edit-price">Preço de custo (R$)</Label>
-                                      <Input
-                                        id="edit-price"
-                                        type="number"
-                                        step="0.01"
-                                        value={formData.cost_price}
-                                        onChange={(e) =>
-                                          setFormData({
-                                            ...formData,
-                                            cost_price: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
+                                  <div className="px-6 pb-6">
+                                    {renderProductFormFields()}
                                   </div>
 
-                                  <DialogFooter>
+                                  <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
                                     <Button
-                                      className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
+                                      className="bg-transparent text-foreground hover:bg-transparent hover:text-destructive"
                                       onClick={() => {
                                         setEditingProduct(null);
                                         resetForm();

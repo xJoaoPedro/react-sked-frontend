@@ -14,6 +14,9 @@ import * as XLSX from "xlsx";
 import { toast } from "sonner"
 import { api } from "@/lib/api";
 import { formatDate, formatPhone, formatPrice, formatTime } from '@/lib/parsers';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale";
 import { LoadingPage } from './LoadingPage';
 import { usePageHeader } from '@/hooks/usePageHeader';
 import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
@@ -540,6 +543,16 @@ export function AppointmentsPage() {
            filterStatus !== 'all' || filterTimeStart || filterTimeEnd;
   };
 
+  const activeFilterCount = [
+    filterId,
+    filterDate,
+    filterService !== 'all',
+    filterClient,
+    filterStatus !== 'all',
+    filterTimeStart,
+    filterTimeEnd,
+  ].filter(Boolean).length;
+
   const buildQuery = () => {
     return {
       page,
@@ -812,9 +825,7 @@ export function AppointmentsPage() {
             Filtros Avançados
             {hasActiveFilters() && (
               <Badge className="ml-2 bg-destructive text-popover hover:bg-destructive">
-                {[filterId, filterDate, filterService !== 'all', filterClient, 
-                  filterStatus !== 'all', filterTimeStart, filterTimeEnd]
-                  .filter(Boolean).length}
+                {activeFilterCount}
               </Badge>
             )}
           </Button>
@@ -858,30 +869,47 @@ export function AppointmentsPage() {
           </Button>
         </div>
 
-        <div className="flex">
+        <div className="flex items-start gap-6">
           {showFilters && (
-            <Card className="p-6 mr-1">
-              <h3 className="font-semibold">Filtros Avançados</h3>
+            <Card className="w-full max-w-[320px] shrink-0 p-5 gap-0">
+              <div className="relative border-b border-border pb-4">
+                <Badge
+                  variant="outline"
+                  className="absolute top-0 right-0 bg-muted text-muted-foreground"
+                >
+                  {activeFilterCount} ativo{activeFilterCount === 1 ? '' : 's'}
+                </Badge>
 
-              <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`} onClick={clearFilters} disabled={!hasActiveFilters()}>
-                <X className="w-4 h-4 mr-2" />
-                Limpar filtros
-              </Button>             
-              
-              <div className="grid grid-cols-1 gap-6">
-                {/* ID Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">ID do Agendamento</label>
+                <div className="space-y-1 pr-24">
+                  <h3 className="font-semibold leading-none">Filtros Avançados</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Refine a listagem por período, cliente, serviço e status.
+                  </p>
+                </div>
+
+                <Button
+                  className="mx-auto mt-4 flex border border-border bg-default px-3 text-foreground hover:bg-primary hover:text-popover"
+                  onClick={clearFilters}
+                  disabled={!hasActiveFilters()}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Limpar
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="appointment-filter-id">ID do Agendamento</Label>
                   <Input
+                    id="appointment-filter-id"
                     placeholder="Buscar por ID"
                     value={filterId}
                     onChange={(e) => setFilterId(e.target.value)}
                   />
                 </div>
 
-                {/* Date Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Data</label>
+                <div className="space-y-2">
+                  <Label>Data</Label>
                   <CalendarDatePicker
                     value={filterDate ? new Date(`${filterDate}T12:00:00`) : undefined}
                     onChange={(date) => {
@@ -892,9 +920,8 @@ export function AppointmentsPage() {
                   />
                 </div>
 
-                {/* Service Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Tipo de Serviço</label>
+                <div className="space-y-2">
+                  <Label>Tipo de Serviço</Label>
                   <Select value={filterService} onValueChange={setFilterService}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
@@ -910,19 +937,18 @@ export function AppointmentsPage() {
                   </Select>
                 </div>
 
-                {/* Client Name Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Nome do Cliente</label>
+                <div className="space-y-2">
+                  <Label htmlFor="appointment-filter-client">Nome do Cliente</Label>
                   <Input
+                    id="appointment-filter-client"
                     placeholder="Buscar por nome..."
                     value={filterClient}
                     onChange={(e) => setFilterClient(e.target.value)}
                   />
                 </div>
 
-                {/* Status Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Status</label>
+                <div className="space-y-2">
+                  <Label>Status</Label>
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
@@ -936,6 +962,46 @@ export function AppointmentsPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Intervalo de Horário</Label>
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1 [&_.react-datepicker-wrapper]:block [&_.react-datepicker-wrapper]:w-full">
+                      <DatePicker
+                        selected={timeToDate(filterTimeStart)}
+                        onChange={(date) => setFilterTimeStart(dateToTime(date))}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={30}
+                        dateFormat="HH:mm"
+                        locale={ptBR}
+                        placeholderText="Início"
+                        isClearable
+                        minTime={new Date(2000, 0, 1, 0, 0, 0)}
+                        maxTime={timeToDate(filterTimeEnd) || new Date(2000, 0, 1, 23, 59, 0)}
+                        popperClassName="z-50"
+                        className="h-8 w-full min-w-0 rounded-lg border border-input bg-gray-200/50 px-2.5 py-1 text-sm transition-colors outline-none placeholder:text-muted-foreground hover:bg-gray-200 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1 [&_.react-datepicker-wrapper]:block [&_.react-datepicker-wrapper]:w-full">
+                      <DatePicker
+                        selected={timeToDate(filterTimeEnd)}
+                        onChange={(date) => setFilterTimeEnd(dateToTime(date))}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={30}
+                        dateFormat="HH:mm"
+                        locale={ptBR}
+                        placeholderText="Fim"
+                        isClearable
+                        minTime={timeToDate(filterTimeStart) || new Date(2000, 0, 1, 0, 0, 0)}
+                        maxTime={new Date(2000, 0, 1, 23, 59, 0)}
+                        popperClassName="z-50"
+                        className="h-8 w-full min-w-0 rounded-lg border border-input bg-gray-200/50 px-2.5 py-1 text-sm transition-colors outline-none placeholder:text-muted-foreground hover:bg-gray-200 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>
