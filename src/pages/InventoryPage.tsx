@@ -239,52 +239,54 @@ export function InventoryPage() {
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="product-name">Nome do Produto</Label>
-          <Input
-            id="product-name"
-            placeholder="Ex: Pomada Matte 80g"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <Label>Categoria</Label>
-            {selectedCategoryMeta && (
-              <Badge variant="outline" className="gap-1.5 text-xs">
-                <selectedCategoryMeta.icon className="w-3.5 h-3.5 text-primary" />
-                {selectedCategoryMeta.label}
-              </Badge>
-            )}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="product-name">Nome do Produto</Label>
+            <Input
+              id="product-name"
+              placeholder="Ex: Pomada Matte 80g"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+            />
           </div>
-          <Select
-            value={formData.category}
-            onValueChange={(value) =>
-              setFormData({ ...formData, category: value })
-            }
-          >
-            <SelectTrigger id="product-category">
-              <SelectValue placeholder="Selecione a categoria" />
-            </SelectTrigger>
-            <SelectContent className="max-h-96">
-              {Object.entries(productCategories).map(([value, meta]) => {
-                const Icon = meta.icon;
 
-                return (
-                  <SelectItem key={value} value={value}>
-                    <div className="flex items-center gap-2">
-                      <Icon className="text-primary" size={16} />
-                      {meta.label}
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <Label>Categoria</Label>
+              {selectedCategoryMeta && (
+                <Badge variant="outline" className="gap-1.5 text-xs">
+                  <selectedCategoryMeta.icon className="w-3.5 h-3.5 text-primary" />
+                  {selectedCategoryMeta.label}
+                </Badge>
+              )}
+            </div>
+            <Select
+              value={formData.category}
+              onValueChange={(value) =>
+                setFormData({ ...formData, category: value })
+              }
+            >
+              <SelectTrigger id="product-category" className="data-[placeholder]:text-gray-500">
+                <SelectValue placeholder="Selecione a categoria" />
+              </SelectTrigger>
+              <SelectContent className="max-h-96">
+                {Object.entries(productCategories).map(([value, meta]) => {
+                  const Icon = meta.icon;
+
+                  return (
+                    <SelectItem key={value} value={value}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="text-primary" size={16} />
+                        {meta.label}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 

@@ -55,6 +55,9 @@ export function ServicesPage() {
     status: "ACTIVE" as "ACTIVE" | "DISABLED",
     company_id: localStorage.getItem('companyId')
   });
+  const selectedCategoryMeta = formData.category
+    ? serviceCategories[formData.category]
+    : null;
 
   usePageHeader("Serviços", "Gerencie os serviços oferecidos pelo seu negócio" );
 
@@ -142,6 +145,174 @@ export function ServicesPage() {
     return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
   };
 
+  const renderCreateServiceForm = () => (
+    <div className="space-y-4 py-2">
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Informações do serviço</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Defina nome, categoria e uma descrição curta para identificar o serviço.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome do Serviço</Label>
+            <Input
+              id="name"
+              placeholder="Ex: Corte Masculino"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="category">Categoria</Label>
+              {selectedCategoryMeta && (
+                <Badge variant="outline" className="gap-1.5 text-xs">
+                  <selectedCategoryMeta.icon className="w-3.5 h-3.5 text-primary" />
+                  {selectedCategoryMeta.label}
+                </Badge>
+              )}
+            </div>
+            <Select
+              value={formData.category}
+              onValueChange={(value) =>
+                setFormData({ ...formData, category: value })
+              }
+            >
+              <SelectTrigger id="category" className="data-[placeholder]:text-gray-500">
+                <SelectValue placeholder="Selecione a categoria" />
+              </SelectTrigger>
+              <SelectContent className="max-h-96">
+                {Object.entries(serviceCategories).map(([value, meta]) => {
+                  const Icon = meta.icon;
+
+                  return (
+                    <SelectItem key={value} value={value}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="text-primary" size={16} />
+                        {meta.label}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Input
+              id="description"
+              placeholder="Breve descrição do serviço"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  description: e.target.value,
+                })
+              }
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Configuração comercial</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Configure duração, preço, comissão e disponibilidade do serviço.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="duration_minutes">Duração</Label>
+            <Select
+              value={formData.duration_minutes}
+              onValueChange={(value) =>
+                setFormData({ ...formData, duration_minutes: value })
+              }
+            >
+              <SelectTrigger id="duration_minutes" className="data-[placeholder]:text-gray-500">
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="15">15 min</SelectItem>
+                <SelectItem value="30">30 min</SelectItem>
+                <SelectItem value="45">45 min</SelectItem>
+                <SelectItem value="60">1h</SelectItem>
+                <SelectItem value="75">1h 15min</SelectItem>
+                <SelectItem value="90">1h 30min</SelectItem>
+                <SelectItem value="105">1h 45min</SelectItem>
+                <SelectItem value="120">2h</SelectItem>
+                <SelectItem value="135">2h 15min</SelectItem>
+                <SelectItem value="150">2h 30min</SelectItem>
+                <SelectItem value="165">2h 45min</SelectItem>
+                <SelectItem value="180">3h</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value: "ACTIVE" | "DISABLED") =>
+                setFormData({ ...formData, status: value })
+              }
+            >
+              <SelectTrigger id="status">
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">Ativo</SelectItem>
+                <SelectItem value="DISABLED">Inativo</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price">Preço (R$)</Label>
+            <Input
+              id="price"
+              type="number"
+              step="0.01"
+              placeholder="Ex: 0,00"
+              value={formData.price}
+              onChange={(e) =>
+                setFormData({ ...formData, price: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="commission">Comissão (%)</Label>
+            <Input
+              id="commission"
+              type="number"
+              step="0.01"
+              min={0}
+              max={100}
+              placeholder="Ex: 40"
+              value={formData.commission}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  commission: Number(e.target.value),
+                })
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (data === null) return <LoadingPage />
 
   const filteredServices = data.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -191,7 +362,10 @@ export function ServicesPage() {
 
                 <Dialog
                   open={isAddDialogOpen}
-                  onOpenChange={setIsAddDialogOpen}
+                  onOpenChange={(open) => {
+                    setIsAddDialogOpen(open);
+                    if (!open) resetForm();
+                  }}
                 >
                   <DialogTrigger asChild>
                     <Button className="bg-primary hover:bg-primary/90">
@@ -199,150 +373,19 @@ export function ServicesPage() {
                       Adicionar Serviço
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px]">
+                  <DialogContent className="overflow-hidden p-0 sm:max-w-[560px]">
                     <DialogHeader>
-                      <DialogTitle>Adicionar Novo Serviço</DialogTitle>
-                      <DialogDescription>
-                        Preencha as informações do serviço
+                      <DialogTitle className="px-6 pt-6">Novo Serviço</DialogTitle>
+                      <DialogDescription className="px-6">
+                        Preencha os dados abaixo para cadastrar o serviço.
                       </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-2 gap-4 py-4">
-                      <div className="col-span-2 space-y-2">
-                        <Label htmlFor="name">Nome do Serviço</Label>
-                        <Input
-                          id="name"
-                          placeholder="Ex: Corte Masculino"
-                          value={formData.name}
-                          onChange={(e) =>
-                            setFormData({ ...formData, name: e.target.value })
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="category">Categoria</Label>
-                        <Select
-                          value={formData.category}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, category: value })
-                          }
-                        >
-                          <SelectTrigger id="duration">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-96">
-                            {Object.entries(serviceCategories).map(([value, meta]) => {
-                              const Icon = meta.icon;
-
-                              return (
-                              <SelectItem key={value} value={value} className="flex items-center gap-2 group">
-                                <div className="flex items-center gap-2">
-                                  <Icon className="text-primary group-hover:text-white" size={16} />
-                                  {meta.label}
-                                </div>
-                              </SelectItem>
-                            )
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="duration_minutes">Duração (minutos)</Label>
-                        <Select
-                          value={formData.duration_minutes}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, duration_minutes: value })
-                          }
-                        >
-                          <SelectTrigger id="duration_minutes">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="15">15 min</SelectItem>
-                            <SelectItem value="30">30 min</SelectItem>
-                            <SelectItem value="45">45 min</SelectItem>
-                            <SelectItem value="60">1h</SelectItem>
-                            <SelectItem value="75">1h 15min</SelectItem>
-                            <SelectItem value="90">1h 30min</SelectItem>
-                            <SelectItem value="105">1h 45min</SelectItem>
-                            <SelectItem value="120">2h</SelectItem>
-                            <SelectItem value="135">2h 15min</SelectItem>
-                            <SelectItem value="150">2h 30min</SelectItem>
-                            <SelectItem value="165">2h 45min</SelectItem>
-                            <SelectItem value="180">3h</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="price">Preço (R$)</Label>
-                        <Input
-                          id="price"
-                          type="number"
-                          step="0.01"
-                          placeholder="Ex: 0,00"
-                          value={formData.price}
-                          onChange={(e) =>
-                            setFormData({ ...formData, price: e.target.value })
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="commission">Comissão (%)</Label>
-                        <Input
-                          id="commission"
-                          type="number"
-                          step="0.01"
-                          min={0} max={100}
-                          placeholder="Ex: 40"
-                          value={formData.commission}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              commission: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="status">Status</Label>
-                        <Select
-                          value={formData.status}
-                          onValueChange={(value: "ACTIVE" | "DISABLED") =>
-                            setFormData({ ...formData, status: value })
-                          }
-                        >
-                          <SelectTrigger id="status">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ACTIVE">Ativo</SelectItem>
-                            <SelectItem value="DISABLED">Inativo</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="col-span-2 space-y-2">
-                        <Label htmlFor="description">Descrição</Label>
-                        <Input
-                          id="description"
-                          placeholder="Breve descrição do serviço"
-                          value={formData.description}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
+                    <div className="px-6 pb-6">
+                      {renderCreateServiceForm()}
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
                       <Button
                         className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
                         onClick={() => {
