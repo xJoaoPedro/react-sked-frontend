@@ -100,7 +100,15 @@ export function formatLimitText(text: string, limit: number) {
 export function formatPhone(phone: string) {
   if (!phone) return '';
 
-  const cleaned = phone.replace(/\D/g, '').slice(0, 11);
+  let cleaned = phone.replace(/\D/g, '');
+
+  if (cleaned.length > 11 && cleaned.startsWith('55')) {
+    cleaned = cleaned.slice(2);
+  }
+
+  if (cleaned.length > 11) {
+    cleaned = cleaned.slice(-11);
+  }
 
   if (cleaned.length <= 2) {
     return cleaned.length === 0 ? '' : `(${cleaned}`;
