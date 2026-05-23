@@ -3,7 +3,7 @@ import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Plus, Edit, Trash2, User, Upload, Search, UserX, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -102,6 +102,15 @@ export function ProfessionalsPage() {
       scheduleOpenings: [],
       status: 'ACTIVE',
     });
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+
+    setFormData((prev) => ({
+      ...prev,
+      phone: digits,
+    }));
   };
 
   const handleEditProfessional = async (id) => {
@@ -243,6 +252,171 @@ export function ProfessionalsPage() {
     resetForm();
   };
 
+  const renderProfessionalDetailsForm = () => (
+    <div className="h-full">
+      <div className="h-full rounded-2xl border border-border bg-card p-4">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Informações do profissional</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Preencha os dados principais e vincule os serviços atendidos por esse profissional.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="professional-name">Nome completo</Label>
+            <Input
+              id="professional-name"
+              placeholder="Ex: João Silva"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="professional-services">Serviços</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="professional-services"
+                  className={`w-full justify-start border border-input ${
+                    formData.services.length > 0
+                      ? 'bg-gray-200/50 text-black hover:bg-gray-200'
+                      : 'bg-gray-200/50 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  {formData.services.length <= 0
+                    ? 'Selecionar serviços'
+                    : `Serviços selecionados: ${formData.services.length}`}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-64" side="bottom" align="start">
+                <div className="flex max-h-72 flex-col gap-0 overflow-y-auto">
+                  {services.map((service) => (
+                    <label
+                      key={service.id}
+                      className="group flex items-center gap-2 rounded-sm p-2 hover:bg-primary"
+                    >
+                      <Checkbox
+                        checked={formData.services.includes(service.id)}
+                        onCheckedChange={() => toggle(service.id)}
+                      />
+                      <span className="text-foreground group-hover:text-white">
+                        {service.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="professional-email">E-mail</Label>
+            <Input
+              id="professional-email"
+              type="email"
+              placeholder="joao@exemplo.com"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="professional-phone">Telefone</Label>
+            <Input
+              id="professional-phone"
+              type="tel"
+              inputMode="numeric"
+              placeholder="(11) 99999-9999"
+              value={formatPhone(formData.phone)}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderProfessionalScheduleForm = () => (
+    <div className="h-full rounded-2xl border border-border bg-card p-4">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-foreground">Agenda</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Defina os horários disponíveis por dia da semana.
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-border">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="w-[140px]">Dia</TableHead>
+              <TableHead>Horário</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {weekDays.map(day => (
+              <TableRow key={day.id}>
+                <TableCell className="font-medium">
+                  {day.label}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-end gap-2">
+                    <DatePicker
+                      selected={timeToDate(formatTime(getOpening(day.id)?.start_time))}
+                      onChange={(date) =>
+                        handleScheduleChange(day.id, 'start_time', dateToTime(date))
+                      }
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={30}
+                      dateFormat="HH:mm"
+                      locale={ptBR}
+                      placeholderText="HH:mm"
+                      isClearable
+                      minTime={new Date(2000, 0, 1, 6, 0, 0)}
+                      maxTime={
+                        timeToDate(formatTime(getOpening(day.id)?.end_time)) ||
+                        new Date(2000, 0, 1, 23, 59, 0)
+                      }
+                      className="w-20 rounded-md border border-primary p-1"
+                    />
+                    <span className="text-xs text-muted-foreground">até</span>
+                    <DatePicker
+                      selected={timeToDate(formatTime(getOpening(day.id)?.end_time))}
+                      onChange={(date) =>
+                        handleScheduleChange(day.id, 'end_time', dateToTime(date))
+                      }
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={30}
+                      dateFormat="HH:mm"
+                      locale={ptBR}
+                      placeholderText="HH:mm"
+                      isClearable
+                      minTime={
+                        timeToDate(formatTime(getOpening(day.id)?.start_time)) ||
+                        new Date(2000, 0, 1, 0, 0, 0)
+                      }
+                      maxTime={new Date(2000, 0, 1, 23, 59, 0)}
+                      className="w-20 rounded-md border border-primary p-1"
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+
   if (data === null) return <LoadingPage />
 
   const filteredProfessionals = data.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -272,193 +446,32 @@ export function ProfessionalsPage() {
                   />
                 </div>
 
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+                  setIsAddDialogOpen(open);
+                  if (!open) resetForm();
+                }}>
                   <DialogTrigger asChild>
                     <Button className="bg-primary hover:bg-primary/90">
                       <Plus className="w-4 h-4 mr-2" />
                       Cadastrar profissional
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[1400px]">
+                  <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-[960px]">
                     <DialogHeader>
-                      <DialogTitle>Adicionar Novo Profissional</DialogTitle>
+                      <DialogTitle className="px-6 pt-6">Novo Profissional</DialogTitle>
+                      <DialogDescription className="px-6">
+                        Cadastre os dados do profissional e configure sua agenda de atendimento.
+                      </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-6 py-4">
-                      <div className="flex gap-6">
-                        <div className="flex-shrink-0">
-                          {/* <Label
-                            htmlFor="photo-upload"
-                            className="cursor-pointer block"
-                          >
-                            TODO IMPLEMENTAR FUTURAMENTE
-                            <div className="w-48 h-64 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-lg">
-                              {formData.photo ? (
-                                <img
-                                  src={formData.photo}
-                                  alt="Preview"
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                  <Upload className="w-12 h-12 text-muted-foreground" />
-                                  <span className="text-sm text-muted-foreground">Clique para carregar foto</span>
-                                </div>
-                              )}
-                            </div>
-                          </Label>
-                          <Input
-                            id="photo-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoUpload}
-                            className="hidden"
-                          /> */}
-                        </div>
-
-                        <div className="flex-1 grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="name">Nome completo</Label>
-                            <Input
-                              id="name"
-                              placeholder="Ex: João Silva"
-                              value={formData.name}
-                              onChange={e =>
-                                setFormData({ ...formData, name: e.target.value })
-                              }
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="email">E-mail</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              placeholder="joao@exemplo.com"
-                              value={formData.email}
-                              onChange={e =>
-                                setFormData({ ...formData, email: e.target.value })
-                              }
-                            />
-                          </div>
-
-                          <div className='space-y-2'>
-                            <Label htmlFor="edit-specialty">Serviços</Label>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button className='bg-gray-200/50 hover:bg-gray-200 text-muted-foreground w-full justify-start'>
-                                  {formData.services.length <= 0 ? 'Selecionar serviços' : `Serviços selecionados: ${formData.services.length}`} 
-                                </Button>
-                              </PopoverTrigger>
-
-                              <PopoverContent className="w-64" side='bottom' align='start'>
-                                <div className="flex flex-col gap-0">
-                                  {services.map((service) => (
-                                    <label key={service.id} className="flex items-center gap-2 group hover:bg-primary p-2 rounded-sm">
-                                      <Checkbox
-                                        checked={formData.services.includes(service.id)}
-                                        onCheckedChange={() => toggle(service.id)}
-                                      />
-                                      <span className='text-foreground group-hover:text-white'>{service.name}</span>
-                                    </label>
-                                  ))}
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Telefone</Label>
-                            <Input
-                              id="phone"
-                              placeholder="(00) 00000-0000"
-                              value={formData.phone}
-                              onChange={e =>
-                                setFormData({ ...formData, phone: e.target.value })
-                              }
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-
-                      <div className="space-y-3 w-fit">
-                        <h3 className="font-semibold text-lg">Agenda</h3>
-                        <div className="border border-border rounded-lg overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                <TableHead className="w-[140px]">Dia</TableHead>
-                                <TableHead>Horário</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {weekDays.map(day => (
-                                <TableRow key={day.id}>
-                                  <TableCell className="font-medium">
-                                    {day.label}
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2">
-                                      <DatePicker
-                                        selected={timeToDate(formatTime(getOpening(day.id)?.start_time))}
-                                        onChange={(date) =>
-                                          handleScheduleChange(day.id, 'start_time', dateToTime(date))
-                                        }
-                                        showTimeSelect
-                                        showTimeSelectOnly
-                                        timeIntervals={30}
-                                        dateFormat="HH:mm"
-                                        locale={ptBR}
-                                        placeholderText="HH:mm"
-                                        isClearable
-
-                                        minTime={new Date(2000, 0, 1, 6, 0, 0)}
-
-                                        maxTime={
-                                          timeToDate(formatTime(getOpening(day.id)?.end_time)) ||
-                                          new Date(2000, 0, 1, 23, 59, 0)
-                                        }
-
-                                        className="w-20 p-1 border border-primary rounded-md"
-                                      />
-                                      <span className="text-xs text-muted-foreground">até</span>
-                                      <DatePicker
-                                        selected={timeToDate(formatTime(getOpening(day.id)?.end_time))}
-                                        onChange={(date) =>
-                                          handleScheduleChange(day.id, 'end_time', dateToTime(date))
-                                        }
-                                        showTimeSelect
-                                        showTimeSelectOnly
-                                        timeIntervals={30}
-                                        dateFormat="HH:mm"
-                                        locale={ptBR}
-                                        placeholderText="HH:mm"
-                                        isClearable
-
-                                        minTime={
-                                          timeToDate(formatTime(getOpening(day.id)?.start_time)) ||
-                                          new Date(2000, 0, 1, 0, 0, 0)
-                                        }
-
-                                        maxTime={new Date(2000, 0, 1, 23, 59, 0)}
-
-                                        className="w-20 p-1 border border-primary rounded-md"
-                                      />
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </div>
+                    <div className="grid max-h-[calc(90vh-140px)] gap-4 overflow-y-auto px-6 pb-6 md:auto-rows-fr md:grid-cols-2 md:items-stretch">
+                      {renderProfessionalDetailsForm()}
+                      {renderProfessionalScheduleForm()}
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
                       <Button
-                        variant="secondary"
-                        className='hover:bg-destructive'
+                        className='bg-transparent text-foreground hover:bg-destructive hover:text-white'
                         onClick={() => {
                           setIsAddDialogOpen(false);
                           resetForm();
@@ -548,194 +561,22 @@ export function ProfessionalsPage() {
                                 Editar
                               </TooltipContent>
                             </Tooltip>
-                            <DialogContent className="sm:max-w-[1400px]">
+                            <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-[960px]">
                               <DialogHeader>
-                                <DialogTitle>Editar Profissional</DialogTitle>
+                                <DialogTitle className="px-6 pt-6">Editar Profissional</DialogTitle>
+                                <DialogDescription className="px-6">
+                                  Atualize os dados do profissional e ajuste sua agenda de atendimento.
+                                </DialogDescription>
                               </DialogHeader>
 
-                              <div className="space-y-6 py-4">
-
-                                <div className="flex gap-6">
-      
-                                  <div className="flex-shrink-0">
-                                    {/* TODO IMPLEMENTAR FUTURAMENTE */}
-                                    {/* <Label
-                                      htmlFor="edit-photo-upload"
-                                      className="cursor-pointer block"
-                                    >
-                                      <div className="w-48 h-64 bg-muted flex items-center justify-center overflow-hidden hover:bg-muted/80 transition-colors border-2 border-dashed border-border hover:border-primary rounded-lg">
-                                        {formData.photo ? (
-                                          <img
-                                            src={formData.photo}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                          />
-                                        ) : (
-                                          <div className="flex flex-col items-center gap-2">
-                                            <Upload className="w-12 h-12 text-muted-foreground" />
-                                            <span className="text-sm text-muted-foreground">Clique para carregar foto</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </Label>
-                                    <Input
-                                      id="edit-photo-upload"
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={handlePhotoUpload}
-                                      className="hidden"
-                                    /> */}
-                                  </div>
-
-                                  <div className="flex-1 grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-name">Nome completo</Label>
-                                      <Input
-                                        id="edit-name"
-                                        value={formData.name}
-                                        onChange={e =>
-                                          setFormData({
-                                            ...formData,
-                                            name: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-email">E-mail</Label>
-                                      <Input
-                                        id="edit-email"
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={e =>
-                                          setFormData({
-                                            ...formData,
-                                            email: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
-
-
-                                    <div className='space-y-2'>
-                                      <Label htmlFor="edit-specialty">Serviços</Label>
-                                      <Popover>
-                                        <PopoverTrigger asChild>
-                                          <Button className='bg-gray-200/50 hover:bg-gray-200 text-muted-foreground w-full justify-start'>
-                                            {formData.services.length <= 0 ? 'Selecionar serviços' : `Serviços selecionados: ${formData.services.length}`} 
-                                          </Button>
-                                        </PopoverTrigger>
-
-                                        <PopoverContent className="w-64" side='bottom' align='start'>
-                                          <div className="flex flex-col gap-0">
-                                            {services.map((service) => (
-                                              <label key={service.id} className="flex items-center gap-2 group hover:bg-primary p-2 rounded-sm">
-                                                <Checkbox
-                                                  checked={formData.services.includes(service.id)}
-                                                  onCheckedChange={() => toggle(service.id)}
-                                                />
-                                                <span className='text-foreground group-hover:text-white'>{service.name}</span>
-                                              </label>
-                                            ))}
-                                          </div>
-                                        </PopoverContent>
-                                      </Popover>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-phone">Telefone</Label>
-                                      <Input
-                                        id="edit-phone"
-                                        value={formData.phone}
-                                        onChange={e =>
-                                          setFormData({
-                                            ...formData,
-                                            phone: e.target.value,
-                                          })
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-3 w-fit">
-                                  <h3 className="font-semibold text-lg">Agenda</h3>
-                                  <div className="border border-border rounded-lg overflow-hidden">
-                                    <Table>
-                                      <TableHeader>
-                                        <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                          <TableHead className="w-[140px]">Dia</TableHead>
-                                          <TableHead>Horário</TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                        {weekDays.map(day => (
-                                          <TableRow key={day.id}>
-                                            <TableCell className="font-medium">
-                                              {day.label}
-                                            </TableCell>
-                                            <TableCell>
-                                              <div className="flex items-center gap-2">
-                                                <DatePicker
-                                                  selected={timeToDate(formatTime(getOpening(day.id)?.start_time))}
-                                                  onChange={(date) =>
-                                                    handleScheduleChange(day.id, 'start_time', dateToTime(date))
-                                                  }
-                                                  showTimeSelect
-                                                  showTimeSelectOnly
-                                                  timeIntervals={30}
-                                                  dateFormat="HH:mm"
-                                                  locale={ptBR}
-                                                  placeholderText="HH:mm"
-                                                  isClearable
-
-                                                  minTime={new Date(2000, 0, 1, 6, 0, 0)}
-
-                                                  maxTime={
-                                                    timeToDate(formatTime(getOpening(day.id)?.end_time)) ||
-                                                    new Date(2000, 0, 1, 23, 59, 0)
-                                                  }
-
-                                                  className="w-20 p-1 border border-primary rounded-md"
-                                                />
-                                                <span className="text-xs text-muted-foreground">até</span>
-                                                <DatePicker
-                                                  selected={timeToDate(formatTime(getOpening(day.id)?.end_time))}
-                                                  onChange={(date) =>
-                                                    handleScheduleChange(day.id, 'end_time', dateToTime(date))
-                                                  }
-                                                  showTimeSelect
-                                                  showTimeSelectOnly
-                                                  timeIntervals={30}
-                                                  dateFormat="HH:mm"
-                                                  locale={ptBR}
-                                                  placeholderText="HH:mm"
-                                                  isClearable
-
-                                                  minTime={
-                                                    timeToDate(formatTime(getOpening(day.id)?.start_time)) ||
-                                                    new Date(2000, 0, 1, 0, 0, 0)
-                                                  }
-
-                                                  maxTime={new Date(2000, 0, 1, 23, 59, 0)}
-
-                                                  className="w-20 p-1 border border-primary rounded-md"
-                                                />
-                                              </div>
-                                            </TableCell>
-                                          </TableRow>
-                                        ))}
-                                      </TableBody>
-                                    </Table>
-                                  </div>
-                                </div>
+                              <div className="grid max-h-[calc(90vh-140px)] gap-4 overflow-y-auto px-6 pb-6 md:auto-rows-fr md:grid-cols-2 md:items-stretch">
+                                {renderProfessionalDetailsForm()}
+                                {renderProfessionalScheduleForm()}
                               </div>
 
-                              <DialogFooter>
+                              <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
                                 <Button
-                                  variant="secondary"
-                                  className='hover:bg-destructive'
+                                  className='bg-transparent text-foreground hover:bg-destructive hover:text-white'
                                   onClick={() => {
                                     setEditingProfessional(null);
                                     resetForm();

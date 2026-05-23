@@ -120,6 +120,443 @@ const getDefaultPageHeader = (pathname: string) =>
 const getNotificationsStorageKey = (companyId?: string | null) =>
   `${NOTIFICATIONS_STORAGE_PREFIX}:${companyId || "anonymous"}`;
 
+/* TODO global search: funcoes da barra global comentadas para reimplementacao futura.
+const SEARCH_RESULT_LIMIT = 12;
+
+const normalizeSearchText = (value: unknown) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const splitSearchTerms = (value: string) =>
+  normalizeSearchText(value)
+    .split(/\s+/)
+    .filter(Boolean);
+
+const appendSearchValues = (value: unknown, values: string[]) => {
+  if (value === null || value === undefined) return;
+
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    const normalizedValue = String(value).trim();
+
+    if (normalizedValue) {
+      values.push(normalizedValue);
+    }
+
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => appendSearchValues(item, values));
+    return;
+  }
+
+  if (typeof value === "object") {
+    Object.entries(value as Record<string, unknown>).forEach(([key, nestedValue]) => {
+      if (["id", "created_at", "updated_at", "createdAt", "updatedAt", "photo", "password", "token"].includes(key)) {
+        return;
+      }
+
+      appendSearchValues(nestedValue, values);
+    });
+  }
+};
+
+const buildSearchText = (...parts: unknown[]) => {
+  const values: string[] = [];
+
+  parts.forEach((part) => appendSearchValues(part, values));
+
+  return values.join(" ");
+};
+
+const getSearchCollection = (value: any, ...keys: string[]) => {
+  if (Array.isArray(value)) return value;
+
+  for (const key of keys) {
+    if (Array.isArray(value?.[key])) {
+      return value[key];
+    }
+  }
+
+  return [];
+};
+
+const GLOBAL_SEARCH_HIGHLIGHT_SELECTOR = "mark[data-global-search-highlight='true']";
+
+const clearGlobalSearchHighlights = (root: HTMLElement | null) => {
+  if (!root) return;
+
+  root.querySelectorAll(GLOBAL_SEARCH_HIGHLIGHT_SELECTOR).forEach((highlight) => {
+    const parent = highlight.parentNode;
+
+    if (!parent) return;
+
+    parent.replaceChild(document.createTextNode(highlight.textContent || ""), highlight);
+    parent.normalize();
+  });
+};
+
+const getNormalizedTextWithIndexMap = (value: string) => {
+  let normalized = "";
+  const indexMap: number[] = [];
+
+  Array.from(value).forEach((char, index) => {
+    const normalizedChar = char
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+    Array.from(normalizedChar).forEach((normalizedPart) => {
+      normalized += normalizedPart;
+      indexMap.push(index);
+    });
+  });
+
+  return { normalized, indexMap };
+};
+
+const mergeRanges = (ranges: Array<[number, number]>) => {
+  const sortedRanges = [...ranges].sort((first, second) => first[0] - second[0]);
+  const mergedRanges: Array<[number, number]> = [];
+
+  sortedRanges.forEach(([start, end]) => {
+    const lastRange = mergedRanges[mergedRanges.length - 1];
+
+    if (!lastRange || start > lastRange[1]) {
+      mergedRanges.push([start, end]);
+      return;
+    }
+
+    lastRange[1] = Math.max(lastRange[1], end);
+  });
+
+  return mergedRanges;
+};
+
+const getHighlightRanges = (text: string, terms: string[]) => {
+  const { normalized, indexMap } = getNormalizedTextWithIndexMap(text);
+  const ranges: Array<[number, number]> = [];
+
+  terms.forEach((term) => {
+    let searchFrom = 0;
+    let foundIndex = normalized.indexOf(term, searchFrom);
+
+    while (foundIndex !== -1) {
+      const start = indexMap[foundIndex];
+      const end = indexMap[foundIndex + term.length - 1] + 1;
+
+      if (Number.isFinite(start) && Number.isFinite(end)) {
+        ranges.push([start, end]);
+      }
+
+      searchFrom = foundIndex + term.length;
+      foundIndex = normalized.indexOf(term, searchFrom);
+    }
+  });
+
+  return mergeRanges(ranges);
+};
+
+const shouldSkipHighlightNode = (node: Text) => {
+  const parent = node.parentElement;
+
+  if (!parent) return true;
+
+  return Boolean(
+    parent.closest(
+      `${GLOBAL_SEARCH_HIGHLIGHT_SELECTOR}, input, textarea, select, button, script, style, [contenteditable="true"]`,
+    ),
+  );
+};
+
+const applyGlobalSearchHighlights = (root: HTMLElement | null, query: string) => {
+  if (!root) return;
+
+  clearGlobalSearchHighlights(root);
+
+  const terms = splitSearchTerms(query);
+  if (terms.length === 0) return;
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  let currentNode = walker.nextNode();
+
+  while (currentNode) {
+    if (currentNode instanceof Text && currentNode.textContent?.trim() && !shouldSkipHighlightNode(currentNode)) {
+      textNodes.push(currentNode);
+    }
+
+    currentNode = walker.nextNode();
+  }
+
+  textNodes.forEach((textNode) => {
+    const text = textNode.textContent || "";
+    const ranges = getHighlightRanges(text, terms);
+
+    if (ranges.length === 0) return;
+
+    const fragment = document.createDocumentFragment();
+    let cursor = 0;
+
+    ranges.forEach(([start, end]) => {
+      if (start > cursor) {
+        fragment.appendChild(document.createTextNode(text.slice(cursor, start)));
+      }
+
+      const mark = document.createElement("mark");
+      mark.dataset.globalSearchHighlight = "true";
+      mark.className = "global-search-highlight";
+      mark.textContent = text.slice(start, end);
+      fragment.appendChild(mark);
+
+      cursor = end;
+    });
+
+    if (cursor < text.length) {
+      fragment.appendChild(document.createTextNode(text.slice(cursor)));
+    }
+
+    textNode.parentNode?.replaceChild(fragment, textNode);
+  });
+
+  root
+    .querySelector(GLOBAL_SEARCH_HIGHLIGHT_SELECTOR)
+    ?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+};
+
+const createSearchEntry = ({
+  id,
+  path,
+  pageTitle,
+  title,
+  description,
+  searchText,
+}: GlobalSearchItem & { searchText: string }) => ({
+  id,
+  path,
+  pageTitle,
+  title,
+  description,
+  searchText: normalizeSearchText(searchText),
+});
+
+const buildGlobalSearchIndex = (dados: any) => {
+  if (!dados) return [];
+
+  const entries = [
+    createSearchEntry({
+      id: "page-dashboard",
+      path: "/dashboard",
+      pageTitle: "Painel",
+      title: "Painel",
+      description: "Resumo geral do negócio",
+      searchText: buildSearchText("painel dashboard resumo", dados.dashboard),
+    }),
+    createSearchEntry({
+      id: "page-daily-schedule",
+      path: "/daily-schedule",
+      pageTitle: "Agenda do Dia",
+      title: "Agenda do Dia",
+      description: "Agenda diária e horários",
+      searchText: buildSearchText("agenda do dia horarios", dados.dailySchedules),
+    }),
+    createSearchEntry({
+      id: "page-appointments",
+      path: "/appointments",
+      pageTitle: "Agendamentos",
+      title: "Agendamentos",
+      description: "Todos os agendamentos",
+      searchText: buildSearchText("agendamentos marcacoes", dados.appointments),
+    }),
+    createSearchEntry({
+      id: "page-cancellations",
+      path: "/cancellations",
+      pageTitle: "Cancelamentos",
+      title: "Cancelamentos",
+      description: "Análise de cancelamentos",
+      searchText: buildSearchText("cancelamentos faltas", dados.cancellations),
+    }),
+    createSearchEntry({
+      id: "page-revenue",
+      path: "/revenue",
+      pageTitle: "Receitas",
+      title: "Receitas",
+      description: "Receitas e transações",
+      searchText: buildSearchText("receitas faturamento transacoes", dados.revenue),
+    }),
+    createSearchEntry({
+      id: "page-inventory",
+      path: "/inventory",
+      pageTitle: "Estoque",
+      title: "Estoque",
+      description: "Produtos e quantidades",
+      searchText: buildSearchText("estoque produtos inventario", dados.products),
+    }),
+    createSearchEntry({
+      id: "page-services",
+      path: "/services",
+      pageTitle: "Serviços",
+      title: "Serviços",
+      description: "Serviços cadastrados",
+      searchText: buildSearchText("servicos procedimentos", dados.services),
+    }),
+    createSearchEntry({
+      id: "page-professionals",
+      path: "/professionals",
+      pageTitle: "Profissionais",
+      title: "Profissionais",
+      description: "Equipe e profissionais",
+      searchText: buildSearchText("profissionais equipe funcionarios", dados.professionals),
+    }),
+    createSearchEntry({
+      id: "page-customers",
+      path: "/customers",
+      pageTitle: "Clientes",
+      title: "Clientes",
+      description: "Base de clientes",
+      searchText: buildSearchText("clientes contatos", dados.customers),
+    }),
+    createSearchEntry({
+      id: "page-settings",
+      path: "/settings",
+      pageTitle: "Configurações Gerais",
+      title: "Configurações Gerais",
+      description: "Dados da empresa e preferências",
+      searchText: buildSearchText("configuracoes empresa preferencias whatsapp", dados.settings),
+    }),
+  ];
+
+  const appointments = getSearchCollection(dados.appointments, "data", "appointments");
+  const cancellations = getSearchCollection(dados.cancellations, "data", "cancellations");
+  const revenues = getSearchCollection(dados.revenue, "data", "recentPayments", "transactions");
+  const products = getSearchCollection(dados.products, "products", "data");
+  const services = getSearchCollection(dados.services, "services", "data");
+  const professionals = getSearchCollection(dados.professionals, "professionals", "data");
+  const customers = getSearchCollection(dados.customers, "customers", "data");
+  const dailyAppointments = getSearchCollection(dados.dailySchedules, "appointments", "data");
+
+  appointments.forEach((appointment: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `appointment-${appointment.id}`,
+        path: "/appointments",
+        pageTitle: "Agendamentos",
+        title: `${appointment.client?.name || "Cliente"} - ${appointment.service?.name || "Serviço"}`,
+        description: `${appointment.employee?.name || "Profissional"} • ${appointment.status || "Status não informado"}`,
+        searchText: buildSearchText(appointment),
+      }),
+    );
+  });
+
+  cancellations.forEach((appointment: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `cancellation-${appointment.id}`,
+        path: "/cancellations",
+        pageTitle: "Cancelamentos",
+        title: `${appointment.client?.name || "Cliente"} - ${appointment.service?.name || "Serviço"}`,
+        description: appointment.cancel_reason || appointment.status || "Cancelamento",
+        searchText: buildSearchText(appointment),
+      }),
+    );
+  });
+
+  revenues.forEach((transaction: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `revenue-${transaction.id}`,
+        path: "/revenue",
+        pageTitle: "Receitas",
+        title: transaction.client_name || transaction.description || "Transação",
+        description: transaction.service_name || transaction.payment_method || transaction.status || "Receita",
+        searchText: buildSearchText(transaction),
+      }),
+    );
+  });
+
+  dailyAppointments.forEach((appointment: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `daily-appointment-${appointment.id}`,
+        path: "/daily-schedule",
+        pageTitle: "Agenda do Dia",
+        title: `${appointment.client?.name || "Cliente"} - ${appointment.service?.name || "Serviço"}`,
+        description: `${appointment.employee?.name || "Profissional"} • ${appointment.status || "Status não informado"}`,
+        searchText: buildSearchText(appointment),
+      }),
+    );
+  });
+
+  products.forEach((product: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `product-${product.id}`,
+        path: "/inventory",
+        pageTitle: "Estoque",
+        title: product.name || "Produto",
+        description: product.category || product.description || "Produto em estoque",
+        searchText: buildSearchText(product),
+      }),
+    );
+  });
+
+  services.forEach((service: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `service-${service.id}`,
+        path: "/services",
+        pageTitle: "Serviços",
+        title: service.name || "Serviço",
+        description: service.description || service.category || "Serviço cadastrado",
+        searchText: buildSearchText(service),
+      }),
+    );
+  });
+
+  professionals.forEach((professional: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `professional-${professional.id}`,
+        path: "/professionals",
+        pageTitle: "Profissionais",
+        title: professional.name || "Profissional",
+        description: professional.email || professional.role || professional.phone || "Profissional cadastrado",
+        searchText: buildSearchText(professional),
+      }),
+    );
+  });
+
+  customers.forEach((customer: any) => {
+    entries.push(
+      createSearchEntry({
+        id: `customer-${customer.id}`,
+        path: "/customers",
+        pageTitle: "Clientes",
+        title: customer.name || "Cliente",
+        description: customer.email || customer.contact || customer.phone || "Cliente cadastrado",
+        searchText: buildSearchText(customer),
+      }),
+    );
+  });
+
+  entries.push(
+    createSearchEntry({
+      id: "settings-company",
+      path: "/settings",
+      pageTitle: "Configurações Gerais",
+      title: dados.settings?.fantasy_name || dados.settings?.email || "Dados da empresa",
+      description: dados.settings?.phone || dados.settings?.email || "Configurações da empresa",
+      searchText: buildSearchText(dados.settings),
+    }),
+  );
+
+  return entries;
+};
+*/
+
 const formatNotificationDateTime = (value?: string | Date) => {
   if (!value) return "";
 
@@ -266,13 +703,51 @@ const normalizeNotification = (eventName: string, rawPayload?: unknown): Notific
 export function Layout() {
   const location = useLocation();
   const [dados, setDados] = useState(null);
+  // TODO global search: reativar estados da busca quando a barra voltar.
+  // const [searchValue, setSearchValue] = useState("");
+  // const [activeHighlightQuery, setActiveHighlightQuery] = useState("");
   const [pageHeader, setPageHeaderState] = useState(() =>
     getDefaultPageHeader(location.pathname),
   );
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const refreshTimeoutRef = useRef<number | null>(null);
+  // TODO global search: reativar ref quando voltar o highlight da busca.
+  // const outletContentRef = useRef<HTMLDivElement | null>(null);
   const notificationSoundRef = useRef<HTMLAudioElement | null>(null);
   const lastSessionRefreshAtRef = useRef(0);
+
+  // TODO global search: reativar indice, resultados e efeito de highlight quando a barra voltar.
+  // const globalSearchIndex = buildGlobalSearchIndex(dados);
+  // const searchTerms = splitSearchTerms(searchValue);
+  // const filteredSearchResults: GlobalSearchItem[] =
+  //   searchTerms.length === 0
+  //     ? []
+  //     : globalSearchIndex
+  //         .filter((item) => searchTerms.some((term) => item.searchText.includes(term)))
+  //         .slice(0, SEARCH_RESULT_LIMIT)
+  //         .map(({ searchText: _searchText, ...item }) => item);
+  //
+  // const handleSearchChange = useCallback((value: string) => {
+  //   setSearchValue(value);
+  //   setActiveHighlightQuery("");
+  // }, []);
+  //
+  // useEffect(() => {
+  //   const root = outletContentRef.current;
+  //
+  //   clearGlobalSearchHighlights(root);
+  //
+  //   if (!activeHighlightQuery.trim()) return;
+  //
+  //   const timeoutId = window.setTimeout(() => {
+  //     applyGlobalSearchHighlights(root, activeHighlightQuery);
+  //   }, 120);
+  //
+  //   return () => {
+  //     window.clearTimeout(timeoutId);
+  //     clearGlobalSearchHighlights(root);
+  //   };
+  // }, [activeHighlightQuery, location.pathname, dados]);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
@@ -614,6 +1089,11 @@ export function Layout() {
               evolutionConnection={dados?.settings?.evolution ?? null}
               onEvolutionConnectionUpdated={refreshDados}
               onEvolutionConnectionNotification={prependManualNotification}
+              // TODO global search: reativar props quando a barra voltar.
+              // searchResults={filteredSearchResults}
+              // searchValue={searchValue}
+              // onSearchChange={handleSearchChange}
+              // onSearchResultSelect={(_item, query) => setActiveHighlightQuery(query)}
             />
             <Outlet
               context={{

@@ -1,4 +1,4 @@
-import { Bell, Search, Calendar, X, DollarSign, Wallet, AlertCircle, CheckCircle, Clock, Trash2, Package, AlertTriangle, CircleX, Wrench, UserCog, Users, Building2, RefreshCw, CalendarPlus2, CalendarSync, CalendarX2, UserPlus, UserRoundX, ShieldCheck, QrCode, LoaderCircle } from "lucide-react";
+import { Bell, Calendar, X, DollarSign, Wallet, AlertCircle, CheckCircle, Clock, Trash2, Package, AlertTriangle, CircleX, Wrench, UserCog, Users, Building2, RefreshCw, CalendarPlus2, CalendarSync, CalendarX2, UserPlus, UserRoundX, ShieldCheck, QrCode, LoaderCircle, MessageCircleMore } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -6,7 +6,6 @@ import { formatPhone } from "@/lib/parsers";
 import { CustomDropdown } from "./CustomDropdown";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Input } from "./ui/input";
 
 interface PageHeaderProps {
   title: string;
@@ -28,6 +27,11 @@ interface PageHeaderProps {
   } | null;
   onEvolutionConnectionUpdated?: () => Promise<unknown> | void;
   onEvolutionConnectionNotification?: (notification: NotificationItem, playSound?: boolean) => void;
+  // TODO global search: reativar props da busca quando a barra voltar.
+  // searchResults?: GlobalSearchItem[];
+  // searchValue?: string;
+  // onSearchChange?: (value: string) => void;
+  // onSearchResultSelect?: (item: GlobalSearchItem, query: string) => void;
 }
 
 export interface NotificationItem {
@@ -39,6 +43,15 @@ export interface NotificationItem {
   isRead: boolean;
   eventName?: string;
 }
+
+// TODO global search: reativar este tipo junto com a barra.
+// export interface GlobalSearchItem {
+//   id: string;
+//   path: string;
+//   pageTitle: string;
+//   title: string;
+//   description?: string;
+// }
 
 const ProductStatusIcon = ({
   accentIcon,
@@ -128,6 +141,12 @@ const getEventVisualConfig = (notification: NotificationItem) => {
       return {
         icon: <Users className="w-5 h-5 text-destructive" />,
         containerClassName: "bg-destructive/10 border-destructive/20",
+      };
+    case "whatsapp:human-handoff-requested":
+    case "whatsapp:human-handoff-message":
+      return {
+        icon: <MessageCircleMore className="w-5 h-5 text-yellow-500" />,
+        containerClassName: "bg-yellow-500/10 border-yellow-500/20",
       };
     case "product:restocked":
       return {
@@ -231,6 +250,11 @@ export function PageHeader({
   evolutionConnection,
   onEvolutionConnectionUpdated,
   onEvolutionConnectionNotification,
+  // TODO global search: reativar props da busca quando a barra voltar.
+  // searchResults = [],
+  // searchValue = "",
+  // onSearchChange,
+  // onSearchResultSelect,
 }: PageHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
@@ -410,6 +434,13 @@ export function PageHeader({
     };
   }, [companyId, isQrModalOpen, onEvolutionConnectionUpdated]);
 
+  // TODO global search: reativar seleção/navegação da busca quando a barra voltar.
+  // const handleSearchSelect = (item: GlobalSearchItem) => {
+  //   onSearchResultSelect?.(item, searchValue);
+  //   setIsSearchOpen(false);
+  //   navigate(item.path);
+  // };
+
   return (
     <>
     <header className="bg-white border-b border-border px-5 py-2 flex-shrink-0 sticky top-0 z-30">
@@ -431,14 +462,7 @@ export function PageHeader({
             </Button>
           )}
 
-          <div className="relative w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              name="search"
-              placeholder="Buscar agendamentos, clientes..."
-              className="pl-10"
-            />
-          </div>
+          {/* TODO global search: barra comentada para reimplementacao futura. */}
 
           <CustomDropdown
             isOpen={isOpen}

@@ -639,7 +639,7 @@ export function InventoryPage() {
 
                                   <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
                                     <Button
-                                      className="bg-transparent text-foreground hover:bg-transparent hover:text-destructive"
+                                      className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
                                       onClick={() => {
                                         setEditingProduct(null);
                                         resetForm();

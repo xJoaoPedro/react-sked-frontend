@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { usePageHeader } from "@/hooks/usePageHeader";
 import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 import { getCurrentAuthSession, isEmployeeSession } from "@/lib/auth";
+import { showRequestErrorToast } from "@/lib/errorHandlers";
 
 const getCompanyProfilePhoto = (settings) => {
   return settings?.evolution?.connected && !settings?.evolution?.phoneMismatch
@@ -25,6 +26,7 @@ export function SettingsPage() {
   const [data, setDataState] = useState(null);
   const [initialEmployeeData, setInitialEmployeeData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUpdatingWhatsAppAutomation, setIsUpdatingWhatsAppAutomation] = useState(false);
   const authSession = getCurrentAuthSession();
   const isEmployee = isEmployeeSession(authSession);
   const profilePhoto = getCompanyProfilePhoto(data);
@@ -131,6 +133,46 @@ export function SettingsPage() {
       setIsSaving(false);
     }
   }
+
+  const handleToggleWhatsAppAutomation = async (enabled: boolean) => {
+    try {
+      setIsUpdatingWhatsAppAutomation(true);
+
+      const companyId = localStorage.getItem('companyId');
+      await api.patch(`/companies/${companyId}/evolution/auto-messages`, { enabled });
+
+      const response = (await api.get(`/companies/${companyId}/settings`)).data.data;
+      setDataState(response);
+      updateDados((prev) => ({
+        ...prev,
+        settings: response,
+      }));
+
+      toast.success(
+        enabled
+          ? 'Mensagens automáticas ativadas com sucesso!'
+          : 'Mensagens automáticas desativadas com sucesso!',
+        {
+          description: enabled
+            ? 'A instância conectada voltou a responder automaticamente.'
+            : 'A conexão foi mantida, mas as respostas automáticas ficaram pausadas.',
+        },
+      );
+    } catch (error) {
+      setDataState((prev) => ({
+        ...prev,
+        evolution: prev?.evolution
+          ? {
+              ...prev.evolution,
+              autoMessagesEnabled: !enabled,
+            }
+          : prev?.evolution,
+      }));
+      showRequestErrorToast(error, 'Não foi possível atualizar o status das mensagens automáticas.');
+    } finally {
+      setIsUpdatingWhatsAppAutomation(false);
+    }
+  };
 
   if (data === null) return <LoadingPage />
 
@@ -368,8 +410,61 @@ export function SettingsPage() {
                     />
                   </div>
                 </div>
-              </div>
+                </div>
 
+            </div>
+
+            <div className="px-6 pb-6">
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-semibold text-foreground">WhatsApp para mensagens automáticas</h4>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                          data?.evolution?.connected && !data?.evolution?.phoneMismatch
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {data?.evolution?.connected && !data?.evolution?.phoneMismatch
+                          ? 'Conectado'
+                          : 'Desconectado'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {data?.evolution?.connected && !data?.evolution?.phoneMismatch
+                        ? `Conectado no número ${formatPhone(data?.evolution?.connectedPhone ?? '')}.`
+                        : 'Conecte o WhatsApp na tela principal para usar as mensagens automáticas.'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 self-start md:self-center">
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">Mensagens automáticas</p>
+                      <p className="text-xs text-muted-foreground">
+                        {data?.evolution?.autoMessagesEnabled ? 'Ligadas' : 'Desligadas'}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={Boolean(data?.evolution?.autoMessagesEnabled)}
+                      onCheckedChange={(checked) => {
+                        setDataState((prev) => ({
+                          ...prev,
+                          evolution: prev?.evolution
+                            ? {
+                                ...prev.evolution,
+                                autoMessagesEnabled: checked,
+                              }
+                            : prev?.evolution,
+                        }));
+                        handleToggleWhatsAppAutomation(checked);
+                      }}
+                      disabled={isUpdatingWhatsAppAutomation || !data?.evolution?.instanceName}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="px-6 py-4  border-t border-border">

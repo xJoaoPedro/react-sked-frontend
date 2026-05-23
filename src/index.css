@@ -186,4 +186,14 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(355 78% 57%) hsl(0 0% 94%);
   }
+
+  /* TODO global search: reativar quando voltar o highlight da busca global.
+  .global-search-highlight {
+    border-radius: 0.25rem;
+    background: hsl(45 100% 62% / 0.7);
+    color: inherit;
+    padding: 0 0.125rem;
+    box-shadow: 0 0 0 1px hsl(45 100% 45% / 0.2);
+  }
+  */
 }
