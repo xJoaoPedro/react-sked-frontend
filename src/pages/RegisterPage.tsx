@@ -14,6 +14,7 @@ import {
   Phone,
 } from "lucide-react";
 import skedLogo from "@/assets/skedLogo.svg";
+import { getCurrentAuthSession, isPendingCompanySession, persistAuthSession } from "@/lib/auth";
 import { formatCNPJ, formatPhone } from "@/lib/parsers";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -99,8 +100,10 @@ export function RegisterPage() {
     setIsLogin(authMode !== "register");
   }, [authMode]);
 
+  const currentSession = getCurrentAuthSession();
+
   if (localStorage.getItem("token") && localStorage.getItem("companyId")) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={isPendingCompanySession(currentSession) ? "/pending-approval" : "/dashboard"} replace />;
   }
 
   const formPanelAnimation = isDesktop
@@ -139,10 +142,9 @@ export function RegisterPage() {
     try {
       const data = await loginAsCompanyOrEmployee(loginForm);
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("companyId", String(data.companyId ?? data.id));
+      persistAuthSession(data);
 
-      navigate("/dashboard");
+      navigate(data.approved === false ? "/pending-approval" : "/dashboard");
     } catch (error: any) {
       setLoginError(
         error?.response?.data?.error ||
@@ -186,10 +188,9 @@ export function RegisterPage() {
           password: payload.password,
         });
 
-        localStorage.setItem("token", loginData.token);
-        localStorage.setItem("companyId", String(loginData.companyId ?? loginData.id));
+        persistAuthSession(loginData);
 
-        navigate("/dashboard");
+        navigate(loginData.approved === false ? "/pending-approval" : "/dashboard");
         return;
       } catch {
         setAuthMode("login");

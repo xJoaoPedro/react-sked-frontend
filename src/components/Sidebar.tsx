@@ -3,7 +3,7 @@ import { socket } from "@/services/socket";
 import { Link, useLocation, useNavigate, } from 'react-router-dom';
 import skedLogo from '../assets/skedLogo.svg';
 import { Users, Menu, LayoutDashboard, CalendarCheck, CalendarX, DollarSign, Package, Wrench, UserCog, CalendarDays, Percent, LogOut, LucideIcon, User, } from 'lucide-react';
-import { getCurrentAuthSession, hasManagerAccess, isEmployeeSession } from '@/lib/auth';
+import { clearAuthStorage, getCurrentAuthSession, hasManagerAccess, isEmployeeSession } from '@/lib/auth';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider, } from './ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from './ui/alert-dialog';
 
@@ -81,8 +81,7 @@ export function Sidebar({ dados }) {
     .filter((category) => category.items.length > 0);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("companyId");
+    clearAuthStorage();
     socket.disconnect();
     navigate("/auth");
   };

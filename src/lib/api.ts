@@ -1,6 +1,7 @@
 import axios from "axios"
 import { socket } from "@/services/socket"
 import { showRequestErrorToast } from "@/lib/errorHandlers"
+import { clearAuthStorage } from "@/lib/auth"
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL + '/api',
@@ -32,11 +33,17 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status
+    const code = error?.response?.data?.code
+
+    if (status === 403 && code === "COMPANY_APPROVAL_PENDING") {
+      window.location.href = "/pending-approval"
+      return Promise.reject(error)
+    }
       
     if (status === 401) {
       showRequestErrorToast(error, "Sessao expirada")
 
-      localStorage.removeItem("token")
+      clearAuthStorage()
       window.location.href = "/auth"
     } else if (status >= 500) {
       showRequestErrorToast(error, "Erro interno do servidor")

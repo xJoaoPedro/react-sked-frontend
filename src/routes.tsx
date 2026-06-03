@@ -15,21 +15,48 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { Layout } from "./components/Layout";
 import { RegisterPage } from "./pages/RegisterPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { hasManagerAccess } from "./lib/auth";
+import {
+  getCurrentAuthSession,
+  hasManagerAccess,
+  isApprovedCompanySession,
+  isPendingCompanySession,
+} from "./lib/auth";
 import { LandingPage } from "./pages/LandingPage";
+import { PendingApprovalPage } from "./pages/PendingApprovalPage";
+import { AdminApprovalPage } from "./pages/AdminApprovalPage";
 
 function ManagerRoute({ element }: { element: ReactElement }) {
   return hasManagerAccess() ? element : <Navigate to="/dashboard" replace />;
 }
 
+function ProtectedAppRoute({ element }: { element: ReactElement }) {
+  const session = getCurrentAuthSession();
+
+  if (!session) return <Navigate to="/auth" replace />;
+  if (isPendingCompanySession(session)) return <Navigate to="/pending-approval" replace />;
+
+  return element;
+}
+
+function PendingApprovalRoute() {
+  const session = getCurrentAuthSession();
+
+  if (!session) return <Navigate to="/auth" replace />;
+  if (isApprovedCompanySession(session)) return <Navigate to="/dashboard" replace />;
+
+  return <PendingApprovalPage />;
+}
+
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
   { path: "/auth", element: <RegisterPage /> },
+  { path: "/pending-approval", element: <PendingApprovalRoute /> },
+  { path: "/admin/companies", element: <AdminApprovalPage /> },
   { path: "*", element: <NotFoundPage /> },
 
   {
     path: "/",
-    element: <Layout />,
+    element: <ProtectedAppRoute element={<Layout />} />,
     children: [
       { path: "dashboard", element: <DashboardPage /> },
       { path: "daily-schedule", element: <DailySchedulePage /> },

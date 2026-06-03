@@ -6,6 +6,9 @@ export interface AuthSession {
   company_id?: number;
   role?: "EMPLOYEE" | "MANAGER";
   auth_type?: "user" | "company";
+  approved?: boolean;
+  status?: "PENDING" | "APPROVED" | "DENIED";
+  approve_date?: string | number | Date | null;
   exp?: number;
 }
 
@@ -27,4 +30,28 @@ export function isEmployeeSession(session: AuthSession | null = getCurrentAuthSe
 
 export function hasManagerAccess(session: AuthSession | null = getCurrentAuthSession()) {
   return !isEmployeeSession(session);
+}
+
+export function isApprovedCompanySession(session: AuthSession | null = getCurrentAuthSession()) {
+  if (session?.auth_type !== "company") return true;
+
+  return session?.approved !== false;
+}
+
+export function isPendingCompanySession(session: AuthSession | null = getCurrentAuthSession()) {
+  return session?.auth_type === "company" && session?.approved === false;
+}
+
+export function clearAuthStorage() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("companyId");
+}
+
+export function persistAuthSession(data: { token: string; companyId?: number; id?: number }) {
+  localStorage.setItem("token", data.token);
+
+  const companyId = data.companyId ?? data.id;
+  if (companyId) {
+    localStorage.setItem("companyId", String(companyId));
+  }
 }
