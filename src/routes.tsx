@@ -16,12 +16,14 @@ import { Layout } from "./components/Layout";
 import { RegisterPage } from "./pages/RegisterPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { hasManagerAccess } from "./lib/auth";
+import { LandingPage } from "./pages/LandingPage";
 
 function ManagerRoute({ element }: { element: ReactElement }) {
   return hasManagerAccess() ? element : <Navigate to="/dashboard" replace />;
 }
 
 export const router = createBrowserRouter([
+  { path: "/", element: <LandingPage /> },
   { path: "/auth", element: <RegisterPage /> },
   { path: "*", element: <NotFoundPage /> },
 
@@ -29,7 +31,6 @@ export const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      { index: true, element: <Navigate to="dashboard" replace /> },
       { path: "dashboard", element: <DashboardPage /> },
       { path: "daily-schedule", element: <DailySchedulePage /> },
       { path: "appointments", element: <AppointmentsPage /> },

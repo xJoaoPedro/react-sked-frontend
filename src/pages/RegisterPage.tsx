@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import skedLogo from "@/assets/skedLogo.svg";
 import { formatCNPJ, formatPhone } from "@/lib/parsers";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
 type LoginForm = {
   email: string;
@@ -50,13 +50,15 @@ function isStrongPassword(password: string) {
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const url = import.meta.env.VITE_BASE_URL;
+  const authMode = searchParams.get("mode") === "register" ? "register" : "login";
 
   const [backgroundImage] = useState(
     () =>
       registerBackgroundImages[Math.floor(Math.random() * registerBackgroundImages.length)],
   );
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(authMode !== "register");
   const [isDesktop, setIsDesktop] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showRegPassword, setShowRegPassword] = useState(false);
@@ -93,6 +95,10 @@ export function RegisterPage() {
     return () => mediaQuery.removeEventListener("change", syncViewport);
   }, []);
 
+  useEffect(() => {
+    setIsLogin(authMode !== "register");
+  }, [authMode]);
+
   if (localStorage.getItem("token") && localStorage.getItem("companyId")) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -100,6 +106,10 @@ export function RegisterPage() {
   const formPanelAnimation = isDesktop
     ? { left: isLogin ? -16 : "calc(50% - 16px)", top: -16 }
     : { left: -16, top: isLogin ? -16 : "calc(50% - 16px)" };
+
+  function setAuthMode(mode: "login" | "register") {
+    setSearchParams({ mode }, { replace: true });
+  }
 
   function formatDigits(value: string, maxLength?: number) {
     const digits = value.replace(/\D/g, "");
@@ -182,7 +192,7 @@ export function RegisterPage() {
         navigate("/dashboard");
         return;
       } catch {
-        setIsLogin(true);
+        setAuthMode("login");
         setLoginForm({
           email: payload.email,
           password: payload.password,
@@ -219,9 +229,12 @@ export function RegisterPage() {
       <div className="pointer-events-none absolute top-[40%] left-[40%] h-[300px] w-[300px] rounded-full bg-[#00A676]/[0.04] blur-2xl" />
 
       <div className="absolute top-8 left-1/2 z-50 -translate-x-1/2">
-        <div className="mx-auto flex h-16 w-28 items-center justify-center rounded-xl border border-[#00A676]/30 bg-[#00A676]/20 px-4 shadow-[0_12px_30px_rgba(0,166,118,0.12)]">
+        <Link
+          to="/"
+          className="mx-auto flex h-16 w-28 items-center justify-center rounded-xl border border-[#00A676]/30 bg-[#00A676]/20 px-4 shadow-[0_12px_30px_rgba(0,166,118,0.12)] transition hover:bg-[#00A676]/25"
+        >
           <img src={skedLogo} alt="Sked" className="h-8 w-full object-contain" />
-        </div>
+        </Link>
       </div>
 
       <div className="relative h-[860px] w-full max-w-[980px] overflow-hidden rounded-2xl shadow-[0_32px_96px_rgba(0,0,0,0.7)] md:h-[600px]">
@@ -268,7 +281,7 @@ export function RegisterPage() {
               Sked.
             </p>
             <button
-              onClick={() => setIsLogin(true)}
+              onClick={() => setAuthMode("login")}
               className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-2.5 text-sm text-white/80 transition-all duration-300 hover:border-[#00A676] hover:text-[#00A676]"
               type="button"
             >
@@ -294,7 +307,7 @@ export function RegisterPage() {
             </p>
             <button
               type="button"
-              onClick={() => setIsLogin(false)}
+              onClick={() => setAuthMode("register")}
               className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-2.5 text-sm text-white/80 transition-all duration-300 hover:border-[#00A676] hover:text-[#00A676]"
             >
               Cadastrar empresa <ArrowRight className="h-3.5 w-3.5" />
@@ -370,7 +383,7 @@ export function RegisterPage() {
                 <button
                   type="button"
                   className="text-[#00A676] hover:underline"
-                  onClick={() => setIsLogin(false)}
+                  onClick={() => setAuthMode("register")}
                 >
                   Ainda não tem conta? Cadastre sua empresa
                 </button>
@@ -515,7 +528,7 @@ export function RegisterPage() {
                 <button
                   type="button"
                   className="text-[#00A676] hover:underline"
-                  onClick={() => setIsLogin(true)}
+                  onClick={() => setAuthMode("login")}
                 >
                   Já tem conta? Entrar
                 </button>
