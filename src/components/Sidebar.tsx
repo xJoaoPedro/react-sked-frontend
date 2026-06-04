@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate, } from 'react-router-dom';
 import skedLogo from '../assets/skedLogo.svg';
 import { Users, Menu, LayoutDashboard, CalendarCheck, CalendarX, DollarSign, Package, Wrench, UserCog, CalendarDays, Percent, LogOut, LucideIcon, User, } from 'lucide-react';
 import { clearAuthStorage, getCurrentAuthSession, hasManagerAccess, isEmployeeSession } from '@/lib/auth';
+import { useCachedEvolutionProfilePhoto } from '@/hooks/useCachedEvolutionProfilePhoto';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider, } from './ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from './ui/alert-dialog';
 
@@ -53,12 +54,6 @@ const menuCategories: MenuCategory[] = [
   },
 ];
 
-const getCompanyProfilePhoto = (dados) => {
-  return dados?.evolution?.connected && !dados?.evolution?.phoneMismatch
-    ? dados?.evolution?.profilePictureUrl || null
-    : null;
-};
-
 export function Sidebar({ dados }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -67,7 +62,8 @@ export function Sidebar({ dados }) {
   const authSession = getCurrentAuthSession();
   const canAccessManagerAreas = hasManagerAccess(authSession);
   const isEmployee = isEmployeeSession(authSession);
-  const profilePhoto = getCompanyProfilePhoto(dados);
+  const companyId = localStorage.getItem("companyId");
+  const profilePhoto = useCachedEvolutionProfilePhoto(companyId, dados?.evolution);
 
   const visibleMenuCategories = menuCategories
     .map((category) => ({

@@ -14,12 +14,7 @@ import { usePageHeader } from "@/hooks/usePageHeader";
 import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
 import { getCurrentAuthSession, isEmployeeSession } from "@/lib/auth";
 import { showRequestErrorToast } from "@/lib/errorHandlers";
-
-const getCompanyProfilePhoto = (settings) => {
-  return settings?.evolution?.connected && !settings?.evolution?.phoneMismatch
-    ? settings?.evolution?.profilePictureUrl || null
-    : null;
-};
+import { useCachedEvolutionProfilePhoto } from "@/hooks/useCachedEvolutionProfilePhoto";
 
 export function SettingsPage() {
   const { dados, updateDados } = useLayoutOutletContext();
@@ -29,7 +24,8 @@ export function SettingsPage() {
   const [isUpdatingWhatsAppAutomation, setIsUpdatingWhatsAppAutomation] = useState(false);
   const authSession = getCurrentAuthSession();
   const isEmployee = isEmployeeSession(authSession);
-  const profilePhoto = getCompanyProfilePhoto(data);
+  const companyId = localStorage.getItem("companyId");
+  const profilePhoto = useCachedEvolutionProfilePhoto(companyId, data?.evolution);
 
   usePageHeader(
     isEmployee ? "Meu Perfil" : "Configurações Gerais",
