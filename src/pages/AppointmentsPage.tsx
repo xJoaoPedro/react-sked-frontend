@@ -707,6 +707,12 @@ export function AppointmentsPage() {
   }, [dados])
 
   useEffect(() => {
+    if (!initialized || !hasBootstrappedRef.current) return
+
+    fetchData()
+  }, [dados])
+
+  useEffect(() => {
     if (!initialized) return
 
     fetchData()

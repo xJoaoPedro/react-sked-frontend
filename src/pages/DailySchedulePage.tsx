@@ -3,7 +3,7 @@ import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { ChevronLeft, ChevronRight, Calendar, Plus, CalendarX, ChevronDown,Check, Search, } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Plus, CalendarX, ChevronDown,Check, Search, Scissors, UserRound, Hand, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, Clock3, } from "lucide-react";
 import { api } from "@/lib/api";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, } from "@/components/ui/empty";
 import { LoadingPage } from "./LoadingPage";
@@ -59,6 +59,26 @@ const appointmentStatusOptions = [
   { value: "CANCELED", label: "Cancelado" },
 ];
 
+const serviceCategoryIcons = {
+  HAIR: Scissors,
+  BEARD: UserRound,
+  AESTHETIC: Star,
+  NAILS: Hand,
+  MASSAGE: Heart,
+  THERAPY: Brain,
+  HEALTH: Stethoscope,
+  DENTAL: Smile,
+  FITNESS: Dumbbell,
+  BEAUTY: Star,
+  AUTOMOTIVE: Car,
+  TECHNICAL: Wrench,
+  HOME_SERVICE: Home,
+  PET: PawPrint,
+  CONSULTING: Briefcase,
+  EDUCATION: GraduationCap,
+  OTHER: MoreHorizontal,
+};
+
 export function DailySchedulePage() {
   const { dados, refreshDados } = useLayoutOutletContext();
   const existingClientDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -108,6 +128,9 @@ export function DailySchedulePage() {
 
     setDataState((prev) => {
       const nextDailySchedule = dados.dailySchedules || null;
+      const selectedDateKey = getDateKeyInTimeZone(selectedDate);
+      const todayDateKey = getDateKeyInTimeZone(new Date());
+      const shouldUseRealtimeAppointments = selectedDateKey === todayDateKey;
 
       if (!nextDailySchedule) {
         return prev;
@@ -119,10 +142,12 @@ export function DailySchedulePage() {
 
       return {
         ...nextDailySchedule,
-        appointments: prev.appointments ?? nextDailySchedule.appointments,
+        appointments: shouldUseRealtimeAppointments
+          ? nextDailySchedule.appointments
+          : (prev.appointments ?? nextDailySchedule.appointments),
       };
     });
-  }, [dados]);
+  }, [dados, selectedDate]);
 
   const professionals = dados?.professionals || [];
   const services = dados?.services || [];
@@ -516,13 +541,9 @@ export function DailySchedulePage() {
     };
   }, [existingClientDropdownOpen]);
 
-  if (data === null) return <LoadingPage />;
-
-  const filteredAppointments = data.appointments.filter((apt) => {
-    return isSameDayInTimeZone(apt.start_time, selectedDate);
-  });
-
   const updateAppointments = async (date) => {
+    if (!data?.id) return;
+
     try {
       const response = (
         await api.get(`/appointments/${data.id}/${date.toISOString()}`, {
@@ -538,6 +559,23 @@ export function DailySchedulePage() {
       console.error("Erro ao atualizar agendamentos:", error);
     }
   };
+
+  useEffect(() => {
+    if (!dados || !data?.id) return;
+
+    const selectedDateKey = getDateKeyInTimeZone(selectedDate);
+    const todayDateKey = getDateKeyInTimeZone(new Date());
+
+    if (selectedDateKey === todayDateKey) return;
+
+    updateAppointments(selectedDate);
+  }, [dados, selectedDate, data?.id]);
+
+  if (data === null) return <LoadingPage />;
+
+  const filteredAppointments = data.appointments.filter((apt) => {
+    return isSameDayInTimeZone(apt.start_time, selectedDate);
+  });
 
   const previousDay = async () => {
     const d = new Date(selectedDate);
@@ -574,6 +612,17 @@ export function DailySchedulePage() {
         return "bg-gray-500";
     }
   };
+
+  const getServiceCategoryIcon = (category) =>
+    serviceCategoryIcons[category] || MoreHorizontal;
+
+  const getClientInitials = (name = "") =>
+    String(name)
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || "")
+      .join("") || "C";
 
   const timeToMinutes = (time) => {
     const [h, m] = time.split(":").map(Number);
@@ -690,6 +739,10 @@ export function DailySchedulePage() {
                             appointment.start_time,
                             appointment.end_time,
                           );
+                          const ServiceIcon = getServiceCategoryIcon(appointment.service?.category);
+                          const clientPhoto = appointment.client?.photo || appointment.client?.profilePictureUrl || null;
+                          const isCompact = height < 60;
+                          const shouldCenterContent = height <= 76;
 
                           return (
                             <div
@@ -702,15 +755,51 @@ export function DailySchedulePage() {
                                 height: `${height}px`,
                               }}
                             >
-                              <div className="text-xs font-semibold truncate">
-                                {appointment.client.name}
+                              <div className="absolute right-2 top-2">
+                                <ServiceIcon className="h-3 w-3 opacity-90" />
                               </div>
-                              <div className="text-xs opacity-90 truncate">
-                                {appointment.service?.name}
-                              </div>
-                              <div className="text-xs opacity-90 mt-1">
-                                {formatDate(appointment.start_time, true)} -{" "}
-                                {formatDate(appointment.end_time, true)}
+
+                              <div className="flex h-full flex-col">
+                                <div
+                                  className={shouldCenterContent ? "flex flex-1 items-center pr-4" : "flex pr-4"}
+                                >
+                                  <div className="min-w-0 flex flex-1 items-center gap-2 self-center">
+                                    <div className="mt-1 flex h-8 w-8 shrink-0 self-center items-center justify-center overflow-hidden rounded-full bg-white/20 ring-1 ring-white/20">
+                                      {clientPhoto ? (
+                                        <img
+                                          src={clientPhoto}
+                                          alt={appointment.client?.name || "Cliente"}
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold">
+                                          {getClientInitials(appointment.client?.name)}
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="min-w-0 flex min-h-8 flex-col justify-center">
+                                      <div className="text-xs font-semibold truncate leading-tight">
+                                        {appointment.client.name}
+                                      </div>
+                                      {!isCompact ? (
+                                        <div className="text-xs opacity-90 truncate leading-tight">
+                                          {appointment.service?.name}
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className={`flex justify-end ${shouldCenterContent ? "pt-0" : "mt-auto pt-1"}`}>
+                                  <div className="flex items-center gap-1 text-xs font-semibold tracking-[0.01em]">
+                                    <Clock3 className="h-3.5 w-3.5 shrink-0" />
+                                    <span className="truncate">
+                                      {formatDate(appointment.start_time, true)} -{" "}
+                                      {formatDate(appointment.end_time, true)}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           );
