@@ -45,8 +45,22 @@ export function CancellationsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [byMonthExists, setByMonthExists] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   usePageHeader("Análise de Cancelamentos", "Insights e estatísticas sobre cancelamentos" );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      setIsDesktop(event.matches);
+    };
+
+    handleChange(mediaQuery);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   // TODO IMPLEMENTAR FUTURAMENTE
   // const exportCSV = () => {
@@ -353,41 +367,47 @@ export function CancellationsPage() {
               </div>
 
               {!byMonthExists ? (
-                <ResponsiveContainer width="100%" height={250}>
-                  <AreaChart data={data.cancellationsByMonth}>
-                    <defs>
-                      <linearGradient id="colorCancellations" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#E63946" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#E63946" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fontSize: 12 }}
-                      stroke="#888"
-                    />
-                    <YAxis
-                      tick={{ fontSize: 12 }}
-                      stroke="#888"
-                    />
-                    <RechartsTooltip
-                      labelFormatter={(label, payload) => `${label} ${payload[0]?.payload?.year ? `,${payload[0].payload.year}` : ""}`}
-                      contentStyle={{
-                        backgroundColor: "white",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="total"
-                      stroke="#E63946"
-                      strokeWidth={2}
-                      fill="url(#colorCancellations)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <div className="h-[170px] sm:h-[220px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={data.cancellationsByMonth}
+                      margin={{ top: 8, right: 12, left: 4, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorCancellations" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#E63946" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#E63946" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis
+                        dataKey="month"
+                        tick={{ fontSize: 12 }}
+                        stroke="#888"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12 }}
+                        stroke="#888"
+                        width={32}
+                      />
+                      <RechartsTooltip
+                        labelFormatter={(label, payload) => `${label} ${payload[0]?.payload?.year ? `,${payload[0].payload.year}` : ""}`}
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "8px",
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="total"
+                        stroke="#E63946"
+                        strokeWidth={2}
+                        fill="url(#colorCancellations)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <Empty>
                   <EmptyHeader>
@@ -428,10 +448,26 @@ export function CancellationsPage() {
                       cy="50%"
                       labelLine={false}
                       label={
-                        ({ payload, percent }: { payload?: { reason?: string; name?: string }; percent: number }) =>
-                          `${payload?.reason ?? payload?.name}: ${(percent * 100).toFixed(0)}%`
+                        ({
+                          payload,
+                          percent,
+                        }: {
+                          payload?: { reason?: string; name?: string };
+                          percent: number;
+                        }) => {
+                          const percentage = Math.round(percent * 100);
+
+                          if (percentage < 8) return "";
+
+                          if (!isDesktop) {
+                            return `${percentage}%`;
+                          }
+
+                          const label = payload?.reason ?? payload?.name ?? "";
+                          return `${label}: ${percentage}%`;
+                        }
                       }
-                      outerRadius={80}
+                      outerRadius={isDesktop ? 78 : 70}
                       fill="#8884d8"
                       dataKey="percentage"
                     >
@@ -740,21 +776,32 @@ export function CancellationsPage() {
 
             {/* Pagination or Summary */}
             {data.recentCancellations.length > 0 && (
-              <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
-                <p className="text-sm text-muted-foreground">
-                  Mostrando{' '}
-                  <span className="font-medium text-foreground">
-                    {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
-                  </span>{' '}
-                  de{' '}
-                  <span className="font-medium text-foreground">
-                    {total}
-                  </span>{' '}
-                  cancelamentos
-                </p>
+              <div className="border-t border-border bg-muted/20 px-4 py-4 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="hidden sm:inline">
+                      Mostrando{' '}
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      de{' '}
+                      <span className="font-medium text-foreground">
+                        {total}
+                      </span>{' '}
+                      cancelamentos
+                    </span>
+                    <span className="sm:hidden">
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      /{' '}
+                      <span className="font-medium text-foreground">{total}</span>{' '}
+                      cancelamentos
+                    </span>
+                  </p>
 
-                <div className="flex items-center gap-2">
-                  <span className="px-3 text-sm">
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <span className="px-1 text-sm sm:px-3">
                     <Input 
                       type="number" 
                       min="1" 
@@ -768,24 +815,27 @@ export function CancellationsPage() {
                       }}
                       className='w-fit'
                     /> / {totalPages}
-                  </span>
+                    </span>
 
-                  <Button
-                    className="bg-destructive hover:bg-destructive/90"
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage(Number(page) - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    className="bg-destructive hover:bg-destructive/90"
-                    size="sm"
-                    disabled={page === totalPages}
-                    onClick={() => setPage(Number(page) + 1)}
-                  >
-                    Próximo
-                  </Button>
+                    <Button
+                      className="bg-destructive hover:bg-destructive/90"
+                      size="sm"
+                      disabled={page === 1}
+                      onClick={() => setPage(Number(page) - 1)}
+                    >
+                      <span className="sm:hidden">‹</span>
+                      <span className="hidden sm:inline">Anterior</span>
+                    </Button>
+                    <Button
+                      className="bg-destructive hover:bg-destructive/90"
+                      size="sm"
+                      disabled={page === totalPages}
+                      onClick={() => setPage(Number(page) + 1)}
+                    >
+                      <span className="sm:hidden">›</span>
+                      <span className="hidden sm:inline">Próximo</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
