@@ -76,6 +76,7 @@ export function AppointmentsPage() {
   const [filterDate, setFilterDate] = useState('');
   const [filterService, setFilterService] = useState('all');
   const [filterClient, setFilterClient] = useState('');
+  const [filterProfessional, setFilterProfessional] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTimeStart, setFilterTimeStart] = useState('');
   const [filterTimeEnd, setFilterTimeEnd] = useState('');
@@ -533,13 +534,15 @@ export function AppointmentsPage() {
     setFilterDate('');
     setFilterService('all');
     setFilterClient('');
+    setFilterProfessional('all');
     setFilterStatus('all');
     setFilterTimeStart('');
     setFilterTimeEnd('');
   };
 
   const hasActiveFilters = () => {
-    return filterId || filterDate || filterService !== 'all' || filterClient || 
+    return filterId || filterDate || filterService !== 'all' || filterClient ||
+           filterProfessional !== 'all' ||
            filterStatus !== 'all' || filterTimeStart || filterTimeEnd;
   };
 
@@ -548,6 +551,7 @@ export function AppointmentsPage() {
     filterDate,
     filterService !== 'all',
     filterClient,
+    filterProfessional !== 'all',
     filterStatus !== 'all',
     filterTimeStart,
     filterTimeEnd,
@@ -561,6 +565,7 @@ export function AppointmentsPage() {
       ...(filterDate && { date: filterDate }),
       ...(filterService !== 'all' && { service: filterService }),
       ...(filterClient && { client: filterClient }),
+      ...(filterProfessional !== 'all' && { employeeId: filterProfessional }),
       ...(filterStatus !== 'all' && { status: filterStatus }),
       ...(filterTimeStart && { timeStart: filterTimeStart }),
       ...(filterTimeEnd && { timeEnd: filterTimeEnd }),      
@@ -576,6 +581,7 @@ export function AppointmentsPage() {
           ...(filterDate && { date: filterDate }),
           ...(filterService !== 'all' && { service: filterService }),
           ...(filterClient && { client: filterClient }),
+          ...(filterProfessional !== 'all' && { employeeId: filterProfessional }),
           ...(filterStatus !== 'all' && { status: filterStatus }),
           ...(filterTimeStart && { timeStart: filterTimeStart }),
           ...(filterTimeEnd && { timeEnd: filterTimeEnd }),
@@ -716,7 +722,7 @@ export function AppointmentsPage() {
     if (!initialized) return
 
     fetchData()
-  }, [initialized, page, filterId, filterDate, filterService, filterClient, filterStatus, filterTimeStart, filterTimeEnd])
+  }, [initialized, page, filterId, filterDate, filterService, filterClient, filterProfessional, filterStatus, filterTimeStart, filterTimeEnd])
 
   useEffect(() => {
     if (!existingClientPopoverOpen) return;
@@ -839,12 +845,12 @@ export function AppointmentsPage() {
           <Popover open={exportOpen} onOpenChange={setExportOpen}>
             <PopoverTrigger asChild>
               <Button className={`p-4 border border-border bg-default text-foreground hover:bg-primary hover:text-popover`}>
-                <Download className="w-4 h-4 mr-2" />
-                Exportar
+                <Download className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Exportar</span>
                 {exportOpen ? (
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="hidden h-4 w-4 md:inline" />
                 ) : (
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="hidden h-4 w-4 md:inline" />
                 )}
               </Button>
             </PopoverTrigger>
@@ -870,14 +876,14 @@ export function AppointmentsPage() {
           </Popover>
 
           <Button onClick={openAddDialog} className="bg-primary hover:bg-primary/70 text-popover">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Agendamento
+            <Plus className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Novo Agendamento</span>
           </Button>
         </div>
 
-        <div className="flex items-start gap-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
           {showFilters && (
-            <Card className="w-full max-w-[320px] shrink-0 p-5 gap-0">
+            <Card className="w-full shrink-0 gap-0 p-5 lg:flex lg:h-full lg:max-w-[320px] lg:flex-col">
               <div className="relative border-b border-border pb-4">
                 <Badge
                   variant="outline"
@@ -903,7 +909,7 @@ export function AppointmentsPage() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 pt-4">
+              <div className="grid grid-cols-1 gap-4 pt-4 lg:flex-1 lg:overflow-y-auto lg:pr-1">
                 <div className="space-y-2">
                   <Label htmlFor="appointment-filter-id">ID do Agendamento</Label>
                   <Input
@@ -924,50 +930,6 @@ export function AppointmentsPage() {
                       setFilterDate(toLocalDateInput(date))
                     }}
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tipo de Serviço</Label>
-                  <Select value={filterService} onValueChange={setFilterService}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-96">
-                      <SelectItem value="all">Todos os Serviços</SelectItem>
-                      {services.map((service) => (
-                        <SelectItem key={service.id} value={service.name}>
-                          {service.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="appointment-filter-client">Nome do Cliente</Label>
-                  <Input
-                    id="appointment-filter-client"
-                    placeholder="Buscar por nome..."
-                    value={filterClient}
-                    onChange={(e) => setFilterClient(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-96">
-                      <SelectItem value="all">Todos os Status</SelectItem>
-                      {statusList.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -1009,11 +971,73 @@ export function AppointmentsPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="appointment-filter-client">Nome do Cliente</Label>
+                  <Input
+                    id="appointment-filter-client"
+                    placeholder="Buscar por nome..."
+                    value={filterClient}
+                    onChange={(e) => setFilterClient(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Tipo de Serviço</Label>
+                  <Select value={filterService} onValueChange={setFilterService}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      <SelectItem value="all">Todos os Serviços</SelectItem>
+                      {services.map((service) => (
+                        <SelectItem key={service.id} value={service.name}>
+                          {service.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Profissional</Label>
+                  <Select value={filterProfessional} onValueChange={setFilterProfessional}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      <SelectItem value="all">Todos os Profissionais</SelectItem>
+                      {professionals.map((professional) => (
+                        <SelectItem key={professional.id} value={String(professional.id)}>
+                          {professional.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      <SelectItem value="all">Todos os Status</SelectItem>
+                      {statusList.map((status) => (
+                        <SelectItem key={status.value} value={status.value}>
+                          {status.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
               </div>
             </Card>
           )}
 
-          <Card className="overflow-hidden py-0 flex-1 gap-0">
+          <Card className="flex-1 gap-0 overflow-hidden py-0">
             <div className="h-[700px] overflow-auto">
               <table className="w-full caption-bottom text-sm">
                 <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
@@ -1159,21 +1183,32 @@ export function AppointmentsPage() {
             
             {/* Pagination or Summary */}
             {data.length > 0 && (
-              <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
-                <p className="text-sm text-muted-foreground">
-                  Mostrando{' '}
-                  <span className="font-medium text-foreground">
-                    {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
-                  </span>{' '}
-                  de{' '}
-                  <span className="font-medium text-foreground">
-                    {total}
-                  </span>{' '}
-                  agendamentos
-                </p>
+              <div className="border-t border-border bg-muted/20 px-4 py-4 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="hidden sm:inline">
+                      Mostrando{' '}
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      de{' '}
+                      <span className="font-medium text-foreground">
+                        {total}
+                      </span>{' '}
+                      agendamentos
+                    </span>
+                    <span className="sm:hidden">
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      /{' '}
+                      <span className="font-medium text-foreground">{total}</span>{' '}
+                      agendamentos
+                    </span>
+                  </p>
 
-                <div className="flex items-center gap-2">
-                  <span className="px-3 text-sm">
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <span className="px-1 text-sm sm:px-3">
                     <Input 
                       type="number" 
                       min="1" 
@@ -1187,22 +1222,25 @@ export function AppointmentsPage() {
                       }}
                       className='w-fit'
                     /> / {totalPages}
-                  </span>
+                    </span>
 
-                  <Button
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage(Number(page) - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    size="sm"
-                    disabled={page === totalPages}
-                    onClick={() => setPage(Number(page) + 1)}
-                  >
-                    Próximo
-                  </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === 1}
+                      onClick={() => setPage(Number(page) - 1)}
+                    >
+                      <span className="sm:hidden">‹</span>
+                      <span className="hidden sm:inline">Anterior</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === totalPages}
+                      onClick={() => setPage(Number(page) + 1)}
+                    >
+                      <span className="sm:hidden">›</span>
+                      <span className="hidden sm:inline">Próximo</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
