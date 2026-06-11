@@ -3,11 +3,10 @@ import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline, Package, Plus } from 'lucide-react';
+import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, ChartColumn, ChartSpline, Package, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { api } from '@/lib/api';
 import { formatDate, formatLimitText, formatPrice, formatTime } from '@/lib/parsers';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { LoadingPage } from './LoadingPage';
@@ -238,7 +237,7 @@ export function RevenuePage() {
               </div>
 
               {data.revenueByMonth.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={220}>
                   <AreaChart data={data.revenueByMonth}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -294,7 +293,7 @@ export function RevenuePage() {
               </div>
 
               {data.revenueByPayment.length > 0 ? (
-                <ResponsiveContainer width="100%" height={280}>
+                <ResponsiveContainer width="100%" height={230}>
                   <BarChart data={data.revenueByPayment}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis 
@@ -388,14 +387,13 @@ export function RevenuePage() {
                     <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Forma de Pagamento</th>
                     <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Status</th>
                     <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Valor</th>
-                    <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
                   </tr>
                 </thead>
 
                 <tbody className="[&_tr:last-child]:border-0">
                   {data.recentPayments.length === 0 ? (
                     <tr className="border-b transition-colors">
-                      <td colSpan={9} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
+                      <td colSpan={8} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
                         <div className="flex h-72 w-full flex-col items-center justify-center gap-2 text-muted-foreground">
                           <DollarSign className="w-12 h-12 opacity-20" />
                           <p className="font-medium">Não há transações para listar.</p>
@@ -466,60 +464,6 @@ export function RevenuePage() {
                               <span className="text-sm font-semibold">{formatPrice(payment.value, false)}</span>
                             </div>
                           </td>
-                          <td className="p-2 align-middle whitespace-nowrap">
-                            <div className="flex items-center gap-1">
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
-                                  Visualizar
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                                  Editar
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                                  Excluir
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </td>
                         </tr>
                       );
                     })
@@ -530,21 +474,32 @@ export function RevenuePage() {
 
             {/* Pagination or Summary */}
             {data.recentPayments.length > 0 && (
-              <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
-                <p className="text-sm text-muted-foreground">
-                  Mostrando{' '}
-                  <span className="font-medium text-foreground">
-                    {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
-                  </span>{' '}
-                  de{' '}
-                  <span className="font-medium text-foreground">
-                    {total}
-                  </span>{' '}
-                  transações
-                </p>
+              <div className="border-t border-border bg-muted/20 px-4 py-4 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="hidden sm:inline">
+                      Mostrando{' '}
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      de{' '}
+                      <span className="font-medium text-foreground">
+                        {total}
+                      </span>{' '}
+                      transações
+                    </span>
+                    <span className="sm:hidden">
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      /{' '}
+                      <span className="font-medium text-foreground">{total}</span>{' '}
+                      transações
+                    </span>
+                  </p>
 
-                <div className="flex items-center gap-2">
-                  <span className="px-3 text-sm">
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <span className="px-1 text-sm sm:px-3">
                     <Input 
                       type="number" 
                       min="1" 
@@ -558,24 +513,25 @@ export function RevenuePage() {
                       }}
                       className='w-fit'
                     /> / {totalPages}
-                  </span>
+                    </span>
 
-                  <Button
-                    className="bg-primary hover:bg-primary/90"
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage(Number(page) - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    className="bg-primary hover:bg-primary/90"
-                    size="sm"
-                    disabled={page === totalPages}
-                    onClick={() => setPage(Number(page) + 1)}
-                  >
-                    Próximo
-                  </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === 1}
+                      onClick={() => setPage(Number(page) - 1)}
+                    >
+                      <span className="sm:hidden">‹</span>
+                      <span className="hidden sm:inline">Anterior</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === totalPages}
+                      onClick={() => setPage(Number(page) + 1)}
+                    >
+                      <span className="sm:hidden">›</span>
+                      <span className="hidden sm:inline">Próximo</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

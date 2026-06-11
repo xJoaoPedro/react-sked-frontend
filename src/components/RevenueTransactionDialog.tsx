@@ -349,29 +349,29 @@ export function RevenueTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[92vh] flex-col overflow-hidden border-border/60 bg-background p-0 shadow-2xl sm:max-w-4xl">
-        <DialogHeader className="border-b border-border bg-muted/30 px-6 py-5">
-          <DialogTitle className="text-xl font-semibold tracking-tight">
+      <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden border-border/60 bg-background p-0 shadow-2xl sm:max-w-4xl">
+        <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+          <DialogTitle className="text-lg font-semibold tracking-tight sm:text-xl">
             {isAppointmentFlow ? "Registrar transações do agendamento" : "Novo lançamento por serviço"}
           </DialogTitle>
-          <DialogDescription className="max-w-3xl text-sm text-muted-foreground">
+          <DialogDescription className="max-w-3xl text-xs text-muted-foreground sm:text-sm">
             {isAppointmentFlow
               ? "Confirme os dados financeiros do serviço concluído e adicione uma ou mais transações até fechar o valor desejado."
               : "Selecione um serviço/agendamento e distribua o valor restante em uma ou mais transações sem ultrapassar o total do serviço."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-hidden px-6 py-5">
-          <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-            <div className="space-y-4 overflow-y-auto pr-2 scrollbar-custom">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 scrollbar-custom">
+          <div className="grid min-h-0 gap-4 sm:gap-5 xl:h-full xl:grid-cols-[320px_minmax(0,1fr)] xl:gap-6">
+            <div className="space-y-3 xl:overflow-y-auto xl:pr-2 sm:space-y-4 scrollbar-custom">
               <div className="grid gap-2">
-                <Label>Serviço / agendamento</Label>
+                <Label className="text-xs sm:text-sm">Serviço / agendamento</Label>
                 <Select
                   value={selectedAppointmentId}
                   onValueChange={setSelectedAppointmentId}
                   disabled={loadingAppointments || isAppointmentFlow || appointmentOptions.length === 0}
                 >
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className="h-9 text-xs sm:h-10 sm:text-sm">
                     <SelectValue placeholder={loadingAppointments ? "Carregando..." : "Selecione um serviço"} />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
@@ -387,19 +387,19 @@ export function RevenueTransactionDialog({
                   </SelectContent>
                 </Select>
                 {!loadingAppointments && appointmentOptions.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground sm:text-sm">
                     Nenhum serviço com valor disponível foi encontrado para lançamento.
                   </p>
                 )}
                 {isAppointmentFlow && !selectedAppointment && !loadingAppointments && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground sm:text-sm">
                     Esse agendamento não está mais disponível para receber novas transações.
                   </p>
                 )}
               </div>
 
               {selectedAppointment && (
-                <div className="rounded-xl border border-border bg-muted/20 p-4">
+                <div className="rounded-xl border border-border bg-muted/20 p-3 sm:p-4">
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
                     <div>
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">Cliente</p>
@@ -419,16 +419,16 @@ export function RevenueTransactionDialog({
                     </div>
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                    <div className="rounded-lg border border-border/70 bg-background px-3 py-2.5">
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3 xl:grid-cols-1 sm:gap-3">
+                    <div className="rounded-lg border border-border/70 bg-background px-3 py-2">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">Valor do serviço</p>
                       <p className="mt-1 text-sm font-semibold">{formatPrice(selectedAppointment.serviceAmount)}</p>
                     </div>
-                    <div className="rounded-lg border border-border/70 bg-background px-3 py-2.5">
+                    <div className="rounded-lg border border-border/70 bg-background px-3 py-2">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">Já lançado</p>
                       <p className="mt-1 text-sm font-semibold">{formatPrice(draftedTotal)}</p>
                     </div>
-                    <div className="rounded-lg border border-border/70 bg-background px-3 py-2.5">
+                    <div className="rounded-lg border border-border/70 bg-background px-3 py-2">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">Restante atual</p>
                       <p className="mt-1 text-sm font-semibold text-primary">
                         {formatPrice(remainingAfterDrafts)}
@@ -439,11 +439,11 @@ export function RevenueTransactionDialog({
               )}
             </div>
 
-            <div className="flex min-h-0 flex-col gap-4">
-              <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-h-0 flex-col gap-3 sm:gap-4">
+              <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold">Transações do lançamento</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground sm:text-sm">
                     Adicione quantas transações forem necessárias para esse atendimento.
                   </p>
                 </div>
@@ -451,13 +451,14 @@ export function RevenueTransactionDialog({
                   type="button"
                   onClick={handleAddTransaction}
                   disabled={!selectedAppointment || remainingAfterDrafts <= 0}
+                  className="h-9 text-xs sm:h-10 sm:text-sm"
                 >
                   <PlusIcon />
                   Adicionar transação
                 </Button>
               </div>  
 
-              <div className="min-h-0 max-h-[32rem] flex-1 space-y-3 overflow-y-auto pr-2 scrollbar-custom">
+              <div className="min-h-0 space-y-3 xl:max-h-[32rem] xl:flex-1 xl:overflow-y-auto xl:pr-2 scrollbar-custom">
                 {transactions.map((transaction, index) => {
                   const otherTransactionsTotal = transactions.reduce((sum, item) => {
                     if (item.id === transaction.id) return sum;
@@ -471,7 +472,7 @@ export function RevenueTransactionDialog({
                   return (
                     <div
                       key={transaction.id}
-                      className="rounded-xl border border-border bg-background p-4 shadow-sm"
+                      className="rounded-xl border border-border bg-background p-3 shadow-sm sm:p-4"
                     >
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
@@ -486,16 +487,17 @@ export function RevenueTransactionDialog({
                           size="sm"
                           onClick={() => handleRemoveTransaction(transaction.id)}
                           disabled={transactions.length === 1}
+                          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
                         >
                           <Trash2Icon />
                           Remover
                         </Button>
                       </div>
 
-                      <div className="grid gap-4">
-                        <div className="grid gap-4 lg:grid-cols-2">
+                      <div className="grid gap-3 sm:gap-4">
+                        <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
                           <div className="grid gap-2">
-                            <Label htmlFor={`revenue-amount-${transaction.id}`}>Valor</Label>
+                            <Label htmlFor={`revenue-amount-${transaction.id}`} className="text-xs sm:text-sm">Valor</Label>
                             <Input
                               id={`revenue-amount-${transaction.id}`}
                               type="number"
@@ -506,18 +508,19 @@ export function RevenueTransactionDialog({
                               onChange={(event) =>
                                 handleTransactionChange(transaction.id, "amount", event.target.value)
                               }
+                              className="h-9 text-xs sm:h-10 sm:text-sm"
                             />
                           </div>
 
                           <div className="grid gap-2">
-                            <Label>Forma de pagamento</Label>
+                            <Label className="text-xs sm:text-sm">Forma de pagamento</Label>
                             <Select
                               value={transaction.paymentMethod}
                               onValueChange={(value) =>
                                 handleTransactionChange(transaction.id, "paymentMethod", value)
                               }
                             >
-                              <SelectTrigger className="h-10">
+                              <SelectTrigger className="h-9 text-xs sm:h-10 sm:text-sm">
                                 <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
                               <SelectContent>
@@ -532,7 +535,7 @@ export function RevenueTransactionDialog({
                         </div>
 
                         <div className="grid gap-2">
-                          <Label htmlFor={`revenue-occurred-at-${transaction.id}`}>Data e hora</Label>
+                          <Label htmlFor={`revenue-occurred-at-${transaction.id}`} className="text-xs sm:text-sm">Data e hora</Label>
                           <Input
                             id={`revenue-occurred-at-${transaction.id}`}
                             type="datetime-local"
@@ -540,11 +543,12 @@ export function RevenueTransactionDialog({
                             onChange={(event) =>
                               handleTransactionChange(transaction.id, "occurredAt", event.target.value)
                             }
+                            className="h-9 text-xs sm:h-10 sm:text-sm"
                           />
                         </div>
 
                         <div className="grid gap-2">
-                          <Label htmlFor={`revenue-description-${transaction.id}`}>Descrição</Label>
+                          <Label htmlFor={`revenue-description-${transaction.id}`} className="text-xs sm:text-sm">Descrição</Label>
                           <Textarea
                             id={`revenue-description-${transaction.id}`}
                             value={transaction.description}
@@ -553,6 +557,7 @@ export function RevenueTransactionDialog({
                             }
                             placeholder="Ex.: Corte premium - João"
                             rows={3}
+                            className="min-h-[88px] text-xs sm:text-sm"
                           />
                         </div>
                       </div>
@@ -564,13 +569,14 @@ export function RevenueTransactionDialog({
           </div>
         </div>
 
-        <DialogFooter className="mx-0 mb-0 shrink-0 border-t border-border bg-muted/20 px-6 py-4">
-          <Button onClick={() => onOpenChange(false)} className="bg-transparent text-foreground hover:bg-destructive hover:text-white">
+        <DialogFooter className="mx-0 mb-0 shrink-0 border-t border-border bg-muted/20 px-4 py-3 sm:px-6 sm:py-4">
+          <Button onClick={() => onOpenChange(false)} className="h-9 text-xs bg-transparent text-foreground hover:bg-destructive hover:text-white sm:h-10 sm:text-sm">
             Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting || !selectedAppointment || appointmentOptions.length === 0 || transactions.length === 0}
+            className="h-9 text-xs sm:h-10 sm:text-sm"
           >
             {submitting
               ? "Salvando..."
