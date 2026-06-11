@@ -6,7 +6,6 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { DollarSign, Package, ShoppingCart, Plus, Edit, Trash2, Search, AlertTriangle, Package2, X, Scissors, User, Sparkles, Hand, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, Minus, PackageOpen, } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatLimitText, formatPrice } from '@/lib/parsers';
@@ -230,18 +229,18 @@ export function InventoryPage() {
   };
 
   const renderProductFormFields = () => (
-    <div className="space-y-4 py-2">
-      <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="space-y-3 py-1 sm:space-y-4 sm:py-2">
+      <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-foreground">Informações do produto</h3>
+          <h3 className="text-xs font-semibold text-foreground sm:text-sm">Informações do produto</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             Defina nome e categoria para facilitar a organização do estoque.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="product-name">Nome do Produto</Label>
+            <Label htmlFor="product-name" className="text-xs sm:text-sm">Nome do Produto</Label>
             <Input
               id="product-name"
               placeholder="Ex: Pomada Matte 80g"
@@ -249,12 +248,13 @@ export function InventoryPage() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
+              className="h-9 text-xs sm:h-10 sm:text-sm"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <Label>Categoria</Label>
+              <Label className="text-xs sm:text-sm">Categoria</Label>
               {selectedCategoryMeta && (
                 <Badge variant="outline" className="gap-1.5 text-xs">
                   <selectedCategoryMeta.icon className="w-3.5 h-3.5 text-primary" />
@@ -268,7 +268,7 @@ export function InventoryPage() {
                 setFormData({ ...formData, category: value })
               }
             >
-              <SelectTrigger id="product-category" className="data-[placeholder]:text-gray-500">
+              <SelectTrigger id="product-category" className="h-9 text-xs data-[placeholder]:text-gray-500 sm:h-10 sm:text-sm">
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent className="max-h-96">
@@ -290,17 +290,17 @@ export function InventoryPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-foreground">Controle de estoque</h3>
+          <h3 className="text-xs font-semibold text-foreground sm:text-sm">Controle de estoque</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             Informe quantidade disponível e custo unitário do produto.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <div className="space-y-2">
-            <Label htmlFor="product-quantity">Quantidade</Label>
+            <Label htmlFor="product-quantity" className="text-xs sm:text-sm">Quantidade</Label>
             <Input
               id="product-quantity"
               type="number"
@@ -311,6 +311,7 @@ export function InventoryPage() {
               onChange={(e) =>
                 setFormData({ ...formData, quantity: e.target.value })
               }
+              className="h-9 text-xs sm:h-10 sm:text-sm"
             />
             <p className="text-xs text-muted-foreground">
               Informe a quantidade atual em estoque.
@@ -318,7 +319,7 @@ export function InventoryPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="product-cost-price">Preço de Custo</Label>
+            <Label htmlFor="product-cost-price" className="text-xs sm:text-sm">Preço de Custo</Label>
             <Input
               id="product-cost-price"
               type="number"
@@ -332,6 +333,7 @@ export function InventoryPage() {
                   cost_price: e.target.value,
                 })
               }
+              className="h-9 text-xs sm:h-10 sm:text-sm"
             />
             <p className="text-xs text-muted-foreground">
               Valor unitário pago pelo produto.
@@ -357,56 +359,56 @@ export function InventoryPage() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto scrollbar-custom">
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Metrics Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <Card className="p-6">
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-muted-foreground text-sm mb-1">Total de custo</p>
-                  <h3 className="text-3xl font-semibold text-destructive mb-2">{formatPrice(data.totalCost)}</h3>
+                  <p className="mb-1 text-sm text-muted-foreground">Total de custo</p>
+                  <h3 className="mb-2 text-2xl font-semibold text-destructive sm:text-3xl">{formatPrice(data.totalCost)}</h3>
                 </div>
-                <div className="bg-destructive/10 p-4 rounded-lg">
+                <div className="rounded-lg bg-destructive/10 p-3 sm:p-4">
                   <ShoppingCart className="w-6 h-6 text-destructive" />
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-muted-foreground text-sm mb-1">Total de produtos</p>
-                  <h3 className="text-3xl font-semibold text-blue-600 mb-2">{data.totalProducts}</h3>
+                  <p className="mb-1 text-sm text-muted-foreground">Total de produtos</p>
+                  <h3 className="mb-2 text-2xl font-semibold text-blue-600 sm:text-3xl">{data.totalProducts}</h3>
                 </div>
-                <div className="bg-blue-600/10 p-4 rounded-lg">
+                <div className="rounded-lg bg-blue-600/10 p-3 sm:p-4">
                   <Package className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-muted-foreground text-sm mb-1">Estoque baixo</p>
-                  <h3 className="text-3xl font-semibold text-yellow-600 mb-2">{data.lowStock}</h3>
+                  <p className="mb-1 text-sm text-muted-foreground">Estoque baixo</p>
+                  <h3 className="mb-2 text-2xl font-semibold text-yellow-600 sm:text-3xl">{data.lowStock}</h3>
                   <p className="text-xs text-muted-foreground mt-1">
                     produtos com até {lowStockThreshold} unidade{lowStockThreshold === 1 ? "" : "s"}
                   </p>
                 </div>
-                <div className="bg-yellow-600/10 p-4 rounded-lg">
+                <div className="rounded-lg bg-yellow-600/10 p-3 sm:p-4">
                   <AlertTriangle className="w-6 h-6 text-yellow-600" />
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-muted-foreground text-sm mb-1">Esgotado</p>
-                  <h3 className="text-3xl font-semibold text-destructive mb-2">{data.outOfStock}</h3>
+                  <p className="mb-1 text-sm text-muted-foreground">Esgotado</p>
+                  <h3 className="mb-2 text-2xl font-semibold text-destructive sm:text-3xl">{data.outOfStock}</h3>
                   <p className="text-xs text-muted-foreground mt-1">produtos sem estoque</p>
                 </div>
-                <div className="bg-destructive/10 p-4 rounded-lg">
+                <div className="rounded-lg bg-destructive/10 p-3 sm:p-4">
                   <PackageOpen className="w-6 h-6 text-destructive" />
                 </div>
               </div>
@@ -415,19 +417,19 @@ export function InventoryPage() {
 
           {/* Search and Table */}
           <Card className="overflow-hidden gap-0">
-            <div className="py-4 px-6 border-b border-border">
-              <div className="flex items-center justify-between">
+            <div className="border-b border-border px-4 py-4 sm:px-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <h2 className="text-lg font-semibold text-foreground">
                   Meus produtos
                 </h2>
-                <div className="flex items-center gap-3">
-                  <div className="relative w-80">
+                <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                  <div className="relative min-w-0 flex-1 sm:max-w-64 md:max-w-72">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
                       placeholder="Buscar produtos..."
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>
 
@@ -436,11 +438,10 @@ export function InventoryPage() {
                       <Button
                         type="button"
                         onClick={() => setQuickFilter((prev) => (prev === 'low' ? null : 'low'))}
-                        className={
-                          quickFilter === 'low'
+                        className={`h-9 px-3 sm:h-10 ${quickFilter === 'low'
                             ? 'border border-yellow-500/30 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20'
                             : 'border border-border bg-default text-foreground hover:bg-yellow-500/10 hover:text-yellow-600'
-                        }
+                        }`}
                       >
                         <AlertTriangle className="w-4 h-4" />
                       </Button>
@@ -455,11 +456,10 @@ export function InventoryPage() {
                       <Button
                         type="button"
                         onClick={() => setQuickFilter((prev) => (prev === 'out' ? null : 'out'))}
-                        className={
-                          quickFilter === 'out'
+                        className={`h-9 px-3 sm:h-10 ${quickFilter === 'out'
                             ? 'border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20'
                             : 'border border-border bg-default text-foreground hover:bg-destructive/10 hover:text-destructive'
-                        }
+                        }`}
                       >
                         <PackageOpen className="w-4 h-4" />
                       </Button>
@@ -483,26 +483,26 @@ export function InventoryPage() {
                     }}
                   >
                     <DialogTrigger asChild>
-                      <Button className="bg-primary hover:bg-primary/90">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar Produto
+                      <Button className="bg-primary px-3 hover:bg-primary/90 sm:px-4">
+                        <Plus className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Adicionar Produto</span>
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="overflow-hidden p-0 sm:max-w-[560px]">
-                      <DialogHeader>
-                        <DialogTitle className="px-6 pt-6">Novo Produto</DialogTitle>
-                        <DialogDescription className="px-6">
+                    <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0 sm:max-w-[560px]">
+                      <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+                        <DialogTitle className="text-lg sm:text-xl">Novo Produto</DialogTitle>
+                        <DialogDescription className="text-xs sm:text-sm">
                           Preencha os dados abaixo para cadastrar o produto no estoque.
                         </DialogDescription>
                       </DialogHeader>
 
-                      <div className="px-6 pb-6">
+                      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 scrollbar-custom">
                         {renderProductFormFields()}
                       </div>
 
-                      <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
+                      <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
                         <Button
-                          className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
+                          className="h-9 text-xs bg-transparent text-foreground hover:bg-destructive hover:text-white sm:h-10 sm:text-sm"
                           onClick={() => {
                             setIsAddDialogOpen(false);
                             resetForm();
@@ -511,7 +511,7 @@ export function InventoryPage() {
                           Cancelar
                         </Button>
                         <Button
-                          className="bg-primary hover:bg-primary/90"
+                          className="h-9 text-xs bg-primary hover:bg-primary/90 sm:h-10 sm:text-sm"
                           onClick={handleAddProduct}
                           disabled={
                             !formData.name ||
@@ -529,74 +529,73 @@ export function InventoryPage() {
               </div>
             </div>
 
-            <div>
-              <Table className="w-full">
-                <TableHeader className="table table-fixed z-10">
-                  <TableRow className="table w-full table-fixed bg-muted/50">
-                    <TableHead className="font-semibold text-foreground">Nome</TableHead>
-                    <TableHead className="font-semibold text-foreground">Categoria</TableHead>
-                    <TableHead className="font-semibold text-foreground">Quantidade</TableHead>
-                    <TableHead className="font-semibold text-foreground">Status</TableHead>
-                    <TableHead className="font-semibold text-foreground">Preço de custo</TableHead>
-                    <TableHead className="font-semibold text-foreground">Valor total</TableHead>
-                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <div className="h-[550px] flex-1 flex overflow-y-auto">
-                  <TableBody className="block overflow-y-auto">
-                    {filteredProducts.length === 0 ? (
-                      <TableRow className='table table-fixed w-full h-full'>
-                        <TableCell colSpan={18} className="w-32 text-center py-16">
-                          <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
-                            <Package className="w-12 h-12 opacity-20" />
-                            <p className="font-medium">Nenhum produto encontrado.</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : (filteredProducts.map((product) => {
-                      const Icon = productCategories[product.category].icon;
+            <div className="h-[550px] overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
+                  <tr className="border-b transition-colors">
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Nome</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Categoria</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Quantidade</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Status</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Preço de custo</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Valor total</th>
+                    <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="[&_tr:last-child]:border-0">
+                  {filteredProducts.length === 0 ? (
+                    <tr className="border-b transition-colors">
+                      <td colSpan={7} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
+                        <div className="flex h-80 w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                          <Package className="h-12 w-12 opacity-20" />
+                          <p className="font-medium">Nenhum produto encontrado.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (filteredProducts.map((product) => {
+                    const Icon = productCategories[product.category].icon;
 
-                      return (
-                        <TableRow key={product.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                <Icon className="text-primary" />
-                              </div>
-                              <div>
-                                <div className="font-medium">{formatLimitText(product.name, 22)}</div>
-                              </div>
+                    return (
+                      <tr key={product.id} className="border-b transition-colors hover:bg-muted/30">
+                        <td className="p-2 align-middle whitespace-nowrap font-medium">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                              <Icon className="text-primary" />
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {productCategories[product.category].label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <div className='w-32 flex justify-between items-center'>
-                              <Button variant='secondary' size='xs' className='w-8 mr-1' onClick={() => changeQuantity(product.id, -1)}><Minus /></Button>
-                              {product.quantity} un
-                              <Button variant='secondary' size='xs' className='w-8 ml-1' onClick={() => changeQuantity(product.id, 1)}><Plus /></Button>
+                            <div>
+                              <div className="font-medium">{formatLimitText(product.name, 22)}</div>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(product.quantity)}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                              <DollarSign className="w-4 h-4 text-[#00A676]" />
-                              <span className="text-sm font-semibold">{formatPrice(product.cost_price, false)}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                              <DollarSign className="w-4 h-4 text-[#00A676]" />
-                              <span className="text-sm font-semibold">{formatPrice(product.cost_price * product.quantity, false)}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <Badge variant="outline" className="text-xs">
+                            {productCategories[product.category].label}
+                          </Badge>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap font-medium">
+                          <div className="flex w-32 items-center justify-between">
+                            <Button variant='secondary' size='xs' className='mr-1 w-8' onClick={() => changeQuantity(product.id, -1)}><Minus /></Button>
+                            {product.quantity} un
+                            <Button variant='secondary' size='xs' className='ml-1 w-8' onClick={() => changeQuantity(product.id, 1)}><Plus /></Button>
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          {getStatusBadge(product.quantity)}
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap font-medium">
+                          <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                            <DollarSign className="h-4 w-4 text-[#00A676]" />
+                            <span className="text-sm font-semibold">{formatPrice(product.cost_price, false)}</span>
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap font-medium">
+                          <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                            <DollarSign className="h-4 w-4 text-[#00A676]" />
+                            <span className="text-sm font-semibold">{formatPrice(product.cost_price * product.quantity, false)}</span>
+                          </div>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
+                          <div className="flex gap-2">
                               <Dialog 
                                 open={editingProduct?.id === product.id}
                                 onOpenChange={(open) => {
@@ -625,21 +624,21 @@ export function InventoryPage() {
                                   </TooltipContent>
                                 </Tooltip>
 
-                              <DialogContent className="overflow-hidden p-0 sm:max-w-[560px]">
-                                  <DialogHeader>
-                                    <DialogTitle className="px-6 pt-6">Editar Produto</DialogTitle>
-                                    <DialogDescription className="px-6">
+                              <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0 sm:max-w-[560px]">
+                                  <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+                                    <DialogTitle className="text-lg sm:text-xl">Editar Produto</DialogTitle>
+                                    <DialogDescription className="text-xs sm:text-sm">
                                       Atualize as informações do produto no estoque.
                                     </DialogDescription>
                                   </DialogHeader>
 
-                                  <div className="px-6 pb-6">
+                                  <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 scrollbar-custom">
                                     {renderProductFormFields()}
                                   </div>
 
-                                  <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
+                                  <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
                                     <Button
-                                      className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
+                                      className="h-9 text-xs bg-transparent text-foreground hover:bg-destructive hover:text-white sm:h-10 sm:text-sm"
                                       onClick={() => {
                                         setEditingProduct(null);
                                         resetForm();
@@ -648,7 +647,7 @@ export function InventoryPage() {
                                       Cancelar
                                     </Button>
                                     <Button
-                                      className="bg-primary hover:bg-primary/90"
+                                      className="h-9 text-xs bg-primary hover:bg-primary/90 sm:h-10 sm:text-sm"
                                       onClick={() => handleEditProduct(product.id)}
                                     > 
                                       Salvar Alterações
@@ -677,17 +676,17 @@ export function InventoryPage() {
                                   </TooltipContent>
                                 </Tooltip>
 
-                                <PopoverContent side="left">
-                                  <p className="text-sm mb-2">Tem certeza que deseja excluir este produto?</p>
+                                <PopoverContent side="left" className="w-64 p-3 sm:w-80 sm:p-4">
+                                  <p className="mb-2 text-xs sm:text-sm">Tem certeza que deseja excluir este produto?</p>
 
                                   <div className="flex justify-end gap-2">
                                     <PopoverClose asChild>
-                                      <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">Cancelar</Button>
+                                      <Button size="sm" className="h-8 px-2 text-xs bg-transparent text-foreground hover:bg-transparent hover:text-destructive sm:h-9 sm:px-3 sm:text-sm">Cancelar</Button>
                                     </PopoverClose>
                                     
                                     <Button
                                       size="sm"
-                                      className="text-sm bg-destructive text-white hover:bg-destructive/60"
+                                      className="h-8 px-2 text-xs bg-destructive text-white hover:bg-destructive/60 sm:h-9 sm:px-3 sm:text-sm"
                                       onClick={() => handleDeleteProduct(product.id)}
                                     >
                                       Confirmar
@@ -695,14 +694,13 @@ export function InventoryPage() {
                                   </div>
                                 </PopoverContent>
                               </Popover> 
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    ))}
-                  </TableBody>
-                </div>
-              </Table>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  ))}
+                </tbody>
+              </table>
             </div>
           </Card>
         </div>
