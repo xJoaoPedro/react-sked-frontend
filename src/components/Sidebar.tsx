@@ -8,18 +8,18 @@ import { useCachedEvolutionProfilePhoto } from '@/hooks/useCachedEvolutionProfil
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider, } from './ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from './ui/alert-dialog';
 
-interface MenuItem {
+export interface MenuItem {
   icon: LucideIcon;
   label: string;
   path: string;
 }
 
-interface MenuCategory {
+export interface MenuCategory {
   title: string;
   items: MenuItem[];
 }
 
-const menuCategories: MenuCategory[] = [
+export const menuCategories: MenuCategory[] = [
   {
     title: 'Geral',
     items: [
@@ -54,6 +54,19 @@ const menuCategories: MenuCategory[] = [
   },
 ];
 
+export function getVisibleMenuCategories(canAccessManagerAreas: boolean) {
+  return menuCategories
+    .map((category) => ({
+      ...category,
+      items: category.items.filter((item) => {
+        if (canAccessManagerAreas) return true;
+
+        return !["/revenue", "/professionals"].includes(item.path);
+      }),
+    }))
+    .filter((category) => category.items.length > 0);
+}
+
 export function Sidebar({ dados }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -65,16 +78,7 @@ export function Sidebar({ dados }) {
   const companyId = localStorage.getItem("companyId");
   const profilePhoto = useCachedEvolutionProfilePhoto(companyId, dados?.evolution);
 
-  const visibleMenuCategories = menuCategories
-    .map((category) => ({
-      ...category,
-      items: category.items.filter((item) => {
-        if (canAccessManagerAreas) return true;
-
-        return !["/revenue", "/professionals"].includes(item.path);
-      }),
-    }))
-    .filter((category) => category.items.length > 0);
+  const visibleMenuCategories = getVisibleMenuCategories(canAccessManagerAreas);
 
   const handleLogout = () => {
     clearAuthStorage();
