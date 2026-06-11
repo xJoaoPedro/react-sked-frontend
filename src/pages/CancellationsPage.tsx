@@ -4,12 +4,11 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
-import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, Eye, Edit, Trash2, CalendarX, ChartBar, ChartPie, ChartSpline, } from "lucide-react";
+import { Calendar, TrendingDown, DollarSign, User, Clock, MessageSquare, Download, Filter, ChevronDown, ChevronUp, FileText, Table2, FileJson, CalendarX, ChartBar, ChartPie, ChartSpline, } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart, } from "recharts";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as XLSX from "xlsx";
 import { toast } from "sonner"
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { api } from "@/lib/api";
 import { formatDate, formatLimitText, formatPrice, formatTime } from "@/lib/parsers";
 import { Input } from "@/components/ui/input";
@@ -640,14 +639,13 @@ export function CancellationsPage() {
                     <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Profissional</th>
                     <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Motivo</th>
                     <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Cancelado por</th>
-                    <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
                   </tr>
                 </thead>
 
                 <tbody className="[&_tr:last-child]:border-0">
                   {data.recentCancellations.length === 0 ? (
                     <tr className="border-b transition-colors">
-                      <td colSpan={9} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
+                      <td colSpan={7} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
                         <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
                           <CalendarX className="w-12 h-12 opacity-20" />
                           <p className="font-medium">
@@ -712,60 +710,6 @@ export function CancellationsPage() {
                               ? "Cliente"
                               : "Estabelecimento"}
                           </Badge>
-                        </td>
-                        <td className="p-2 align-middle whitespace-nowrap">
-                          <div className="flex items-center gap-1">
-                            <Tooltip disableHoverableContent>
-                              <TooltipTrigger asChild>
-                                <div>
-                                  <Button 
-                                    size="sm"
-                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TooltipTrigger>
-
-                              <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
-                                Visualizar
-                              </TooltipContent>
-                            </Tooltip>
-                            
-                            <Tooltip disableHoverableContent>
-                              <TooltipTrigger asChild>
-                                <div>
-                                  <Button  
-                                    size="sm"
-                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TooltipTrigger>
-
-                              <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                                Editar
-                              </TooltipContent>
-                            </Tooltip>
-                            
-                            <Tooltip disableHoverableContent>
-                              <TooltipTrigger asChild>
-                                <div>
-                                  <Button  
-                                    size="sm"
-                                    className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TooltipTrigger>
-
-                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                                Excluir
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
                         </td>
                       </tr>
                     ))
