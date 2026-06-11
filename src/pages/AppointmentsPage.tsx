@@ -1152,19 +1152,19 @@ export function AppointmentsPage() {
                                 </TooltipContent>
                               </Tooltip>
 
-                              <PopoverContent side="left">
-                                <p className="text-sm mb-2">Tem certeza que deseja excluir este agendamento?</p>
+                              <PopoverContent side="left" className="w-64 p-3 sm:w-80 sm:p-4">
+                                <p className="mb-2 text-xs sm:text-sm">Tem certeza que deseja excluir este agendamento?</p>
 
                                 <div className="flex justify-end gap-2">
                                   <PopoverClose asChild>
-                                    <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">
+                                    <Button size="sm" className="h-8 px-2 text-xs bg-transparent text-foreground hover:bg-transparent hover:text-destructive sm:h-9 sm:px-3 sm:text-sm">
                                       Cancelar
                                     </Button>
                                   </PopoverClose>
 
                                   <Button
                                     size="sm"
-                                    className="text-sm bg-destructive text-white hover:bg-destructive/60"
+                                    className="h-8 px-2 text-xs bg-destructive text-white hover:bg-destructive/60 sm:h-9 sm:px-3 sm:text-sm"
                                     onClick={() => handleDeleteAppointment(appointment.id)}
                                   >
                                     Confirmar
@@ -1255,9 +1255,9 @@ export function AppointmentsPage() {
           if (!open) resetForm();
         }}
       >
-        <DialogContent className="gap-0 overflow-x-hidden border-border/60 bg-background p-0 shadow-2xl sm:max-w-[820px]">
-          <DialogHeader className="border-b border-border bg-muted/30 px-6 py-5">
-            <DialogTitle className="text-xl font-semibold tracking-tight">
+        <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden border-border/60 bg-background p-0 shadow-2xl sm:max-w-[820px]">
+          <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+            <DialogTitle className="text-lg font-semibold tracking-tight sm:text-xl">
               {editingAppointment ? 'Editar Agendamento' : 'Novo Agendamento'}
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -1267,11 +1267,11 @@ export function AppointmentsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 px-6 py-6">
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
             {!editingAppointment && (
-              <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
                 <div className="mb-3">
-                  <Label className="text-sm font-semibold text-foreground">Tipo de cliente</Label>
+                  <Label className="text-xs font-semibold text-foreground sm:text-sm">Tipo de cliente</Label>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Escolha se deseja cadastrar um novo cliente ou usar um já existente.
                   </p>
@@ -1280,7 +1280,7 @@ export function AppointmentsPage() {
                   <Button
                     type="button"
                     variant={clientMode === 'new' ? 'default' : 'secondary'}
-                    className="justify-center"
+                    className="h-9 justify-center px-3 text-xs sm:h-10 sm:text-sm"
                     onClick={() => {
                       setClientMode('new');
                       setFormData((prev) => ({
@@ -1297,7 +1297,7 @@ export function AppointmentsPage() {
                   <Button
                     type="button"
                     variant={clientMode === 'existing' ? 'default' : 'secondary'}
-                    className="justify-center"
+                    className="h-9 justify-center px-3 text-xs sm:h-10 sm:text-sm"
                     onClick={() => {
                       setClientMode('existing');
                       setFormData((prev) => ({
@@ -1315,9 +1315,9 @@ export function AppointmentsPage() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-foreground">Dados do cliente</h3>
+                <h3 className="text-xs font-semibold text-foreground sm:text-sm">Dados do cliente</h3>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Preencha as informações de contato para identificar o agendamento.
                 </p>
@@ -1325,7 +1325,7 @@ export function AppointmentsPage() {
 
               {!editingAppointment && clientMode === 'existing' ? (
                 <div className="space-y-2">
-                  <Label htmlFor="appointment-existing-client">Cliente</Label>
+                  <Label htmlFor="appointment-existing-client" className="text-xs sm:text-sm">Cliente</Label>
                   <div className="relative" ref={existingClientDropdownRef}>
                     <Button
                       type="button"
@@ -1333,7 +1333,7 @@ export function AppointmentsPage() {
                       aria-expanded={existingClientPopoverOpen}
                       aria-haspopup="listbox"
                       onClick={() => setExistingClientPopoverOpen((current) => !current)}
-                      className="h-10 w-full justify-between border border-input bg-muted px-3 font-normal text-foreground hover:bg-muted"
+                      className="h-9 w-full justify-between border border-input bg-muted px-3 text-xs font-normal text-foreground hover:bg-muted sm:h-10 sm:text-sm"
                     >
                       <span className="truncate text-left">
                         {selectedExistingCustomer
@@ -1352,7 +1352,7 @@ export function AppointmentsPage() {
                               value={existingClientSearch}
                               onChange={(e) => setExistingClientSearch(e.target.value)}
                               placeholder="Buscar cliente..."
-                              className="pl-9"
+                              className="h-9 pl-9 text-xs sm:h-10 sm:text-sm"
                             />
                           </div>
 
@@ -1391,9 +1391,9 @@ export function AppointmentsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                   <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="appointment-client-name">Nome do cliente</Label>
+                    <Label htmlFor="appointment-client-name" className="text-xs sm:text-sm">Nome do cliente</Label>
                     <Input
                       id="appointment-client-name"
                       placeholder="Nome do cliente"
@@ -1401,11 +1401,12 @@ export function AppointmentsPage() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, client_name: e.target.value }))
                       }
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="appointment-client-email">E-mail do cliente</Label>
+                    <Label htmlFor="appointment-client-email" className="text-xs sm:text-sm">E-mail do cliente</Label>
                     <Input
                       id="appointment-client-email"
                       type="email"
@@ -1414,11 +1415,12 @@ export function AppointmentsPage() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, client_email: e.target.value }))
                       }
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="appointment-client-phone">Telefone do cliente</Label>
+                    <Label htmlFor="appointment-client-phone" className="text-xs sm:text-sm">Telefone do cliente</Label>
                     <Input
                       id="appointment-client-phone"
                       type="tel"
@@ -1426,30 +1428,31 @@ export function AppointmentsPage() {
                       placeholder="(11) 99999-9999"
                       value={formatPhone(formData.client_contact)}
                       onChange={(e) => handleClientPhoneChange(e.target.value)}
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-foreground">Detalhes do agendamento</h3>
+                <h3 className="text-xs font-semibold text-foreground sm:text-sm">Detalhes do agendamento</h3>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Selecione serviço, profissional, data, horário e status.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="appointment-service">Serviço</Label>
+                  <Label htmlFor="appointment-service" className="text-xs sm:text-sm">Serviço</Label>
                   <Select
                     value={formData.service_id}
                     onValueChange={(value) =>
                       setFormData((prev) => ({ ...prev, service_id: value }))
                     }
                   >
-                    <SelectTrigger id="appointment-service">
+                    <SelectTrigger id="appointment-service" className="h-9 text-xs sm:h-10 sm:text-sm">
                       <SelectValue placeholder="Selecione o serviço" />
                     </SelectTrigger>
                     <SelectContent className="max-h-96">
@@ -1463,14 +1466,14 @@ export function AppointmentsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="appointment-professional">Profissional</Label>
+                  <Label htmlFor="appointment-professional" className="text-xs sm:text-sm">Profissional</Label>
                   <Select
                     value={formData.employee_id}
                     onValueChange={(value) =>
                       setFormData((prev) => ({ ...prev, employee_id: value }))
                     }
                   >
-                    <SelectTrigger id="appointment-professional">
+                    <SelectTrigger id="appointment-professional" className="h-9 text-xs sm:h-10 sm:text-sm">
                       <SelectValue placeholder="Selecione o profissional" />
                     </SelectTrigger>
                     <SelectContent className="max-h-96">
@@ -1484,8 +1487,9 @@ export function AppointmentsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="appointment-date">Data</Label>
+                  <Label htmlFor="appointment-date" className="text-xs sm:text-sm">Data</Label>
                   <CalendarDatePicker
+                    className="h-9 text-xs sm:h-10 sm:text-sm"
                     value={formData.appointment_date ? new Date(`${formData.appointment_date}T12:00:00`) : undefined}
                     onChange={(date) =>
                       setFormData((prev) => {
@@ -1515,7 +1519,7 @@ export function AppointmentsPage() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="appointment-time">Horário</Label>
+                    <Label htmlFor="appointment-time" className="text-xs sm:text-sm">Horário</Label>
                     {formData.employee_id && formData.appointment_date && formData.service_id && !isPastAppointmentDate && hasProfessionalAvailability() && (
                       <span className="text-xs text-muted-foreground">
                         {getTimeSelectOptions().length} horários disponíveis
@@ -1538,7 +1542,7 @@ export function AppointmentsPage() {
                       !hasProfessionalAvailability()
                     }
                   >
-                    <SelectTrigger id="appointment-time">
+                    <SelectTrigger id="appointment-time" className="h-9 text-xs sm:h-10 sm:text-sm">
                       <SelectValue
                         placeholder={
                           !formData.service_id
@@ -1569,14 +1573,14 @@ export function AppointmentsPage() {
                 </div>
 
                 <div className="md:col-span-2 space-y-2">
-                  <Label htmlFor="appointment-status">Status</Label>
+                  <Label htmlFor="appointment-status" className="text-xs sm:text-sm">Status</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) =>
                       setFormData((prev) => ({ ...prev, status: value }))
                     }
                   >
-                    <SelectTrigger id="appointment-status">
+                    <SelectTrigger id="appointment-status" className="h-9 text-xs sm:h-10 sm:text-sm">
                       <SelectValue placeholder="Selecione o status" />
                     </SelectTrigger>
                     <SelectContent className="max-h-96">
@@ -1592,10 +1596,10 @@ export function AppointmentsPage() {
             </div>
           </div>
 
-          <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4">
+          <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-4 py-3 sm:px-6 sm:py-4">
             <Button
               size="sm"
-              className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive"
+              className="h-9 text-xs bg-transparent text-foreground hover:bg-transparent hover:text-destructive sm:text-sm"
               type="button"
               onClick={() => {
                 setIsDialogOpen(false);
@@ -1606,6 +1610,7 @@ export function AppointmentsPage() {
             </Button>
             <Button
               type="button"
+              className="h-9 text-xs sm:h-10 sm:text-sm"
               onClick={handleSubmitAppointment}
               disabled={
                 (editingAppointment || clientMode === 'new'
