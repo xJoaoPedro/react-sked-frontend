@@ -57,7 +57,12 @@ export function MobileCard({
         >
           <div
             className="absolute inset-0 rounded-[28px]"
-            style={{ ...cardFaceStyle, transform: "rotateY(0deg) translateZ(1px)" }}
+            style={{
+              ...cardFaceStyle,
+              transform: "rotateY(0deg) translateZ(1px)",
+              pointerEvents: isLogin ? "auto" : "none",
+            }}
+            aria-hidden={!isLogin}
           >
             <div className="absolute inset-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#0D1515]/95 shadow-[0_28px_70px_rgba(0,0,0,0.45)]">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,166,118,0.18),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_30%)]" />
@@ -134,7 +139,12 @@ export function MobileCard({
 
           <div
             className="absolute inset-0 rounded-[28px]"
-            style={{ ...cardFaceStyle, transform: "rotateY(180deg) translateZ(1px)" }}
+            style={{
+              ...cardFaceStyle,
+              transform: "rotateY(180deg) translateZ(1px)",
+              pointerEvents: isLogin ? "none" : "auto",
+            }}
+            aria-hidden={isLogin}
           >
             <div className="absolute inset-0 overflow-hidden rounded-[28px] border border-white/10 bg-[#0D1515]/95 shadow-[0_28px_70px_rgba(0,0,0,0.45)]">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,166,118,0.18),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_30%)]" />
