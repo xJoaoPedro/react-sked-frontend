@@ -1081,7 +1081,7 @@ export function Layout() {
             <Sidebar dados={dados.settings} />
           </div>
           <main className="flex-1 flex flex-col overflow-hidden">
-            <MobileDashboardHeader title={pageHeader.title} dados={dados} />
+            <MobileDashboardHeader title={pageHeader.title} dados={dados} refreshDados={refreshDados} />
             <div className="hidden md:block">
               <PageHeader
                 title={pageHeader.title}
