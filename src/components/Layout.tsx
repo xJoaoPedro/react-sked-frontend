@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { LoadingPage } from "@/pages/LoadingPage";
 import { socket } from "@/services/socket";
+import { MobileDashboardHeader } from "./MobileDashboardHeader";
 import { PageHeader, type NotificationItem } from "./PageHeader";
 import { Sidebar } from "./Sidebar";
 
@@ -1076,34 +1077,41 @@ export function Layout() {
         <LoadingPage />
       ) : (
         <>
-          <Sidebar dados={dados.settings} />
+          <div className="hidden md:block">
+            <Sidebar dados={dados.settings} />
+          </div>
           <main className="flex-1 flex flex-col overflow-hidden">
-            <PageHeader
-              title={pageHeader.title}
-              subtitle={pageHeader.subtitle}
-              notifications={notifications}
-              onMarkAsRead={markNotificationAsRead}
-              onMarkAllAsRead={markAllNotificationsAsRead}
-              onClearNotifications={clearNotifications}
-              onDeleteNotification={deleteNotification}
-              evolutionConnection={dados?.settings?.evolution ?? null}
-              onEvolutionConnectionUpdated={refreshDados}
-              onEvolutionConnectionNotification={prependManualNotification}
-              // TODO global search: reativar props quando a barra voltar.
-              // searchResults={filteredSearchResults}
-              // searchValue={searchValue}
-              // onSearchChange={handleSearchChange}
-              // onSearchResultSelect={(_item, query) => setActiveHighlightQuery(query)}
-            />
-            <Outlet
-              context={{
-                dados,
-                updateDados,
-                refreshDados,
-                setPageHeader,
-                notifications,
-              }}
-            />
+            <MobileDashboardHeader title={pageHeader.title} dados={dados} refreshDados={refreshDados} />
+            <div className="hidden md:block">
+              <PageHeader
+                title={pageHeader.title}
+                subtitle={pageHeader.subtitle}
+                notifications={notifications}
+                onMarkAsRead={markNotificationAsRead}
+                onMarkAllAsRead={markAllNotificationsAsRead}
+                onClearNotifications={clearNotifications}
+                onDeleteNotification={deleteNotification}
+                evolutionConnection={dados?.settings?.evolution ?? null}
+                onEvolutionConnectionUpdated={refreshDados}
+                onEvolutionConnectionNotification={prependManualNotification}
+                // TODO global search: reativar props quando a barra voltar.
+                // searchResults={filteredSearchResults}
+                // searchValue={searchValue}
+                // onSearchChange={handleSearchChange}
+                // onSearchResultSelect={(_item, query) => setActiveHighlightQuery(query)}
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <Outlet
+                context={{
+                  dados,
+                  updateDados,
+                  refreshDados,
+                  setPageHeader,
+                  notifications,
+                }}
+              />
+            </div>
           </main>
         </>
       )}

@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
-import { User, Users, UserPlus, Cake, Gift, Repeat, UserRoundX, UserX, } from "lucide-react";
+import { User, Users, UserPlus, Repeat, UserRoundX, UserX, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingPage } from "./LoadingPage";
 import { formatDate, formatPhone } from "@/lib/parsers";
@@ -51,16 +48,16 @@ export function CustomersPage() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto scrollbar-custom">
-        <div className="p-6 space-y-6">
+        <div className="space-y-6 p-4 sm:p-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="p-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">
+                  <p className="mb-1 text-sm text-muted-foreground">
                     Total de Clientes
                   </p>
-                  <h3 className="text-3xl font-bold text-foreground">
+                  <h3 className="text-2xl font-bold text-foreground sm:text-3xl">
                     {data.totalCustomers}
                   </h3>
                 </div>
@@ -70,13 +67,13 @@ export function CustomersPage() {
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">
+                  <p className="mb-1 text-sm text-muted-foreground">
                     Novos este mês
                   </p>
-                  <h3 className="text-3xl font-bold text-foreground">
+                  <h3 className="text-2xl font-bold text-foreground sm:text-3xl">
                     {data.newCustomers}
                   </h3>
                 </div>
@@ -86,13 +83,13 @@ export function CustomersPage() {
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">
+                  <p className="mb-1 text-sm text-muted-foreground">
                     Taxa de Retorno
                   </p>
-                  <h3 className="text-3xl font-bold text-foreground">
+                  <h3 className="text-2xl font-bold text-foreground sm:text-3xl">
                     {data.totalCustomers > 0 ? ((data.returningCustomers / data.totalCustomers) * 100).toFixed(1) : 0}%
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -108,7 +105,7 @@ export function CustomersPage() {
 
           {/* Customers Table */}
           <Card className="overflow-hidden gap-0">
-            <div className="py-3 px-6 border-b border-border">
+            <div className="border-b border-border px-4 py-4 sm:px-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-lg mb-1">
@@ -121,32 +118,31 @@ export function CustomersPage() {
               </div>
             </div>
 
-            <div>
-              <Table className="w-full">
-                <TableHeader className="table table-fixed z-10">
-                  <TableRow className="table w-full table-fixed bg-muted/50">
-                    <TableHead className="font-semibold text-foreground">Nome</TableHead>
-                    <TableHead className="font-semibold text-foreground">Contato</TableHead>
-                    <TableHead className="font-semibold text-foreground">Visitas</TableHead>
-                    <TableHead className="font-semibold text-foreground">Última Visita</TableHead>
-                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
+            <div className="h-[500px] overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
+                  <tr className="border-b transition-colors">
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Nome</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Contato</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Visitas</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Última Visita</th>
+                    <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
+                  </tr>
+                </thead>
 
-                <div className="h-[500px] flex-1 flex overflow-y-auto">
-                  <TableBody className="block overflow-y-auto">
-                    {data.customers.length === 0 ? (
-                      <TableRow className='table table-fixed w-full h-full'>
-                        <TableCell colSpan={18} className="w-32 text-center py-16">
-                          <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
-                            <UserX className="w-12 h-12 opacity-20" />
-                            <p className="font-medium">Nenhum cliente encontrado.</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : (data.customers.map((customer) => (
-                      <TableRow key={customer.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                        <TableCell className="font-medium py-3">
+                <tbody className="[&_tr:last-child]:border-0">
+                  {data.customers.length === 0 ? (
+                    <tr className="border-b transition-colors">
+                      <td colSpan={5} className="w-32 p-2 py-16 text-center align-middle whitespace-nowrap">
+                        <div className="flex h-80 w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                          <UserX className="h-12 w-12 opacity-20" />
+                          <p className="font-medium">Nenhum cliente encontrado.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (data.customers.map((customer) => (
+                    <tr key={customer.id} className="border-b transition-colors hover:bg-muted/30">
+                      <td className="py-3 p-2 align-middle whitespace-nowrap font-medium">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
                               <User className="w-4 h-4 text-muted-foreground" />
@@ -160,22 +156,22 @@ export function CustomersPage() {
                               </div>
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <div className="text-sm">
                             <div>{customer.email}</div>
                             <div className="text-muted-foreground">
                               {formatPhone(customer.contact)}
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">
                           <span className="w-full px-2 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                             {customer.visits}
                           </span>
-                        </TableCell>
-                        <TableCell>{formatDate(customer.lastVisit)}</TableCell>
-                        <TableCell className="text-right">
+                        </td>
+                        <td className="p-2 align-middle whitespace-nowrap">{formatDate(customer.lastVisit)}</td>
+                        <td className="p-2 text-right align-middle whitespace-nowrap">
                           <div className="flex gap-2">
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -195,30 +191,40 @@ export function CustomersPage() {
                               </TooltipContent>
                             </Tooltip>
                           </div>
-                        </TableCell>
-                      </TableRow>
+                        </td>
+                      </tr>
                     )))}
-                  </TableBody>
-                </div>
-              </Table>
+                </tbody>
+              </table>
             </div>
 
             {data.customers.length > 0 && (
-              <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
-                <p className="text-sm text-muted-foreground">
-                  Mostrando{' '}
-                  <span className="font-medium text-foreground">
-                    {(page - 1) * limit + 1}-{Math.min(page * limit, data.totalCustomers)}
-                  </span>{' '}
-                  de{' '}
-                  <span className="font-medium text-foreground">
-                    {data.totalCustomers}
-                  </span>{' '}
-                  cancelamentos
-                </p>
+              <div className="border-t border-border bg-muted/20 px-4 py-4 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="hidden sm:inline">
+                      Mostrando{' '}
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, data.totalCustomers)}
+                      </span>{' '}
+                      de{' '}
+                      <span className="font-medium text-foreground">
+                        {data.totalCustomers}
+                      </span>{' '}
+                      clientes
+                    </span>
+                    <span className="sm:hidden">
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, data.totalCustomers)}
+                      </span>{' '}
+                      /{' '}
+                      <span className="font-medium text-foreground">{data.totalCustomers}</span>{' '}
+                      clientes
+                    </span>
+                  </p>
 
-                <div className="flex items-center gap-2">
-                  <span className="px-3 text-sm">
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <span className="px-1 text-sm sm:px-3">
                     <Input 
                       type="number" 
                       min="1" 
@@ -232,23 +238,25 @@ export function CustomersPage() {
                       }}
                       className='w-fit'
                     /> / {totalPages}
-                  </span>
+                    </span>
 
-                  <Button
-                    
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage(Number(page) - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    size="sm"
-                    disabled={page === totalPages}
-                    onClick={() => setPage(Number(page) + 1)}
-                  >
-                    Próximo
-                  </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === 1}
+                      onClick={() => setPage(Number(page) - 1)}
+                    >
+                      <span className="sm:hidden">‹</span>
+                      <span className="hidden sm:inline">Anterior</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === totalPages}
+                      onClick={() => setPage(Number(page) + 1)}
+                    >
+                      <span className="sm:hidden">›</span>
+                      <span className="hidden sm:inline">Próximo</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

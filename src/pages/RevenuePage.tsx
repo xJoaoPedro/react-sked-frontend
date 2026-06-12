@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '../components/ui/select';
-import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, Eye, Edit, Trash2, ChartColumn, ChartSpline, Package, Plus } from 'lucide-react';
+import { TrendingUp, Calendar, Download, DollarSign, CreditCard, Wallet, PiggyBank, ChevronUp, FileJson, Table2, FileText, ChevronDown, TrendingDown, Clock, User, MessageSquare, Banknote, QrCode, ChartColumn, ChartSpline, Package, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { api } from '@/lib/api';
 import { formatDate, formatLimitText, formatPrice, formatTime } from '@/lib/parsers';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { LoadingPage } from './LoadingPage';
@@ -113,11 +111,11 @@ export function RevenuePage() {
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3">
             <Button
-              className="border border-border bg-primary text-popover hover:bg-primary/90"
+              className="border border-border bg-primary px-3 text-popover hover:bg-primary/90 sm:px-4"
               onClick={() => setIsRevenueDialogOpen(true)}
             >
-              <Plus className="mr-2 h-4 w-4" />
-              Novo lançamento
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Novo lancamento</span>
             </Button>
 
             <Select value={filterPeriod} onValueChange={setFilterPeriod}>
@@ -239,7 +237,7 @@ export function RevenuePage() {
               </div>
 
               {data.revenueByMonth.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={220}>
                   <AreaChart data={data.revenueByMonth}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -295,7 +293,7 @@ export function RevenuePage() {
               </div>
 
               {data.revenueByPayment.length > 0 ? (
-                <ResponsiveContainer width="100%" height={280}>
+                <ResponsiveContainer width="100%" height={230}>
                   <BarChart data={data.revenueByPayment}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis 
@@ -377,45 +375,41 @@ export function RevenuePage() {
               </div>
             </div>
             
-            <div>
-              <Table className="w-full">
-                <TableHeader className="table table-fixed z-10 w-full">
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead className="font-semibold text-foreground w-[100px]">ID</TableHead>
-                    <TableHead className="font-semibold text-foreground">Data/Hora</TableHead>
-                    <TableHead className="font-semibold text-foreground">Cliente</TableHead>
-                    <TableHead className="font-semibold text-foreground">Serviço</TableHead>
-                    <TableHead className="font-semibold text-foreground">Profissional</TableHead>                    
-                    <TableHead className="font-semibold text-foreground">Forma de Pagamento</TableHead>
-                    <TableHead className="font-semibold text-foreground">Status</TableHead>
-                    <TableHead className="font-semibold text-foreground">Valor</TableHead>
-                    <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
+            <div className="h-[500px] overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
+                  <tr className="border-b transition-colors">
+                    <th className="h-10 w-[100px] px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">ID</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Data/Hora</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Cliente</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Serviço</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Profissional</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Forma de Pagamento</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Status</th>
+                    <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Valor</th>
+                  </tr>
+                </thead>
 
-                <div className="h-[500px] flex overflow-y-auto">
-                  <TableBody className="block overflow-y-auto">
-                    {data.recentPayments.length === 0 ? (
-                      <TableRow className='table table-fixed w-full h-full'>
-                        <TableCell colSpan={9} className="w-32 text-center py-16">
-                          <Empty>
-                            <EmptyHeader>
-                              <EmptyMedia variant="icon">
-                                <DollarSign  />
-                              </EmptyMedia>
-                              <EmptyTitle className='text-muted-foreground'>Não há transações para listar.</EmptyTitle>
-                            </EmptyHeader>
-                          </Empty>
-                        </TableCell>
-                      </TableRow>
-                      ) : (
-                      data.recentPayments.map((payment) => {
-                        const Icon = paymentIcons[payment.paymentMethod] || Wallet;
-                        
-                        return (
-                        <TableRow key={payment.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                          <TableCell className="w-[100px] font-mono text-sm font-semibold text-primary">{payment.id}</TableCell>
-                          <TableCell>
+                <tbody className="[&_tr:last-child]:border-0">
+                  {data.recentPayments.length === 0 ? (
+                    <tr className="border-b transition-colors">
+                      <td colSpan={8} className="w-32 p-2 align-middle whitespace-nowrap text-center py-16">
+                        <div className="flex h-72 w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                          <DollarSign className="w-12 h-12 opacity-20" />
+                          <p className="font-medium">Não há transações para listar.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    data.recentPayments.map((payment) => {
+                      const Icon = paymentIcons[payment.paymentMethod] || Wallet;
+
+                      return (
+                        <tr key={payment.id} className="border-b transition-colors hover:bg-muted/30">
+                          <td className="w-[100px] p-2 align-middle whitespace-nowrap font-mono text-sm font-semibold text-primary">
+                            {payment.id}
+                          </td>
+                          <td className="p-2 align-middle whitespace-nowrap">
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -426,33 +420,33 @@ export function RevenuePage() {
                                 <span className="text-sm text-muted-foreground">{formatTime(payment.date)}</span>
                               </div>
                             </div>
-                          </TableCell>
-                          <TableCell>
+                          </td>
+                          <td className="p-2 align-middle whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                                 <User className="w-4 h-4 text-primary" />
                               </div>
                               <span className="font-medium">{payment.clientName}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
+                          </td>
+                          <td className="p-2 align-middle whitespace-nowrap">
                             <span className="text-muted-foreground">{payment.serviceName}</span>
-                          </TableCell>
-                          <TableCell>
+                          </td>
+                          <td className="p-2 align-middle whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                                 <User className="w-4 h-4 text-primary" />
                               </div>
                               <span className="font-medium">{payment.professionalName}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
+                          </td>
+                          <td className="p-2 align-middle whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <Icon className="w-4 h-4 text-primary" />
                               <span className="text-sm">{formatLimitText(method[payment.paymentMethod], 24)}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
+                          </td>
+                          <td className="p-2 align-middle whitespace-nowrap">
                             <Badge
                               variant="outline"
                               className={
@@ -460,98 +454,52 @@ export function RevenuePage() {
                                   ? "bg-primary/10 text-primary border-primary/20"
                                   : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                               }
-
                             >
-                              {payment.status === "COMPLETED"
-                                ? "Pago"
-                                : "Pendente"}
+                              {payment.status === "COMPLETED" ? "Pago" : "Pendente"}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
+                          </td>
+                          <td className="p-2 align-middle whitespace-nowrap">
                             <div className="flex items-center gap-1.5 font-semibold text-foreground">
                               <DollarSign className="w-4 h-4 text-[#00A676]" />
                               <span className="text-sm font-semibold">{formatPrice(payment.value, false)}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button 
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-primary/10 hover:text-primary"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-primary fill-primary">
-                                  Visualizar
-                                </TooltipContent>
-                              </Tooltip>
-                              
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button  
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-blue-500/10 hover:text-blue-600"
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                                  Editar
-                                </TooltipContent>
-                              </Tooltip>
-                              
-                              <Tooltip disableHoverableContent>
-                                <TooltipTrigger asChild>
-                                  <div>
-                                    <Button  
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive">
-                                  Excluir
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )})
-                    )}
-                  </TableBody>
-                </div>
-              </Table>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
 
             {/* Pagination or Summary */}
             {data.recentPayments.length > 0 && (
-              <div className="border-t border-border px-6 py-4 flex items-center justify-between bg-muted/20">
-                <p className="text-sm text-muted-foreground">
-                  Mostrando{' '}
-                  <span className="font-medium text-foreground">
-                    {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
-                  </span>{' '}
-                  de{' '}
-                  <span className="font-medium text-foreground">
-                    {total}
-                  </span>{' '}
-                  transações
-                </p>
+              <div className="border-t border-border bg-muted/20 px-4 py-4 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="hidden sm:inline">
+                      Mostrando{' '}
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      de{' '}
+                      <span className="font-medium text-foreground">
+                        {total}
+                      </span>{' '}
+                      transações
+                    </span>
+                    <span className="sm:hidden">
+                      <span className="font-medium text-foreground">
+                        {(page - 1) * limit + 1}-{Math.min(page * limit, total)}
+                      </span>{' '}
+                      /{' '}
+                      <span className="font-medium text-foreground">{total}</span>{' '}
+                      transações
+                    </span>
+                  </p>
 
-                <div className="flex items-center gap-2">
-                  <span className="px-3 text-sm">
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <span className="px-1 text-sm sm:px-3">
                     <Input 
                       type="number" 
                       min="1" 
@@ -565,24 +513,25 @@ export function RevenuePage() {
                       }}
                       className='w-fit'
                     /> / {totalPages}
-                  </span>
+                    </span>
 
-                  <Button
-                    className="bg-primary hover:bg-primary/90"
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage(Number(page) - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    className="bg-primary hover:bg-primary/90"
-                    size="sm"
-                    disabled={page === totalPages}
-                    onClick={() => setPage(Number(page) + 1)}
-                  >
-                    Próximo
-                  </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === 1}
+                      onClick={() => setPage(Number(page) - 1)}
+                    >
+                      <span className="sm:hidden">‹</span>
+                      <span className="hidden sm:inline">Anterior</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={page === totalPages}
+                      onClick={() => setPage(Number(page) + 1)}
+                    >
+                      <span className="sm:hidden">›</span>
+                      <span className="hidden sm:inline">Próximo</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

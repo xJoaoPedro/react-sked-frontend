@@ -6,8 +6,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "../components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "../components/ui/table";
-import { Info, Plus, Edit, Trash2, Search, Clock, Scissors, Sparkles, Hand, Flower2, DollarSign, User, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, } from "lucide-react";
+import { Info, Plus, Edit, Trash2, Search, Clock, Scissors, Sparkles, Hand, DollarSign, User, Heart, Brain, Stethoscope, Smile, Dumbbell, Star, Car, Wrench, Home, PawPrint, Briefcase, GraduationCap, MoreHorizontal, } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatLimitText, formatPrice } from "@/lib/parsers";
 import { api } from "@/lib/api";
@@ -146,18 +145,18 @@ export function ServicesPage() {
   };
 
   const renderCreateServiceForm = () => (
-    <div className="space-y-4 py-2">
-      <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="space-y-3 py-1 sm:space-y-4 sm:py-2">
+      <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-foreground">Informações do serviço</h3>
+          <h3 className="text-xs font-semibold text-foreground sm:text-sm">Informações do serviço</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             Defina nome, categoria e uma descrição curta para identificar o serviço.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome do Serviço</Label>
+            <Label htmlFor="name" className="text-xs sm:text-sm">Nome do Serviço</Label>
             <Input
               id="name"
               placeholder="Ex: Corte Masculino"
@@ -165,12 +164,13 @@ export function ServicesPage() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
+              className="h-9 text-xs sm:h-10 sm:text-sm"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="category">Categoria</Label>
+              <Label htmlFor="category" className="text-xs sm:text-sm">Categoria</Label>
               {selectedCategoryMeta && (
                 <Badge variant="outline" className="gap-1.5 text-xs">
                   <selectedCategoryMeta.icon className="w-3.5 h-3.5 text-primary" />
@@ -184,7 +184,7 @@ export function ServicesPage() {
                 setFormData({ ...formData, category: value })
               }
             >
-              <SelectTrigger id="category" className="data-[placeholder]:text-gray-500">
+              <SelectTrigger id="category" className="h-9 text-xs data-[placeholder]:text-gray-500 sm:h-10 sm:text-sm">
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent className="max-h-96">
@@ -205,7 +205,7 @@ export function ServicesPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
+            <Label htmlFor="description" className="text-xs sm:text-sm">Descrição</Label>
             <Input
               id="description"
               placeholder="Breve descrição do serviço"
@@ -216,29 +216,30 @@ export function ServicesPage() {
                   description: e.target.value,
                 })
               }
+              className="h-9 text-xs sm:h-10 sm:text-sm"
             />
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-foreground">Configuração comercial</h3>
+          <h3 className="text-xs font-semibold text-foreground sm:text-sm">Configuração comercial</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             Configure duração, preço, comissão e disponibilidade do serviço.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <div className="space-y-2">
-            <Label htmlFor="duration_minutes">Duração</Label>
+            <Label htmlFor="duration_minutes" className="text-xs sm:text-sm">Duração</Label>
             <Select
               value={formData.duration_minutes}
               onValueChange={(value) =>
                 setFormData({ ...formData, duration_minutes: value })
               }
             >
-              <SelectTrigger id="duration_minutes" className="data-[placeholder]:text-gray-500">
+              <SelectTrigger id="duration_minutes" className="h-9 text-xs data-[placeholder]:text-gray-500 sm:h-10 sm:text-sm">
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
@@ -259,14 +260,14 @@ export function ServicesPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
+            <Label htmlFor="status" className="text-xs sm:text-sm">Status</Label>
             <Select
               value={formData.status}
               onValueChange={(value: "ACTIVE" | "DISABLED") =>
                 setFormData({ ...formData, status: value })
               }
             >
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="h-9 text-xs sm:h-10 sm:text-sm">
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
@@ -277,7 +278,7 @@ export function ServicesPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Preço (R$)</Label>
+            <Label htmlFor="price" className="text-xs sm:text-sm">Preço (R$)</Label>
             <Input
               id="price"
               type="number"
@@ -287,11 +288,12 @@ export function ServicesPage() {
               onChange={(e) =>
                 setFormData({ ...formData, price: e.target.value })
               }
+              className="h-9 text-xs sm:h-10 sm:text-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="commission">Comissão (%)</Label>
+            <Label htmlFor="commission" className="text-xs sm:text-sm">Comissão (%)</Label>
             <Input
               id="commission"
               type="number"
@@ -306,6 +308,7 @@ export function ServicesPage() {
                   commission: Number(e.target.value),
                 })
               }
+              className="h-9 text-xs sm:h-10 sm:text-sm"
             />
           </div>
         </div>
@@ -321,7 +324,7 @@ export function ServicesPage() {
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         {/* Info Banner */}
-        <Card className="p-4 bg-primary/10 border-primary/20 m-6 mb-0">
+        <Card className="m-4 mb-0 border-primary/20 bg-primary/10 p-4 sm:m-6 sm:mb-0">
           <div className="flex items-start gap-3">
             <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
@@ -338,9 +341,9 @@ export function ServicesPage() {
         </Card>
 
         {/* Services Table */}
-        <Card className="overflow-hidden m-6 gap-0">
-          <div className="py-3 px-6 border-b border-border">
-            <div className="flex items-center justify-between">
+        <Card className="m-4 gap-0 overflow-hidden sm:m-6">
+          <div className="border-b border-border px-4 py-4 sm:px-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h3 className="font-semibold text-lg mb-1">
                   Lista de Serviços
@@ -349,14 +352,14 @@ export function ServicesPage() {
                   {data.length} serviços cadastrados • {data.filter(f => f.status === "ACTIVE").length} ativos • Média {formatPrice(data.reduce((acc, curr) => acc + Number(curr.price), 0) / data.length)}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="relative w-64">
+              <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <div className="relative min-w-0 flex-1 sm:max-w-64 md:max-w-72">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     placeholder="Buscar serviços..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                   />
                 </div>
 
@@ -368,26 +371,26 @@ export function ServicesPage() {
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar Serviço
+                    <Button className="bg-primary px-3 hover:bg-primary/90 sm:px-4">
+                      <Plus className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Adicionar Serviço</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="overflow-hidden p-0 sm:max-w-[560px]">
-                    <DialogHeader>
-                      <DialogTitle className="px-6 pt-6">Novo Serviço</DialogTitle>
-                      <DialogDescription className="px-6">
+                  <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0 sm:max-w-[560px]">
+                    <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+                      <DialogTitle className="text-lg sm:text-xl">Novo Serviço</DialogTitle>
+                      <DialogDescription className="text-xs sm:text-sm">
                         Preencha os dados abaixo para cadastrar o serviço.
                       </DialogDescription>
                     </DialogHeader>
 
-                    <div className="px-6 pb-6">
+                    <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 scrollbar-custom">
                       {renderCreateServiceForm()}
                     </div>
 
-                    <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
+                    <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
                       <Button
-                        className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
+                        className="h-9 text-xs bg-transparent text-foreground hover:bg-destructive hover:text-white sm:h-10 sm:text-sm"
                         onClick={() => {
                           setIsAddDialogOpen(false);
                           resetForm();
@@ -396,7 +399,7 @@ export function ServicesPage() {
                         Cancelar
                       </Button>
                       <Button
-                        className="bg-primary hover:bg-primary/90"
+                        className="h-9 text-xs bg-primary hover:bg-primary/90 sm:h-10 sm:text-sm"
                         onClick={handleAddService}
                         disabled={!formData.name || !formData.category || !formData.duration_minutes || !formData.price || isNaN(formData.commission)}
                       >
@@ -409,38 +412,36 @@ export function ServicesPage() {
             </div>
           </div>
 
-          <div>
-            <Table className="w-full">
-              <TableHeader className="table table-fixed z-10">
-                <TableRow className="table w-full table-fixed bg-muted/50">
-                  <TableHead className="font-semibold text-foreground">Serviço</TableHead>
-                  <TableHead className="font-semibold text-foreground">Categoria</TableHead>
-                  <TableHead className="font-semibold text-foreground">Duração</TableHead>
-                  <TableHead className="font-semibold text-foreground">Preço</TableHead>
-                  <TableHead className="font-semibold text-foreground">Comissão</TableHead>
-                  <TableHead className="font-semibold text-foreground">Status</TableHead>
-                  <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              
-              <div className="h-[600px] flex-1 flex overflow-y-auto">
-                <TableBody className="block overflow-y-auto">
-                  {filteredServices.length === 0 ? (
-                    <TableRow className='table table-fixed w-full h-full'>
-                      <TableCell colSpan={18} className="w-32 text-center py-16">
-                        <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
-                          <Wrench className="w-12 h-12 opacity-20" />
-                          <p className="font-medium">Nenhum serviço cadastrado.</p>
-                          <Button onClick={() => setIsAddDialogOpen(true)}>Criar serviço</Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (filteredServices.map((service) => {
-                    const Icon = serviceCategories[service.category].icon;
-                      
-                    return (
-                    <TableRow key={service.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                      <TableCell className="font-medium">
+          <div className="h-[600px] overflow-auto">
+            <table className="w-full caption-bottom text-sm">
+              <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
+                <tr className="border-b transition-colors">
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Serviço</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Categoria</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Duração</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Preço</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Comissão</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Status</th>
+                  <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="[&_tr:last-child]:border-0">
+                {filteredServices.length === 0 ? (
+                  <tr className="border-b transition-colors">
+                    <td colSpan={7} className="w-32 p-2 align-middle whitespace-nowrap py-16 text-center">
+                      <div className="flex h-80 w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <Wrench className="h-12 w-12 opacity-20" />
+                        <p className="font-medium">Nenhum serviço cadastrado.</p>
+                        <Button onClick={() => setIsAddDialogOpen(true)}>Criar serviço</Button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (filteredServices.map((service) => {
+                  const Icon = serviceCategories[service.category].icon;
+                    
+                  return (
+                  <tr key={service.id} className="border-b transition-colors hover:bg-muted/30">
+                    <td className="p-2 align-middle whitespace-nowrap font-medium">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <Icon className="text-primary" />
@@ -452,31 +453,31 @@ export function ServicesPage() {
                             </div> */}
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap">
                         <Badge variant="outline" className="text-xs">
                           {serviceCategories[service.category].label}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap">
                         <div className="flex items-center gap-1 text-muted-foreground">
                           <Clock className="w-4 h-4" />
                           <span>{service.duration_minutes} min</span>
                         </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap font-medium">
                         <div className="flex items-center gap-1.5 font-semibold text-foreground">
                           <DollarSign className="w-4 h-4 text-[#00A676]" />
                           <span className="text-sm font-semibold">{formatPrice(service.price, false)}</span>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap text-muted-foreground">
                         {service.commission}%
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap">
                         {getStatusBadge(service.status)}
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap">
                         <div className="flex gap-2">
                           <Dialog 
                             open={editingService?.id === service.id}
@@ -501,180 +502,25 @@ export function ServicesPage() {
                                   </DialogTrigger>
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
-                                Editar
-                              </TooltipContent>
-                            </Tooltip>
-                            <DialogContent className="sm:max-w-[600px]">
-                              <DialogHeader>
-                                <DialogTitle>Editar Serviço</DialogTitle>
-                                <DialogDescription>
-                                  Atualize as informações do serviço
+                                  <TooltipContent side="top" sideOffset={4} className="bg-blue-500 fill-blue-500">
+                                    Editar
+                                  </TooltipContent>
+                                </Tooltip>
+                            <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0 sm:max-w-[560px]">
+                              <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+                                <DialogTitle className="text-lg sm:text-xl">Editar Serviço</DialogTitle>
+                                <DialogDescription className="text-xs sm:text-sm">
+                                  Atualize as informações do serviço.
                                 </DialogDescription>
                               </DialogHeader>
 
-                              <div className="grid grid-cols-2 gap-4 py-4">
-                                <div className="col-span-2 space-y-2">
-                                  <Label htmlFor="edit-name">
-                                    Nome do Serviço
-                                  </Label>
-                                  <Input
-                                    id="edit-name"
-                                    value={formData.name}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        name: e.target.value,
-                                      })
-                                    }
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label>Categoria</Label>
-                                  <Select
-                                    value={formData.category}
-                                    onValueChange={(value) =>
-                                      setFormData({ ...formData, category: value })
-                                    }
-                                  >
-                                    <SelectTrigger id="duration">
-                                      <SelectValue placeholder="Selecione" />
-                                    </SelectTrigger>
-                                    <SelectContent className="max-h-96">
-                                      {Object.entries(serviceCategories).map(([value, meta]) => {
-                                        const Icon = meta.icon;
-
-                                        return (
-                                        <SelectItem key={value} value={value} className="flex items-center gap-2 group">
-                                          <div className="flex items-center gap-2">
-                                            <Icon className="text-primary group-hover:text-white" size={16} />
-                                            {meta.label}
-                                          </div>
-                                        </SelectItem>
-                                      )
-                                      })}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-duration">
-                                    Duração (minutos)
-                                  </Label>
-                                  <Select
-                                    value={String(formData.duration_minutes)}
-                                    onValueChange={(value) =>
-                                      setFormData({
-                                        ...formData,
-                                        duration_minutes: value,
-                                      })
-                                    }
-                                  >
-                                    <SelectTrigger id="edit-duration">
-                                      <SelectValue placeholder="Selecione" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="15">15 min</SelectItem>
-                                      <SelectItem value="30">30 min</SelectItem>
-                                      <SelectItem value="45">45 min</SelectItem>
-                                      <SelectItem value="60">1h</SelectItem>
-                                      <SelectItem value="75">1h 15min</SelectItem>
-                                      <SelectItem value="90">1h 30min</SelectItem>
-                                      <SelectItem value="105">
-                                        1h 45min
-                                      </SelectItem>
-                                      <SelectItem value="120">2h</SelectItem>
-                                      <SelectItem value="135">
-                                        2h 15min
-                                      </SelectItem>
-                                      <SelectItem value="150">
-                                        2h 30min
-                                      </SelectItem>
-                                      <SelectItem value="165">
-                                        2h 45min
-                                      </SelectItem>
-                                      <SelectItem value="180">3h</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-price">Preço (R$)</Label>
-                                  <Input
-                                    id="edit-price"
-                                    type="number"
-                                    step="0.01"
-                                    value={formData.price}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        price: e.target.value,
-                                      })
-                                    }
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-commission">Comissão (%)</Label>
-                                  <Input
-                                    id="edit-commission"
-                                    type="number"
-                                    step="0.01"
-                                    value={formData.commission}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        commission: Number(e.target.value),
-                                      })
-                                    }
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-status">Status</Label>
-                                  <Select
-                                    value={formData.status}
-                                    onValueChange={(
-                                      value: "ACTIVE" | "DISABLED",
-                                    ) =>
-                                      setFormData({ ...formData, status: value })
-                                    }
-                                  >
-                                    <SelectTrigger id="edit-status">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="ACTIVE">
-                                        Ativo
-                                      </SelectItem>
-                                      <SelectItem value="DISABLED">
-                                        Inativo
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                <div className="col-span-2 space-y-2">
-                                  <Label htmlFor="edit-description">
-                                    Descrição
-                                  </Label>
-                                  <Input
-                                    id="edit-description"
-                                    value={formData.description ?? ''}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        description: e.target.value,
-                                      })
-                                    }
-                                  />
-                                </div>
+                              <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 scrollbar-custom">
+                                {renderCreateServiceForm()}
                               </div>
 
-                              <DialogFooter>
+                              <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
                                 <Button
-                                  className="bg-transparent text-foreground hover:bg-destructive hover:text-white"
+                                  className="h-9 text-xs bg-transparent text-foreground hover:bg-destructive hover:text-white sm:h-10 sm:text-sm"
                                   onClick={() => {
                                     setEditingService(null);
                                     resetForm();
@@ -683,7 +529,7 @@ export function ServicesPage() {
                                   Cancelar
                                 </Button>
                                 <Button
-                                  className="bg-primary hover:bg-primary/90"
+                                  className="h-9 text-xs bg-primary hover:bg-primary/90 sm:h-10 sm:text-sm"
                                   onClick={() => handleEditService(service.id)}
                                 > 
                                   Salvar Alterações
@@ -712,17 +558,17 @@ export function ServicesPage() {
                               </TooltipContent>
                             </Tooltip>
 
-                            <PopoverContent side="left">
-                              <p className="text-sm mb-2">Tem certeza que deseja excluir este serviço?</p>
+                            <PopoverContent side="left" className="w-64 p-3 sm:w-80 sm:p-4">
+                              <p className="mb-2 text-xs sm:text-sm">Tem certeza que deseja excluir este serviço?</p>
 
                               <div className="flex justify-end gap-2">
                                 <PopoverClose asChild>
-                                  <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">Cancelar</Button>
+                                  <Button size="sm" className="h-8 px-2 text-xs bg-transparent text-foreground hover:bg-transparent hover:text-destructive sm:h-9 sm:px-3 sm:text-sm">Cancelar</Button>
                                 </PopoverClose>
                                 
                                 <Button
                                   size="sm"
-                                  className="text-sm bg-destructive text-white hover:bg-destructive/60"
+                                  className="h-8 px-2 text-xs bg-destructive text-white hover:bg-destructive/60 sm:h-9 sm:px-3 sm:text-sm"
                                   onClick={() => handleDeleteService(service.id)}
                                 >
                                   Confirmar
@@ -731,13 +577,12 @@ export function ServicesPage() {
                             </PopoverContent>
                           </Popover>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   )} 
                 ))}
-                </TableBody>
-              </div>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </Card>
       </div>

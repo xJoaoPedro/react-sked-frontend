@@ -254,17 +254,17 @@ export function ProfessionalsPage() {
 
   const renderProfessionalDetailsForm = () => (
     <div className="h-full">
-      <div className="h-full rounded-2xl border border-border bg-card p-4">
+      <div className="h-full rounded-2xl border border-border bg-card p-2.5 sm:p-4">
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-foreground">Informações do profissional</h3>
+          <h3 className="text-xs font-semibold text-foreground sm:text-sm">Informações do profissional</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             Preencha os dados principais e vincule os serviços atendidos por esse profissional.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-2.5 sm:space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="professional-name">Nome completo</Label>
+            <Label htmlFor="professional-name" className="text-[11px] sm:text-sm">Nome completo</Label>
             <Input
               id="professional-name"
               placeholder="Ex: João Silva"
@@ -272,16 +272,17 @@ export function ProfessionalsPage() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
+              className="h-8 text-[11px] sm:h-10 sm:text-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="professional-services">Serviços</Label>
+            <Label htmlFor="professional-services" className="text-[11px] sm:text-sm">Serviços</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   id="professional-services"
-                  className={`w-full justify-start border border-input ${
+                  className={`h-8 w-full justify-start border border-input px-2.5 text-[11px] sm:h-10 sm:px-3 sm:text-sm ${
                     formData.services.length > 0
                       ? 'bg-gray-200/50 text-black hover:bg-gray-200'
                       : 'bg-gray-200/50 text-gray-500 hover:bg-gray-200'
@@ -315,7 +316,7 @@ export function ProfessionalsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="professional-email">E-mail</Label>
+            <Label htmlFor="professional-email" className="text-[11px] sm:text-sm">E-mail</Label>
             <Input
               id="professional-email"
               type="email"
@@ -324,11 +325,12 @@ export function ProfessionalsPage() {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
+              className="h-8 text-[11px] sm:h-10 sm:text-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="professional-phone">Telefone</Label>
+            <Label htmlFor="professional-phone" className="text-[11px] sm:text-sm">Telefone</Label>
             <Input
               id="professional-phone"
               type="tel"
@@ -336,6 +338,7 @@ export function ProfessionalsPage() {
               placeholder="(11) 99999-9999"
               value={formatPhone(formData.phone)}
               onChange={(e) => handlePhoneChange(e.target.value)}
+              className="h-8 text-[11px] sm:h-10 sm:text-sm"
             />
           </div>
         </div>
@@ -344,30 +347,30 @@ export function ProfessionalsPage() {
   );
 
   const renderProfessionalScheduleForm = () => (
-    <div className="h-full rounded-2xl border border-border bg-card p-4">
+    <div className="h-full rounded-2xl border border-border bg-card p-2.5 sm:p-4">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-foreground">Agenda</h3>
+        <h3 className="text-xs font-semibold text-foreground sm:text-sm">Agenda</h3>
         <p className="mt-1 text-xs text-muted-foreground">
           Defina os horários disponíveis por dia da semana.
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="w-[140px]">Dia</TableHead>
+              <TableHead className="w-[108px] text-[11px] sm:w-[140px] sm:text-sm">Dia</TableHead>
               <TableHead>Horário</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {weekDays.map(day => (
               <TableRow key={day.id}>
-                <TableCell className="font-medium">
+                <TableCell className="text-[11px] font-medium sm:text-sm">
                   {day.label}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex min-w-[150px] items-center justify-end gap-1.5 sm:min-w-0 sm:gap-2">
                     <DatePicker
                       selected={timeToDate(formatTime(getOpening(day.id)?.start_time))}
                       onChange={(date) =>
@@ -385,9 +388,9 @@ export function ProfessionalsPage() {
                         timeToDate(formatTime(getOpening(day.id)?.end_time)) ||
                         new Date(2000, 0, 1, 23, 59, 0)
                       }
-                      className="w-20 rounded-md border border-primary p-1"
+                      className="w-16 rounded-md border border-primary p-1 text-[11px] sm:w-20 sm:text-sm"
                     />
-                    <span className="text-xs text-muted-foreground">até</span>
+                    <span className="text-[11px] text-muted-foreground sm:text-xs">até</span>
                     <DatePicker
                       selected={timeToDate(formatTime(getOpening(day.id)?.end_time))}
                       onChange={(date) =>
@@ -405,7 +408,7 @@ export function ProfessionalsPage() {
                         new Date(2000, 0, 1, 0, 0, 0)
                       }
                       maxTime={new Date(2000, 0, 1, 23, 59, 0)}
-                      className="w-20 rounded-md border border-primary p-1"
+                      className="w-16 rounded-md border border-primary p-1 text-[11px] sm:w-20 sm:text-sm"
                     />
                   </div>
                 </TableCell>
@@ -425,9 +428,9 @@ export function ProfessionalsPage() {
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         {/* Professionals Table */}
-        <Card className="overflow-hidden m-6 gap-0">
-          <div className="py-3 px-6 border-b border-border">
-            <div className="flex items-center justify-between">
+        <Card className="m-4 gap-0 overflow-hidden sm:m-6">
+          <div className="border-b border-border px-4 py-4 sm:px-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h3 className="font-semibold text-lg mb-1">Profissionais</h3>
                 <p className="text-sm text-muted-foreground">
@@ -435,14 +438,14 @@ export function ProfessionalsPage() {
                 </p>
               </div>
 
-              <div className='flex gap-3 items-center'>
-                <div className="relative w-64">
+              <div className='flex flex-wrap items-center justify-end gap-2 sm:gap-3'>
+                <div className="relative min-w-0 flex-1 sm:max-w-64 md:max-w-72">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     placeholder="Buscar profissionais..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                   />
                 </div>
 
@@ -451,27 +454,27 @@ export function ProfessionalsPage() {
                   if (!open) resetForm();
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Cadastrar profissional
+                    <Button className="bg-primary px-3 hover:bg-primary/90 sm:px-4">
+                      <Plus className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Cadastrar profissional</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-[960px]">
-                    <DialogHeader>
-                      <DialogTitle className="px-6 pt-6">Novo Profissional</DialogTitle>
-                      <DialogDescription className="px-6">
+                  <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0 sm:max-w-[960px]">
+                    <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+                      <DialogTitle className="text-lg sm:text-xl">Novo Profissional</DialogTitle>
+                      <DialogDescription className="text-xs sm:text-sm">
                         Cadastre os dados do profissional e configure sua agenda de atendimento.
                       </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid max-h-[calc(90vh-140px)] gap-4 overflow-y-auto px-6 pb-6 md:auto-rows-fr md:grid-cols-2 md:items-stretch">
+                    <div className="grid min-h-0 flex-1 gap-3 overflow-y-auto px-4 py-4 sm:gap-4 sm:px-6 sm:py-5 lg:auto-rows-fr lg:grid-cols-2 lg:items-stretch scrollbar-custom">
                       {renderProfessionalDetailsForm()}
                       {renderProfessionalScheduleForm()}
                     </div>
 
-                    <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
+                    <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
                       <Button
-                        className='bg-transparent text-foreground hover:bg-destructive hover:text-white'
+                        className='h-9 text-xs bg-transparent text-foreground hover:bg-destructive hover:text-white sm:h-10 sm:text-sm'
                         onClick={() => {
                           setIsAddDialogOpen(false);
                           resetForm();
@@ -480,7 +483,7 @@ export function ProfessionalsPage() {
                         Cancelar
                       </Button>
                       <Button
-                        className="bg-primary hover:bg-primary/90"
+                        className="h-9 text-xs bg-primary hover:bg-primary/90 sm:h-10 sm:text-sm"
                         onClick={handleAddProfessional}
                         disabled={!formData.name || !formData.email || !formData.phone}
                       >
@@ -493,31 +496,30 @@ export function ProfessionalsPage() {
             </div>
           </div>
 
-          <div>
-            <Table className="w-full">
-              <TableHeader className="table table-fixed z-10">
-                <TableRow className="table w-full table-fixed bg-muted/50">
-                  <TableHead className="font-semibold text-foreground">Nome</TableHead>
-                  <TableHead className="font-semibold text-foreground">Email</TableHead>
-                  <TableHead className="font-semibold text-foreground">Telefone</TableHead>
-                  <TableHead className="font-semibold text-foreground">Status</TableHead>
-                  <TableHead className="font-semibold text-foreground ps-3">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <div className="h-[600px] flex-1 flex overflow-y-auto">
-                <TableBody className="block overflow-y-auto">
-                  {filteredProfessionals.length === 0 ? (
-                    <TableRow className='table table-fixed w-full h-full'>
-                      <TableCell colSpan={18} className="w-32 text-center py-16">
-                        <div className="w-full h-96 flex flex-col justify-center items-center gap-2 text-muted-foreground">
-                          <UserX className="w-12 h-12 opacity-20" />
-                          <p className="font-medium">Nenhum funcionário encontrado.</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (filteredProfessionals.map((professional) => (
-                    <TableRow key={professional.id} className="table w-full table-fixed hover:bg-muted/30 transition-colors">
-                      <TableCell className="font-medium py-3">
+          <div className="h-[600px] overflow-auto">
+            <table className="w-full caption-bottom text-sm">
+              <thead className="sticky top-0 z-10 bg-muted [&_tr]:border-b">
+                <tr className="border-b transition-colors">
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Nome</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Email</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Telefone</th>
+                  <th className="h-10 px-2 text-left align-middle font-semibold whitespace-nowrap text-foreground">Status</th>
+                  <th className="h-10 px-2 ps-3 text-left align-middle font-semibold whitespace-nowrap text-foreground">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="[&_tr:last-child]:border-0">
+                {filteredProfessionals.length === 0 ? (
+                  <tr className="border-b transition-colors">
+                    <td colSpan={5} className="w-32 p-2 py-16 text-center align-middle whitespace-nowrap">
+                      <div className="flex h-80 w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <UserX className="h-12 w-12 opacity-20" />
+                        <p className="font-medium">Nenhum funcionário encontrado.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (filteredProfessionals.map((professional) => (
+                  <tr key={professional.id} className="border-b transition-colors hover:bg-muted/30">
+                    <td className="py-3 p-2 align-middle whitespace-nowrap font-medium">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
                             <User className="w-4 h-4 text-muted-foreground" />
@@ -526,13 +528,13 @@ export function ProfessionalsPage() {
                             <div className="font-medium">{professional.name}</div>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>{professional.email}</TableCell>
-                      <TableCell>{formatPhone(professional.phone)}</TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap">{professional.email}</td>
+                      <td className="p-2 align-middle whitespace-nowrap">{formatPhone(professional.phone)}</td>
+                      <td className="p-2 align-middle whitespace-nowrap">
                         {getStatusBadge(professional.status)}
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-2 align-middle whitespace-nowrap">
                         <div className="flex gap-2">
                           <Dialog 
                             open={editingProfessional?.id === professional.id}
@@ -561,22 +563,22 @@ export function ProfessionalsPage() {
                                 Editar
                               </TooltipContent>
                             </Tooltip>
-                            <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-[960px]">
-                              <DialogHeader>
-                                <DialogTitle className="px-6 pt-6">Editar Profissional</DialogTitle>
-                                <DialogDescription className="px-6">
+                            <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0 sm:max-w-[960px]">
+                              <DialogHeader className="border-b border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+                                <DialogTitle className="text-lg sm:text-xl">Editar Profissional</DialogTitle>
+                                <DialogDescription className="text-xs sm:text-sm">
                                   Atualize os dados do profissional e ajuste sua agenda de atendimento.
                                 </DialogDescription>
                               </DialogHeader>
 
-                              <div className="grid max-h-[calc(90vh-140px)] gap-4 overflow-y-auto px-6 pb-6 md:auto-rows-fr md:grid-cols-2 md:items-stretch">
+                              <div className="grid min-h-0 flex-1 gap-3 overflow-y-auto px-4 py-4 sm:gap-4 sm:px-6 sm:py-5 lg:auto-rows-fr lg:grid-cols-2 lg:items-stretch scrollbar-custom">
                                 {renderProfessionalDetailsForm()}
                                 {renderProfessionalScheduleForm()}
                               </div>
 
-                              <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-6 py-4 sm:justify-end">
+                              <DialogFooter className="mx-0 mb-0 border-t border-border bg-muted/20 px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
                                 <Button
-                                  className='bg-transparent text-foreground hover:bg-destructive hover:text-white'
+                                  className='h-9 text-xs bg-transparent text-foreground hover:bg-destructive hover:text-white sm:h-10 sm:text-sm'
                                   onClick={() => {
                                     setEditingProfessional(null);
                                     resetForm();
@@ -585,7 +587,7 @@ export function ProfessionalsPage() {
                                   Cancelar
                                 </Button>
                                 <Button
-                                  className="bg-primary hover:bg-primary/90"
+                                  className="h-9 text-xs bg-primary hover:bg-primary/90 sm:h-10 sm:text-sm"
                                   onClick={() => handleEditProfessional(professional.id)}
                                 >
                                   Salvar Alterações
@@ -614,17 +616,17 @@ export function ProfessionalsPage() {
                               </TooltipContent>
                             </Tooltip>
 
-                            <PopoverContent side="left">
-                              <p className="text-sm mb-2">Tem certeza que deseja excluir este serviço?</p>
+                            <PopoverContent side="left" className="w-64 p-3 sm:w-80 sm:p-4">
+                              <p className="mb-2 text-xs sm:text-sm">Tem certeza que deseja excluir este profissional?</p>
 
                               <div className="flex justify-end gap-2">
                                 <PopoverClose asChild>
-                                  <Button size="sm" className="text-sm bg-transparent text-foreground hover:bg-transparent hover:text-destructive">Cancelar</Button>
+                                  <Button size="sm" className="h-8 px-2 text-xs bg-transparent text-foreground hover:bg-transparent hover:text-destructive sm:h-9 sm:px-3 sm:text-sm">Cancelar</Button>
                                 </PopoverClose>
                                 
                                 <Button
                                   size="sm"
-                                  className="text-sm bg-destructive text-white hover:bg-destructive/60"
+                                  className="h-8 px-2 text-xs bg-destructive text-white hover:bg-destructive/60 sm:h-9 sm:px-3 sm:text-sm"
                                   onClick={() => handleDeleteProfessional(professional.id)}
                                 >
                                   Confirmar
@@ -633,12 +635,11 @@ export function ProfessionalsPage() {
                             </PopoverContent>
                           </Popover>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   )))}
-                </TableBody>
-              </div>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </Card>
       </div>

@@ -32,7 +32,14 @@ export function AppointmentList({appointments}: AppointmentProps) {
       };
       
       const config = statusConfig[status];
-      return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
+      return (
+        <Badge
+          variant="outline"
+          className={`${config.className} max-w-full whitespace-nowrap text-xs sm:text-sm`}
+        >
+          {config.label}
+        </Badge>
+      );
     };
   return (
     <Card className="p-6">
@@ -44,25 +51,33 @@ export function AppointmentList({appointments}: AppointmentProps) {
         {appointments.length > 0 ? appointments.map((appointment) => (
           <div 
             key={appointment.id}
-            className="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+            className="rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
           >
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <User className="w-6 h-6 text-primary" />
+            <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{appointment.clientName}</p>
+                    <p className="truncate text-sm text-muted-foreground">{appointment.service}</p>
+                  </div>
+
+                  <div className="self-start sm:self-auto">
+                    {getStatusBadge(appointment.status)}
+                  </div>
+                </div>
+
+                <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm leading-snug break-words">
+                    {formatDate(appointment.dateTime)}, {formatTime(appointment.dateTime)}
+                  </span>
+                </div>
+              </div>
             </div>
-            
-            <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{appointment.clientName}</p>
-              <p className="text-sm text-muted-foreground truncate">{appointment.service}</p>
-            </div>
-            
-            <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm">
-                {formatDate(appointment.dateTime)}, {formatTime(appointment.dateTime)}
-              </span>
-            </div>
-            
-            {getStatusBadge(appointment.status)}
           </div>
         )) : (
           <Empty>

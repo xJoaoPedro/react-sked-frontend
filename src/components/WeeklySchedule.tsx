@@ -42,36 +42,40 @@ export function WeeklySchedule({ weekStats }: DashboardProps) {
   const maxAppointments = Math.max(...weekDays.map(d => d.appointments), 0);
 
   return (
-    <Card className="p-6 gap-0">
-      <h3 className="text-xl font-semibold mb-6">Visão Semanal</h3>
+    <Card className="gap-0 p-4 sm:p-6">
+      <h3 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">Visão Semanal</h3>
       
-      <div className="grid grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-7">
         {weekDays.map((day, index) => (
           <div 
             key={index}
-            className={`text-center p-4 rounded-lg border-2 transition-all ${
+            className={`rounded-lg border-2 p-3 transition-all sm:p-4 sm:text-center ${
               day.isToday 
                 ? 'border-primary bg-primary/5' 
                 : 'border-border hover:border-primary/50'
             }`}
           >
-            <p className="text-sm text-muted-foreground mb-1">{day.day}</p>
-            <p className={`text-2xl font-semibold mb-3 ${
-              day.isToday ? 'text-primary' : 'text-foreground'
-            }`}>
-              {day.date}
-            </p>
-            
-            <div className="space-y-1">
-              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: day.appointments === 0 || maxAppointments === 0 ? '0' : `${(day.appointments / maxAppointments) * 100}%` }}
-                />
+            <div className="flex items-center gap-3 sm:block">
+              <div className="min-w-0 flex-1 sm:mb-3">
+                <p className="mb-1 text-xs text-muted-foreground sm:text-sm">{day.day}</p>
+                <p className={`text-xl font-semibold sm:text-2xl ${
+                  day.isToday ? 'text-primary' : 'text-foreground'
+                }`}>
+                  {day.date}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {day.appointments} agend.
-              </p>
+
+              <div className="min-w-0 flex-[1.3] space-y-1 sm:flex-none">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div 
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: day.appointments === 0 || maxAppointments === 0 ? '0' : `${(day.appointments / maxAppointments) * 100}%` }}
+                  />
+                </div>
+                <p className="text-right text-[11px] text-muted-foreground sm:mt-2 sm:text-center sm:text-xs">
+                  {day.appointments} agend.
+                </p>
+              </div>
             </div>
           </div>
         ))}

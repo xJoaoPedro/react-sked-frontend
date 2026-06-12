@@ -5,7 +5,6 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Building2, CreditCard, Save, Mail, Phone, Globe, DollarSign, Check, Baby, Wifi, Car, Puzzle, Accessibility, PawPrint, User, } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingPage } from "./LoadingPage";
 import { formatPhone } from "@/lib/parsers";
 import { api } from "@/lib/api";
@@ -194,9 +193,9 @@ export function SettingsPage() {
     return (
       <div className="flex flex-col h-full overflow-hidden">
         <div className="flex-1 overflow-y-auto scrollbar-custom">
-          <div className="p-6 space-y-6">
+          <div className="space-y-6 p-4 sm:p-6">
             <Card className="gap-0">
-              <div className="px-6 py-4">
+              <div className="px-4 py-4 sm:px-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <User className="w-5 h-5 text-primary" />
@@ -210,10 +209,10 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                   <div className="col-span-2 space-y-2">
-                    <Label htmlFor="user-name">Nome</Label>
+                    <Label htmlFor="user-name" className="text-xs sm:text-sm">Nome</Label>
                     <Input
                       id="user-name"
                       value={data.name ?? ""}
@@ -221,11 +220,12 @@ export function SettingsPage() {
                         setDataState((prev) => ({ ...prev, name: e.target.value }))
                       }
                       placeholder="Seu nome"
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>
 
                   <div className="col-span-2 space-y-2">
-                    <Label htmlFor="user-email">E-mail</Label>
+                    <Label htmlFor="user-email" className="text-xs sm:text-sm">E-mail</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -235,13 +235,13 @@ export function SettingsPage() {
                         onChange={(e) =>
                           setDataState((prev) => ({ ...prev, email: e.target.value }))
                         }
-                        className="pl-10"
+                        className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="col-span-2 space-y-2">
-                    <Label htmlFor="user-phone">Telefone</Label>
+                    <Label htmlFor="user-phone" className="text-xs sm:text-sm">Telefone</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -252,7 +252,7 @@ export function SettingsPage() {
                         placeholder="(11) 99999-9999"
                         value={formatPhone(data.phone ?? "")}
                         onChange={(e) => handlePhoneChange(e.target.value)}
-                        className="pl-10"
+                        className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                       />
                     </div>
                   </div>
@@ -262,14 +262,14 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <div className="border-t bg-white p-4 flex justify-between items-center">
+        <div className="flex flex-col gap-3 border-t bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-muted-foreground">
             Atualize apenas suas informações pessoais.
           </div>
           <Button
             onClick={handleSaveData}
             disabled={isSaving || !hasPendingChanges}
-            className="min-w-[160px]"
+            className="h-9 w-full min-w-[160px] text-xs sm:h-10 sm:w-auto sm:text-sm"
           >
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? "Salvando..." : "Salvar Alterações"}
@@ -282,10 +282,10 @@ export function SettingsPage() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto scrollbar-custom">
-        <div className="p-6 space-y-6">
+        <div className="space-y-6 p-4 pb-24 sm:p-6 sm:pb-6">
           {/* Company Profile */}
           <Card className="gap-0">
-            <div className="px-6 py-4">
+            <div className="px-4 py-4 sm:px-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Building2 className="w-5 h-5 text-primary" />
@@ -299,11 +299,11 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="p-6">
-                <div className="flex gap-6 mb-6">
+            <div className="p-4 sm:p-6">
+                <div className="mb-6 flex flex-col gap-6 lg:flex-row">
                 {/* Company Photo */}
-                <div className="flex-shrink-0">
-                  <div className="w-32 h-32 bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-border rounded-lg">
+                <div className="flex flex-col items-center self-center lg:self-start lg:items-start">
+                  <div className="h-28 w-28 overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted sm:h-32 sm:w-32 flex items-center justify-center">
                       {profilePhoto ? (
                         <img
                           src={profilePhoto}
@@ -325,9 +325,9 @@ export function SettingsPage() {
                 </div>
 
                 {/* Company Info */}
-                <div className="flex-1 grid grid-cols-2 gap-4">
-                  <div className="col-span-2 space-y-2">
-                    <Label htmlFor="company-name">Nome da empresa</Label>
+                <div className="grid flex-1 grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+                  <div className="space-y-2 lg:col-span-2">
+                    <Label htmlFor="company-name" className="text-xs sm:text-sm">Nome da empresa</Label>
                     <Input
                       id="company-name"
                       value={data.fantasy_name}
@@ -335,11 +335,12 @@ export function SettingsPage() {
                         setDataState((prev) => ({ ...prev, fantasy_name: e.target.value }))
                       }
                       placeholder="Nome do seu negócio"
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="company-email">E-mail</Label>
+                    <Label htmlFor="company-email" className="text-xs sm:text-sm">E-mail</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -349,13 +350,13 @@ export function SettingsPage() {
                         onChange={(e) =>
                           setDataState((prev) => ({ ...prev, email: e.target.value }))
                         }
-                        className="pl-10"
+                        className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="company-phone">Telefone</Label>
+                    <Label htmlFor="company-phone" className="text-xs sm:text-sm">Telefone</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -366,7 +367,7 @@ export function SettingsPage() {
                         placeholder="(11) 99999-9999"
                         value={formatPhone(data.phone ?? "")}
                         onChange={(e) => handlePhoneChange(e.target.value)}
-                        className="pl-10"
+                        className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                       />
                     </div>
                     <p className="text-xs text-amber-700">
@@ -374,8 +375,8 @@ export function SettingsPage() {
                     </p>
                   </div>
 
-                  <div className="col-span-2 space-y-2">
-                    <Label htmlFor="company-website">Website (opcional)</Label>
+                  <div className="space-y-2 lg:col-span-2">
+                    <Label htmlFor="company-website" className="text-xs sm:text-sm">Website (opcional)</Label>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -384,13 +385,13 @@ export function SettingsPage() {
                         onChange={(e) =>
                           setDataState((prev) => ({ ...prev, website: e.target.value }))
                         }
-                        className="pl-10"
+                        className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="low-stock-threshold">Limite de estoque baixo</Label>
+                  <div className="space-y-2 lg:col-span-2">
+                    <Label htmlFor="low-stock-threshold" className="text-xs sm:text-sm">Limite de estoque baixo</Label>
                     <Input
                       id="low-stock-threshold"
                       type="number"
@@ -403,6 +404,7 @@ export function SettingsPage() {
                         }))
                       }
                       placeholder="Ex.: 2"
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>
                 </div>
@@ -410,11 +412,11 @@ export function SettingsPage() {
 
             </div>
 
-            <div className="px-6 pb-6">
+            <div className="px-4 pb-4 sm:px-6 sm:pb-6">
               <div className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h4 className="font-semibold text-foreground">WhatsApp para mensagens automáticas</h4>
                       <span
                         className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -435,8 +437,8 @@ export function SettingsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3 self-start md:self-center">
-                    <div className="text-right">
+                  <div className="flex w-full items-center justify-between gap-3 self-start rounded-xl bg-muted/30 p-3 lg:w-auto lg:justify-start lg:self-center lg:bg-transparent lg:p-0">
+                    <div className="text-left lg:text-right">
                       <p className="text-sm font-medium text-foreground">Mensagens automáticas</p>
                       <p className="text-xs text-muted-foreground">
                         {data?.evolution?.autoMessagesEnabled ? 'Ligadas' : 'Desligadas'}
@@ -463,7 +465,7 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="px-6 py-4  border-t border-border">
+            <div className="border-t border-border px-4 py-4 sm:px-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <CreditCard className="w-5 h-5 text-primary" />
@@ -476,11 +478,11 @@ export function SettingsPage() {
                 </div>
               </div>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="space-y-6 p-4 sm:p-6">
               <div>
                 <p className="font-medium mb-3">Formas de pagamento aceitas</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <DollarSign className="w-5 h-5 text-primary" />
                       <span className="font-medium">Dinheiro</span>
@@ -493,7 +495,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <CreditCard className="w-5 h-5 text-primary" />
                       <span className="font-medium">Cartão de Débito</span>
@@ -506,7 +508,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <CreditCard className="w-5 h-5 text-primary" />
                       <span className="font-medium">Cartão de Crédito</span>
@@ -519,7 +521,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <DollarSign className="w-5 h-5 text-primary" />
                       <span className="font-medium">PIX</span>
@@ -535,7 +537,7 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-border">
+            <div className="border-t border-border px-4 py-4 sm:px-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Check className="w-5 h-5 text-primary" />
@@ -549,11 +551,11 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="space-y-6 p-4 sm:p-6">
               <div>
                 <p className="font-medium mb-3">Comodidades disponíveis</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <Baby className="w-5 h-5 text-primary" />
                       <span className="font-medium">Aceita crianças</span>
@@ -566,7 +568,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <Wifi className="w-5 h-5 text-primary" />
                       <span className="font-medium">Wi-Fi</span>
@@ -579,7 +581,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <Car className="w-5 h-5 text-primary" />
                       <span className="font-medium">Estacionamento</span>
@@ -592,7 +594,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <Puzzle className="w-5 h-5 text-primary" />
                       <span className="font-medium">Aceita autistas</span>
@@ -605,7 +607,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <Accessibility className="w-5 h-5 text-primary" />
                       <span className="font-medium">Acessibilidade</span>
@@ -618,7 +620,7 @@ export function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-muted/30 p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       <PawPrint className="w-5 h-5 text-primary" />
                       <span className="font-medium">Pet friendly</span>
@@ -637,29 +639,32 @@ export function SettingsPage() {
         </div>
       </div>
 
-      <div className="fixed bottom-6 right-6 z-30">
-        <Tooltip disableHoverableContent>
-          <TooltipTrigger asChild>
-            <Button
-              className={`h-14 w-14 rounded-full p-0 shadow-lg transition-all ${
-                hasPendingChanges
-                  ? "bg-primary hover:bg-primary/90 animate-pulse ring-4 ring-primary/20 scale-105"
-                  : "bg-primary/80 hover:bg-primary/90"
-              }`}
-              onClick={handleSaveData}
-              disabled={isSaving}
-            >
-              <Save className="size-6" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" sideOffset={4} className="bg-primary fill-primary">
-            {isSaving
+      <div className="fixed bottom-4 right-4 z-30 sm:bottom-6 sm:right-6">
+        <Button
+          className={`h-12 w-12 rounded-full p-0 shadow-lg transition-all sm:h-14 sm:w-14 ${
+            hasPendingChanges
+              ? "bg-primary hover:bg-primary/90 animate-pulse ring-4 ring-primary/20 scale-105"
+              : "bg-primary/80 hover:bg-primary/90"
+          }`}
+          onClick={handleSaveData}
+          disabled={isSaving}
+          aria-label={
+            isSaving
               ? "Salvando alterações"
               : hasPendingChanges
                 ? "Você tem alterações pendentes"
-                : "Tudo salvo!"}
-          </TooltipContent>
-        </Tooltip>
+                : "Tudo salvo"
+          }
+          title={
+            isSaving
+              ? "Salvando alterações"
+              : hasPendingChanges
+                ? "Você tem alterações pendentes"
+                : "Tudo salvo!"
+          }
+        >
+          <Save className="size-5 sm:size-6" />
+        </Button>
       </div>
     </div>
   );
