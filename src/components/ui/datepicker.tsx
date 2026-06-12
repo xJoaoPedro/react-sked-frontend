@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-export function DatePicker({ value, onChange, className, ...calendarProps }) {
+type DatePickerProps = {
+  value?: Date;
+  onChange?: (selected: Date | undefined) => void;
+  className?: string;
+} & Record<string, any>;
+
+export function DatePicker({ value, onChange, className, ...calendarProps }: DatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>();
 
   React.useEffect(() => {
