@@ -4,7 +4,12 @@ import skedLogo from "@/assets/skedLogo.svg";
 import { DesktopCard } from "@/components/auth/DesktopCard";
 import { MobileCard } from "@/components/auth/MobileCard";
 import { type LoginForm, type RegisterForm, formatDigits } from "@/components/auth/types";
-import { getCurrentAuthSession, isPendingCompanySession, persistAuthSession } from "@/lib/auth";
+import {
+  getCurrentAuthSession,
+  getDefaultAuthenticatedRoute,
+  isPendingCompanySession,
+  persistAuthSession,
+} from "@/lib/auth";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
 const registerBackgroundImages = [
@@ -80,7 +85,11 @@ export function RegisterPage() {
   if (localStorage.getItem("token") && localStorage.getItem("companyId")) {
     return (
       <Navigate
-        to={isPendingCompanySession(currentSession) ? "/pending-approval" : "/dashboard"}
+        to={
+          isPendingCompanySession(currentSession)
+            ? "/pending-approval"
+            : getDefaultAuthenticatedRoute(currentSession)
+        }
         replace
       />
     );
@@ -114,7 +123,11 @@ export function RegisterPage() {
 
       persistAuthSession(data);
 
-      navigate(data.approved === false ? "/pending-approval" : "/dashboard");
+      navigate(
+        data.approved === false
+          ? "/pending-approval"
+          : getDefaultAuthenticatedRoute(getCurrentAuthSession()),
+      );
     } catch (error: any) {
       setLoginError(
         error?.response?.data?.error ||
@@ -160,7 +173,11 @@ export function RegisterPage() {
 
         persistAuthSession(loginData);
 
-        navigate(loginData.approved === false ? "/pending-approval" : "/dashboard");
+        navigate(
+          loginData.approved === false
+            ? "/pending-approval"
+            : getDefaultAuthenticatedRoute(getCurrentAuthSession()),
+        );
         return;
       } catch {
         setAuthMode("login");

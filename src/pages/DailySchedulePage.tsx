@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "
 import { toast } from "sonner";
 import { showRequestErrorToast } from "@/lib/errorHandlers";
 import { RevenueTransactionDialog } from "@/components/RevenueTransactionDialog";
+import { getCurrentAuthSession, isEmployeeSession } from "@/lib/auth";
 
 const timeSlots = [
   "06:00",
@@ -81,6 +82,11 @@ const serviceCategoryIcons = {
 
 export function DailySchedulePage() {
   const { dados, refreshDados } = useLayoutOutletContext();
+  const authSession = getCurrentAuthSession();
+  const isEmployee = isEmployeeSession(authSession);
+  const authenticatedEmployeeId = authSession?.employee_id
+    ? String(authSession.employee_id)
+    : "";
   const existingClientDropdownRef = useRef<HTMLDivElement | null>(null);
   const [data, setDataState] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -97,7 +103,7 @@ export function DailySchedulePage() {
     client_name: "",
     client_email: "",
     client_contact: "",
-    employee_id: "",
+    employee_id: authenticatedEmployeeId,
     service_id: "",
     appointment_time: "",
     status: "PENDING",
@@ -149,6 +155,19 @@ export function DailySchedulePage() {
     });
   }, [dados, selectedDate]);
 
+  useEffect(() => {
+    if (!isEmployee || !authenticatedEmployeeId) return;
+
+    setFormData((prev) =>
+      prev.employee_id === authenticatedEmployeeId
+        ? prev
+        : {
+            ...prev,
+            employee_id: authenticatedEmployeeId,
+          },
+    );
+  }, [authenticatedEmployeeId, isEmployee]);
+
   const professionals = dados?.professionals || [];
   const services = dados?.services || [];
   const customers = dados?.customers?.customers || [];
@@ -174,7 +193,7 @@ export function DailySchedulePage() {
       client_name: "",
       client_email: "",
       client_contact: "",
-      employee_id: "",
+      employee_id: authenticatedEmployeeId,
       service_id: "",
       appointment_time: "",
       status: "PENDING",
@@ -1040,6 +1059,7 @@ export function DailySchedulePage() {
                     onValueChange={(value) =>
                       setFormData((prev) => ({ ...prev, employee_id: value }))
                     }
+                    disabled={isEmployee}
                   >
                     <SelectTrigger id="daily-appointment-professional">
                       <SelectValue placeholder="Selecione o profissional" />

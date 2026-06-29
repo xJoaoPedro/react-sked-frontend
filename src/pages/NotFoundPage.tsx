@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Compass } from "lucide-react";
 import skedLogo from "@/assets/skedLogo.svg";
 import { Button } from "@/components/ui/button";
+import { getCurrentAuthSession, getDefaultAuthenticatedRoute } from "@/lib/auth";
 
 const notFoundBackgroundImages = [
   "/login-bg-1.jpg",
@@ -13,6 +14,7 @@ const notFoundBackgroundImages = [
 
 export function NotFoundPage() {
   const hasSession = Boolean(localStorage.getItem("token"));
+  const currentSession = getCurrentAuthSession();
   const [backgroundImage] = useState(
     () =>
       notFoundBackgroundImages[Math.floor(Math.random() * notFoundBackgroundImages.length)],
@@ -62,9 +64,9 @@ export function NotFoundPage() {
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg" className="sm:min-w-52">
-            <Link to={hasSession ? "/dashboard" : "/auth"}>
+            <Link to={hasSession ? getDefaultAuthenticatedRoute(currentSession) : "/auth"}>
               <ArrowLeft />
-              {hasSession ? "Voltar ao painel" : "Ir para o acesso"}
+              {hasSession ? "Voltar ao sistema" : "Ir para o acesso"}
             </Link>
           </Button>
 

@@ -16,6 +16,7 @@ import { Layout } from "./components/Layout";
 import { RegisterPage } from "./pages/RegisterPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import {
+  getDefaultAuthenticatedRoute,
   getCurrentAuthSession,
   hasManagerAccess,
   isApprovedCompanySession,
@@ -26,7 +27,7 @@ import { PendingApprovalPage } from "./pages/PendingApprovalPage";
 import { AdminApprovalPage } from "./pages/AdminApprovalPage";
 
 function ManagerRoute({ element }: { element: ReactElement }) {
-  return hasManagerAccess() ? element : <Navigate to="/dashboard" replace />;
+  return hasManagerAccess() ? element : <Navigate to={getDefaultAuthenticatedRoute()} replace />;
 }
 
 function ProtectedAppRoute({ element }: { element: ReactElement }) {
@@ -58,18 +59,18 @@ export const router = createBrowserRouter([
     path: "/",
     element: <ProtectedAppRoute element={<Layout />} />,
     children: [
-      { path: "dashboard", element: <DashboardPage /> },
+      { path: "dashboard", element: <ManagerRoute element={<DashboardPage />} /> },
       { path: "daily-schedule", element: <DailySchedulePage /> },
       { path: "appointments", element: <AppointmentsPage /> },
-      { path: "cancellations", element: <CancellationsPage /> },
+      { path: "cancellations", element: <ManagerRoute element={<CancellationsPage />} /> },
       // TODO IMPLEMENTAR FUTURAMENTE
       // { path: "commissions", element: <CommissionsPage /> },
       // { path: "reports", element: <ReportsPage /> },
       { path: "revenue", element: <ManagerRoute element={<RevenuePage />} /> },
       { path: "inventory", element: <InventoryPage /> },
-      { path: "services", element: <ServicesPage /> },
+      { path: "services", element: <ManagerRoute element={<ServicesPage />} /> },
       { path: "professionals", element: <ManagerRoute element={<ProfessionalsPage />} /> },
-      { path: "customers", element: <CustomersPage /> },
+      { path: "customers", element: <ManagerRoute element={<CustomersPage />} /> },
       { path: "settings", element: <SettingsPage /> },
     ],
   },

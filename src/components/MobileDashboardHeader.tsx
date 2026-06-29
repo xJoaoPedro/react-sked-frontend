@@ -34,7 +34,10 @@ export function MobileDashboardHeader({ title, dados, refreshDados }: MobileDash
   const companyId = localStorage.getItem("companyId");
   const profilePhoto = useCachedEvolutionProfilePhoto(companyId, dados?.settings?.evolution);
   const visibleMenuCategories = getVisibleMenuCategories(canAccessManagerAreas);
-  const shouldShowQrButton = Boolean(companyId) && dados?.settings?.evolution?.connected === false;
+  const shouldShowQrButton =
+    !isEmployee &&
+    Boolean(companyId) &&
+    dados?.settings?.evolution?.connected === false;
 
   useEffect(() => {
     setConnectionStatus(dados?.settings?.evolution?.status ?? null);

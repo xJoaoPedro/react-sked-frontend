@@ -244,9 +244,9 @@ export function ProfessionalsPage() {
   };
 
   const handleAddProfessional = async () => {
-    const response = (await api.post('/professionals', formData)).data.data
+    await api.post('/professionals', formData)
 
-    toast.success('Funcionário adicionado com sucesso')
+    toast.success('Funcionário adicionado com sucesso. A senha de acesso foi enviada por e-mail.')
     await Promise.all([fetchProfessionals(), refreshDados()]);
     setIsAddDialogOpen(false);
     resetForm();

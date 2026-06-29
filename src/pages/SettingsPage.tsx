@@ -19,6 +19,10 @@ export function SettingsPage() {
   const { dados, updateDados } = useLayoutOutletContext();
   const [data, setDataState] = useState(null);
   const [initialEmployeeData, setInitialEmployeeData] = useState(null);
+  const [passwordData, setPasswordData] = useState({
+    password: "",
+    confirmPassword: "",
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdatingWhatsAppAutomation, setIsUpdatingWhatsAppAutomation] = useState(false);
   const authSession = getCurrentAuthSession();
@@ -92,22 +96,40 @@ export function SettingsPage() {
     try {
       setIsSaving(true);
 
+      if (passwordData.password && passwordData.password.length < 6) {
+        toast.error("A senha deve ter pelo menos 6 caracteres.");
+        return;
+      }
+
+      if (passwordData.password !== passwordData.confirmPassword) {
+        toast.error("A confirmação de senha não confere.");
+        return;
+      }
+
       if (isEmployee) {
         await api.patch(`/users/${authSession?.user_id}`, {
           name: data.name,
           email: data.email,
           phone: data.phone,
+          ...(passwordData.password ? { password: passwordData.password } : {}),
         });
 
         const response = (await api.get(`/users/${authSession?.user_id}`)).data.data;
         toast.success('Seus dados foram alterados com sucesso!');
         setDataState(response);
         setInitialEmployeeData(response);
+        setPasswordData({
+          password: "",
+          confirmPassword: "",
+        });
         return;
       }
 
       const previousPhone = dados?.settings?.phone ?? "";
-      const updateResponse = await api.patch(`/companies/${localStorage.getItem('companyId')}`, data)
+      const updateResponse = await api.patch(`/companies/${localStorage.getItem('companyId')}`, {
+        ...data,
+        ...(passwordData.password ? { password: passwordData.password } : {}),
+      })
       const response = (await api.get(`/companies/${localStorage.getItem('companyId')}/settings`)).data.data
       const phoneChanged = Boolean(updateResponse?.data?.data?.phoneChanged) || previousPhone !== (response?.phone ?? "");
 
@@ -120,6 +142,10 @@ export function SettingsPage() {
       }
 
       setDataState(response)
+      setPasswordData({
+        password: "",
+        confirmPassword: "",
+      });
       updateDados((prev) => ({
         ...prev,
         settings: response,
@@ -186,8 +212,10 @@ export function SettingsPage() {
                 phone: initialEmployeeData.phone,
               }
             : null,
-        )
-      : JSON.stringify(data) !== JSON.stringify(dados?.settings);
+        ) ||
+        Boolean(passwordData.password)
+      : JSON.stringify(data) !== JSON.stringify(dados?.settings) ||
+        Boolean(passwordData.password);
 
   if (isEmployee) {
     return (
@@ -255,6 +283,34 @@ export function SettingsPage() {
                         className="h-9 pl-10 text-xs sm:h-10 sm:text-sm"
                       />
                     </div>
+                  </div>
+
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="user-password" className="text-xs sm:text-sm">Nova senha</Label>
+                    <Input
+                      id="user-password"
+                      type="password"
+                      value={passwordData.password}
+                      onChange={(e) =>
+                        setPasswordData((prev) => ({ ...prev, password: e.target.value }))
+                      }
+                      placeholder="Deixe em branco para manter a atual"
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="user-confirm-password" className="text-xs sm:text-sm">Confirmar nova senha</Label>
+                    <Input
+                      id="user-confirm-password"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData((prev) => ({ ...prev, confirmPassword: e.target.value }))
+                      }
+                      placeholder="Repita a nova senha"
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
+                    />
                   </div>
                 </div>
               </div>
@@ -404,6 +460,34 @@ export function SettingsPage() {
                         }))
                       }
                       placeholder="Ex.: 2"
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="company-password" className="text-xs sm:text-sm">Nova senha</Label>
+                    <Input
+                      id="company-password"
+                      type="password"
+                      value={passwordData.password}
+                      onChange={(e) =>
+                        setPasswordData((prev) => ({ ...prev, password: e.target.value }))
+                      }
+                      placeholder="Deixe em branco para manter a atual"
+                      className="h-9 text-xs sm:h-10 sm:text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="company-confirm-password" className="text-xs sm:text-sm">Confirmar nova senha</Label>
+                    <Input
+                      id="company-confirm-password"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData((prev) => ({ ...prev, confirmPassword: e.target.value }))
+                      }
+                      placeholder="Repita a nova senha"
                       className="h-9 text-xs sm:h-10 sm:text-sm"
                     />
                   </div>

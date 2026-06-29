@@ -22,6 +22,7 @@ import { usePageHeader } from '@/hooks/usePageHeader';
 import { useLayoutOutletContext } from '@/hooks/useLayoutOutletContext';
 import { showRequestErrorToast } from '@/lib/errorHandlers';
 import { RevenueTransactionDialog } from '@/components/RevenueTransactionDialog';
+import { getCurrentAuthSession, isEmployeeSession } from '@/lib/auth';
 
 const statusList = [
   { value: 'confirmed', label: 'Confirmado' },
@@ -39,6 +40,11 @@ const appointmentStatusOptions = [
 
 export function AppointmentsPage() {
   const { dados, refreshDados } = useLayoutOutletContext();
+  const authSession = getCurrentAuthSession();
+  const isEmployee = isEmployeeSession(authSession);
+  const authenticatedEmployeeId = authSession?.employee_id
+    ? String(authSession.employee_id)
+    : '';
   const latestFetchIdRef = useRef(0);
   const hasBootstrappedRef = useRef(false);
   const existingClientDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -66,7 +72,7 @@ export function AppointmentsPage() {
     client_name: '',
     client_email: '',
     client_contact: '',
-    employee_id: '',
+    employee_id: authenticatedEmployeeId,
     service_id: '',
     appointment_date: '',
     appointment_time: '',
@@ -130,7 +136,7 @@ export function AppointmentsPage() {
       client_name: '',
       client_email: '',
       client_contact: '',
-      employee_id: '',
+      employee_id: authenticatedEmployeeId,
       service_id: '',
       appointment_date: '',
       appointment_time: '',
@@ -141,6 +147,19 @@ export function AppointmentsPage() {
     setExistingClientPopoverOpen(false);
     setEditingAppointment(null);
   };
+
+  useEffect(() => {
+    if (!isEmployee || !authenticatedEmployeeId) return;
+
+    setFormData((prev) =>
+      prev.employee_id === authenticatedEmployeeId
+        ? prev
+        : {
+            ...prev,
+            employee_id: authenticatedEmployeeId,
+          },
+    );
+  }, [authenticatedEmployeeId, isEmployee]);
 
   const toLocalDateInput = (value) => {
     if (!value) return '';
@@ -999,22 +1018,24 @@ export function AppointmentsPage() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Profissional</Label>
-                  <Select value={filterProfessional} onValueChange={setFilterProfessional}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-96">
-                      <SelectItem value="all">Todos os Profissionais</SelectItem>
-                      {professionals.map((professional) => (
-                        <SelectItem key={professional.id} value={String(professional.id)}>
-                          {professional.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {!isEmployee && (
+                  <div className="space-y-2">
+                    <Label>Profissional</Label>
+                    <Select value={filterProfessional} onValueChange={setFilterProfessional}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-96">
+                        <SelectItem value="all">Todos os Profissionais</SelectItem>
+                        {professionals.map((professional) => (
+                          <SelectItem key={professional.id} value={String(professional.id)}>
+                            {professional.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label>Status</Label>
@@ -1472,6 +1493,7 @@ export function AppointmentsPage() {
                     onValueChange={(value) =>
                       setFormData((prev) => ({ ...prev, employee_id: value }))
                     }
+                    disabled={isEmployee}
                   >
                     <SelectTrigger id="appointment-professional" className="h-9 text-xs sm:h-10 sm:text-sm">
                       <SelectValue placeholder="Selecione o profissional" />

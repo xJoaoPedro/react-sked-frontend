@@ -32,6 +32,10 @@ export function hasManagerAccess(session: AuthSession | null = getCurrentAuthSes
   return !isEmployeeSession(session);
 }
 
+export function getDefaultAuthenticatedRoute(session: AuthSession | null = getCurrentAuthSession()) {
+  return isEmployeeSession(session) ? "/daily-schedule" : "/dashboard";
+}
+
 export function isApprovedCompanySession(session: AuthSession | null = getCurrentAuthSession()) {
   if (session?.auth_type !== "company") return true;
 

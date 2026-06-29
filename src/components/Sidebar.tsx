@@ -55,13 +55,19 @@ export const menuCategories: MenuCategory[] = [
 ];
 
 export function getVisibleMenuCategories(canAccessManagerAreas: boolean) {
+  const employeeAllowedPaths = new Set([
+    "/daily-schedule",
+    "/appointments",
+    "/inventory",
+  ]);
+
   return menuCategories
     .map((category) => ({
       ...category,
       items: category.items.filter((item) => {
         if (canAccessManagerAreas) return true;
 
-        return !["/revenue", "/professionals"].includes(item.path);
+        return employeeAllowedPaths.has(item.path);
       }),
     }))
     .filter((category) => category.items.length > 0);
