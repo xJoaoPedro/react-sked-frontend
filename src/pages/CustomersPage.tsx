@@ -2,13 +2,34 @@ import { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { User, Users, UserPlus, Repeat, UserRoundX, UserX, } from "lucide-react";
+import { User, Users, UserPlus, Repeat, UserX } from "lucide-react";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingPage } from "./LoadingPage";
 import { formatDate, formatPhone } from "@/lib/parsers";
 import { api } from "@/lib/api";
 import { usePageHeader } from "@/hooks/usePageHeader";
 import { useLayoutOutletContext } from "@/hooks/useLayoutOutletContext";
+
+const getWhatsAppHref = (phone: string) => {
+  const cleaned = phone?.replace(/\D/g, "") ?? "";
+
+  if (!cleaned) return null;
+
+  if (cleaned.startsWith("55") && cleaned.length >= 12) {
+    return `https://wa.me/${cleaned}`;
+  }
+
+  if (cleaned.length === 10 || cleaned.length === 11) {
+    return `https://wa.me/55${cleaned}`;
+  }
+
+  if (cleaned.length >= 12) {
+    return `https://wa.me/${cleaned}`;
+  }
+
+  return null;
+};
 
 export function CustomersPage() {
   const { dados } = useLayoutOutletContext();
@@ -140,7 +161,10 @@ export function CustomersPage() {
                         </div>
                       </td>
                     </tr>
-                  ) : (data.customers.map((customer) => (
+                  ) : (data.customers.map((customer) => {
+                    const whatsappHref = getWhatsAppHref(customer.contact);
+
+                    return (
                     <tr key={customer.id} className="border-b transition-colors hover:bg-muted/30">
                       <td className="py-3 p-2 align-middle whitespace-nowrap font-medium">
                           <div className="flex items-center gap-3">
@@ -172,28 +196,47 @@ export function CustomersPage() {
                         </td>
                         <td className="p-2 align-middle whitespace-nowrap">{formatDate(customer.lastVisit)}</td>
                         <td className="p-2 text-right align-middle whitespace-nowrap">
-                          <div className="flex gap-2">
-                            <Tooltip>
+                          <div className="flex items-center gap-1">
+                            <Tooltip disableHoverableContent>
                               <TooltipTrigger asChild>
                                 <div>
                                   <Button
-                                    type="button"
+                                    asChild={Boolean(whatsappHref)}
                                     size="sm"
-                                    className="h-8 w-8 p-0 rounded-md bg-transparent text-foreground hover:bg-destructive/10 hover:text-destructive"
+                                    type={whatsappHref ? undefined : "button"}
+                                    disabled={!whatsappHref}
+                                    className={`h-8 w-8 p-0 rounded rounded-md ${
+                                      whatsappHref
+                                        ? "bg-transparent text-foreground hover:bg-emerald-500/10 hover:text-emerald-600"
+                                        : "bg-transparent text-muted-foreground"
+                                    }`}
                                   >
-                                    <UserRoundX className="w-4 h-4" />
+                                    {whatsappHref ? (
+                                      <a
+                                        href={whatsappHref}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex size-full items-center justify-center"
+                                        aria-label={`Entrar em contato com ${customer.name} no WhatsApp`}
+                                      >
+                                        <WhatsAppIcon sx={{ fontSize: 18 }} />
+                                      </a>
+                                    ) : (
+                                      <WhatsAppIcon sx={{ fontSize: 18 }} />
+                                    )}
                                   </Button>
                                 </div>
                               </TooltipTrigger>
 
-                              <TooltipContent side="top" sideOffset={4} className="bg-destructive fill-destructive text-white">
-                                Bloquear usuário
+                              <TooltipContent side="top" sideOffset={4} className="bg-emerald-500 fill-emerald-500">
+                                {whatsappHref ? "Entrar em contato" : "Cliente sem telefone válido"}
                               </TooltipContent>
                             </Tooltip>
                           </div>
                         </td>
                       </tr>
-                    )))}
+                    );
+                  }))}
                 </tbody>
               </table>
             </div>
