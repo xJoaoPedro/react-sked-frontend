@@ -668,6 +668,13 @@ export function DailySchedulePage() {
     };
   };
 
+  const getAppointmentDurationMinutes = (start, end) => {
+    const s = getTimePartsInTimeZone(start);
+    const e = getTimePartsInTimeZone(end);
+
+    return e.hours * 60 + e.minutes - (s.hours * 60 + s.minutes);
+  };
+
   const shouldUseFixedColumns = data.professionals.length > 3;
   const gridTemplateColumns = shouldUseFixedColumns
     ? `96px repeat(${data.professionals.length}, 350px)`
@@ -764,68 +771,108 @@ export function DailySchedulePage() {
                             appointment.start_time,
                             appointment.end_time,
                           );
+                          const durationMinutes = getAppointmentDurationMinutes(
+                            appointment.start_time,
+                            appointment.end_time,
+                          );
                           const ServiceIcon = getServiceCategoryIcon(appointment.service?.category);
                           const clientPhoto = appointment.client?.photo || appointment.client?.profilePictureUrl || null;
-                          const isCompact = height < 60;
-                          const shouldCenterContent = height <= 76;
+                          const isQuarterHourAppointment = durationMinutes === 15;
+                          const isCompact = isQuarterHourAppointment || height < 60;
+                          const shouldCenterContent = isQuarterHourAppointment || height <= 76;
 
                           return (
                             <div
                               key={appointment.id}
                               className={`absolute left-1 right-1 ${getStatusColor(
                                 appointment.status,
-                              )} text-white rounded-lg p-2 shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow`}
+                              )} text-white rounded-lg shadow-sm border-l-4 pointer-events-auto cursor-pointer hover:shadow-md transition-shadow ${
+                                isQuarterHourAppointment ? "px-2 py-1" : "p-2"
+                              }`}
                               style={{
                                 top: `${top}px`,
                                 height: `${height}px`,
                               }}
                             >
-                              <div className="absolute right-2 top-2">
-                                <ServiceIcon className="h-3 w-3 opacity-90" />
-                              </div>
+                              {!isQuarterHourAppointment ? (
+                                <div className="absolute right-2 top-2">
+                                  <ServiceIcon className="h-3 w-3 opacity-90" />
+                                </div>
+                              ) : null}
 
-                              <div className="flex h-full flex-col">
-                                <div
-                                  className={shouldCenterContent ? "flex flex-1 items-center pr-4" : "flex pr-4"}
-                                >
-                                  <div className="min-w-0 flex flex-1 items-center gap-2 self-center">
-                                    <div className="mt-1 flex h-8 w-8 shrink-0 self-center items-center justify-center overflow-hidden rounded-full bg-white/20 ring-1 ring-white/20">
-                                      {clientPhoto ? (
-                                        <img
-                                          src={clientPhoto}
-                                          alt={appointment.client?.name || "Cliente"}
-                                          className="h-full w-full object-cover"
-                                        />
-                                      ) : (
-                                        <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold">
-                                          {getClientInitials(appointment.client?.name)}
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <div className="min-w-0 flex min-h-8 flex-col justify-center">
-                                      <div className="text-xs font-semibold truncate leading-tight">
-                                        {appointment.client.name}
+                              {isQuarterHourAppointment ? (
+                                <div className="flex h-full items-center gap-2">
+                                  <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 ring-1 ring-white/20">
+                                    {clientPhoto ? (
+                                      <img
+                                        src={clientPhoto}
+                                        alt={appointment.client?.name || "Cliente"}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center text-[9px] font-semibold">
+                                        {getClientInitials(appointment.client?.name)}
                                       </div>
-                                      {!isCompact ? (
-                                        <div className="text-xs opacity-90 truncate leading-tight">
-                                          {appointment.service?.name}
+                                    )}
+                                  </div>
+
+                                  <div className="min-w-0 flex-1 text-xs font-semibold truncate leading-tight">
+                                    {appointment.client.name}
+                                  </div>
+
+                                  <div className="shrink-0 text-[10px] font-semibold whitespace-nowrap leading-none">
+                                    {formatDate(appointment.start_time, true)} -{" "}
+                                    {formatDate(appointment.end_time, true)}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex h-full flex-col">
+                                  <div
+                                    className={shouldCenterContent ? "flex flex-1 items-center pr-4" : "flex pr-4"}
+                                  >
+                                    <div className="min-w-0 flex flex-1 items-center gap-2 self-center">
+                                      <div
+                                        className={`flex shrink-0 self-center items-center justify-center overflow-hidden rounded-full bg-white/20 ring-1 ring-white/20 ${
+                                          isCompact ? "mt-0 h-7 w-7" : "mt-1 h-8 w-8"
+                                        }`}
+                                      >
+                                        {clientPhoto ? (
+                                          <img
+                                            src={clientPhoto}
+                                            alt={appointment.client?.name || "Cliente"}
+                                            className="h-full w-full object-cover"
+                                          />
+                                        ) : (
+                                          <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold">
+                                            {getClientInitials(appointment.client?.name)}
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <div className="min-w-0 flex min-h-8 flex-col justify-center">
+                                        <div className="text-xs font-semibold truncate leading-tight">
+                                          {appointment.client.name}
                                         </div>
-                                      ) : null}
+                                        {!isCompact ? (
+                                          <div className="text-xs opacity-90 truncate leading-tight">
+                                            {appointment.service?.name}
+                                          </div>
+                                        ) : null}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className={`flex justify-end ${shouldCenterContent ? "pt-0" : "mt-auto pt-1"}`}>
+                                    <div className="flex items-center gap-1 text-xs font-semibold tracking-[0.01em]">
+                                      <Clock3 className="h-3.5 w-3.5 shrink-0" />
+                                      <span className="truncate">
+                                        {formatDate(appointment.start_time, true)} -{" "}
+                                        {formatDate(appointment.end_time, true)}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
-
-                                <div className={`flex justify-end ${shouldCenterContent ? "pt-0" : "mt-auto pt-1"}`}>
-                                  <div className="flex items-center gap-1 text-xs font-semibold tracking-[0.01em]">
-                                    <Clock3 className="h-3.5 w-3.5 shrink-0" />
-                                    <span className="truncate">
-                                      {formatDate(appointment.start_time, true)} -{" "}
-                                      {formatDate(appointment.end_time, true)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
+                              )}
                             </div>
                           );
                         })}
