@@ -561,18 +561,24 @@ export function DailySchedulePage() {
   }, [existingClientDropdownOpen]);
 
   const updateAppointments = async (date) => {
-    if (!data?.id) return;
+    const companyId = localStorage.getItem("companyId");
+
+    if (!companyId) return;
 
     try {
       const response = (
-        await api.get(`/appointments/${data.id}/${date.toISOString()}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        await api.get(`/companies/${companyId}/appointments`, {
+          params: {
+            page: 1,
+            limit: 500,
+            date: getDateKeyInTimeZone(date),
+          },
         })
       ).data.data;
 
       setDataState((prev) => ({
         ...prev,
-        appointments: response,
+        appointments: response?.data || [],
       }));
     } catch (error) {
       console.error("Erro ao atualizar agendamentos:", error);
@@ -580,7 +586,7 @@ export function DailySchedulePage() {
   };
 
   useEffect(() => {
-    if (!dados || !data?.id) return;
+    if (!dados) return;
 
     const selectedDateKey = getDateKeyInTimeZone(selectedDate);
     const todayDateKey = getDateKeyInTimeZone(new Date());
@@ -588,7 +594,7 @@ export function DailySchedulePage() {
     if (selectedDateKey === todayDateKey) return;
 
     updateAppointments(selectedDate);
-  }, [dados, selectedDate, data?.id]);
+  }, [dados, selectedDate]);
 
   if (data === null) return <LoadingPage />;
 
